@@ -1,0 +1,27 @@
+﻿name: deploy-main.yml
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Docker image tag to deploy'
+        required: false
+        default: 'latest'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Log in to Azure"
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: "Deploy Container App"
+        uses: azure/container-apps-deploy-action@v1
+        with:
+          imageToDeploy: "${{ vars.AZURE_DEV_ACR_REGISTRY_URL }}/${{ vars.IMAGE_NAME }}:${{ github.event.inputs.image_tag }}"
+          containerAppName: "${{ vars.CONTAINER_APP_NAME }}"
+          resourceGroup: "${{ vars.RESOURCE_GROUP }}"
+          containerAppEnvironment: "${{ vars.CONTAINER_APP_ENVIRONMENT }}"
+          runtimeStack: "dotnetcore:8.0"
