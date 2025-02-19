@@ -1,10 +1,13 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Mvc;
-using WCCG.e;
+using WCCG.eReferralsService.API.Extensions;
+using WCCG.eReferralsService.API.Models;
 
 namespace WCCG.eReferralsService.API.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[ExcludeFromCodeCoverage]
 public class WeatherForecastController : ControllerBase
 {
     private static readonly string[] Summaries =
@@ -22,6 +25,8 @@ public class WeatherForecastController : ControllerBase
     [HttpGet(Name = "GetWeatherForecast")]
     public IEnumerable<WeatherForecast> Get()
     {
+        _logger.CalledMethod(nameof(Get));
+
         return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
                 Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),

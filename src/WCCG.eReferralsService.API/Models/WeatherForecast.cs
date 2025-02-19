@@ -1,4 +1,4 @@
-namespace WCCG.e;
+namespace WCCG.eReferralsService.API.Models;
 
 public class WeatherForecast
 {
