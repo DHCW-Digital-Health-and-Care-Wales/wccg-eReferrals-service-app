@@ -24,7 +24,6 @@ public class HeaderValidationErrorTests
         //Assert
         error.Code.Should().Be(FhirHttpErrorCodes.ReceiverBadRequest);
         error.DiagnosticsMessage.Should().Be(expectedDetailsMessage);
-        error.System.Should().Be(FhirConstants.HttpErrorCodesSystem);
         error.Display.Should().Be(expectedDisplayMessage);
     }
 }

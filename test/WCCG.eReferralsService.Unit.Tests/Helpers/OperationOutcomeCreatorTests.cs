@@ -24,7 +24,7 @@ public class OperationOutcomeCreatorTests
         {
             Severity = OperationOutcome.IssueSeverity.Error,
             Code = issueType,
-            Details = new CodeableConcept(error.System, error.Code, error.Display),
+            Details = new CodeableConcept(BaseFhirHttpError.System, error.Code, error.Display),
             Diagnostics = error.DiagnosticsMessage
         }).ToList();
 
@@ -47,7 +47,7 @@ public class OperationOutcomeCreatorTests
         {
             Severity = OperationOutcome.IssueSeverity.Error,
             Code = exception.IssueType,
-            Details = new CodeableConcept(error.System, error.Code, error.Display),
+            Details = new CodeableConcept(BaseFhirHttpError.System, error.Code, error.Display),
             Diagnostics = error.DiagnosticsMessage
         }).ToList();
 

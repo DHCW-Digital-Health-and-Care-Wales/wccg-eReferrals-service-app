@@ -14,11 +14,13 @@ namespace WCCG.eReferralsService.API.Middleware;
 public class ResponseMiddleware
 {
     private readonly RequestDelegate _next;
+    private readonly JsonSerializerOptions _serializerOptions;
     private readonly ILogger<ResponseMiddleware> _logger;
 
-    public ResponseMiddleware(RequestDelegate next, ILogger<ResponseMiddleware> logger)
+    public ResponseMiddleware(RequestDelegate next, JsonSerializerOptions serializerOptions, ILogger<ResponseMiddleware> logger)
     {
         _next = next;
+        _serializerOptions = serializerOptions;
         _logger = logger;
     }
 
@@ -59,7 +61,7 @@ public class ResponseMiddleware
         context.Response.ContentType = FhirConstants.FhirMediaType;
         context.Response.StatusCode = (int)statusCode;
         await context.Response.Body.WriteAsync(
-            Encoding.UTF8.GetBytes(JsonSerializer.Serialize(body, new JsonSerializerOptions().ForFhirExtended())));
+            Encoding.UTF8.GetBytes(JsonSerializer.Serialize(body, _serializerOptions)));
     }
 
     private static void AddResponseHeaders(HttpContext context)

@@ -10,4 +10,10 @@ public class PasReferralsApiConfig
 
     [Required]
     public required string BaseUrl { get; set; }
+
+    [Required]
+    public required string CreateReferralEndpoint { get; set; }
+
+    [Required]
+    public required int TimeoutSeconds { get; set; }
 }

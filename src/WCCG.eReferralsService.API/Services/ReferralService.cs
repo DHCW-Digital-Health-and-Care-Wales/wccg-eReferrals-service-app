@@ -1,14 +1,19 @@
-using WCCG.eReferralsService.API.ApiClients;
+using System.Net.Http.Headers;
+using Microsoft.Extensions.Options;
+using WCCG.eReferralsService.API.Configuration;
+using WCCG.eReferralsService.API.Constants;
 
 namespace WCCG.eReferralsService.API.Services;
 
 public class ReferralService : IReferralService
 {
-    private readonly IPasReferralsApiClient _apiClient;
+    private readonly HttpClient _httpClient;
+    private readonly PasReferralsApiConfig _pasReferralsApiConfig;
 
-    public ReferralService(IPasReferralsApiClient apiClient)
+    public ReferralService(HttpClient httpClient, IOptions<PasReferralsApiConfig> pasReferralsApiOptions)
     {
-        _apiClient = apiClient;
+        _httpClient = httpClient;
+        _pasReferralsApiConfig = pasReferralsApiOptions.Value;
     }
 
     public async Task<string> CreateReferralAsync(string bundleJson)
@@ -17,6 +22,9 @@ public class ReferralService : IReferralService
 
         //todo: Bundle trimming
 
-        return await _apiClient.CreateReferralAsync(bundleJson);
+        var response = await _httpClient.PostAsync(_pasReferralsApiConfig.CreateReferralEndpoint,
+            new StringContent(bundleJson, new MediaTypeHeaderValue(FhirConstants.FhirMediaType)));
+
+        return await response.Content.ReadAsStringAsync();
     }
 }

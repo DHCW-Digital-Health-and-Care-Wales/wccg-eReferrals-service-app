@@ -1,8 +1,8 @@
+using System.Text.Json;
 using Microsoft.Extensions.Options;
 using WCCG.eReferralsService.API.Configuration.OptionValidators;
 using WCCG.eReferralsService.API.Configuration;
 using WCCG.eReferralsService.API.Extensions;
-using Swashbuckle.AspNetCore.SwaggerGen;
 using WCCG.eReferralsService.API.Middleware;
 using WCCG.eReferralsService.API.Swagger;
 
@@ -16,14 +16,12 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(options => { options.OperationFilter<SwaggerProcessMessageOperationFilter>(); });
-builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
 
 builder.Services.AddApplicationInsights(builder.Environment.IsDevelopment(), builder.Configuration);
 
-builder.Services.AddServices();
+builder.Services.AddSingleton(new JsonSerializerOptions().ForFhirExtended());
 builder.Services.AddHttpClients();
 builder.Services.AddValidators();
-builder.Services.AddVersioning();
 
 builder.Services.AddHealthChecks();
 
@@ -35,14 +33,7 @@ app.UseMiddleware<ResponseMiddleware>();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(options =>
-    {
-        var descriptions = app.DescribeApiVersions();
-        foreach (var description in descriptions)
-        {
-            options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json", description.GroupName.ToUpperInvariant());
-        }
-    });
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();

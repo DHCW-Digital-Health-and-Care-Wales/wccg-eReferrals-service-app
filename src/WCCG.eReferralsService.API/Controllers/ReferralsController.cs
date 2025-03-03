@@ -3,14 +3,11 @@ using WCCG.eReferralsService.API.Extensions;
 using WCCG.eReferralsService.API.Services;
 using WCCG.eReferralsService.API.Swagger;
 using WCCG.eReferralsService.API.Validators;
-using Asp.Versioning;
 using WCCG.eReferralsService.API.Constants;
 
-namespace WCCG.eReferralsService.API.Controllers.v1;
+namespace WCCG.eReferralsService.API.Controllers;
 
 [ApiController]
-[ApiVersion("1.0")]
-[Route("api/v{version:apiVersion}/[controller]")]
 public class ReferralsController : ControllerBase
 {
     private readonly IHeaderValidator _headerValidator;
@@ -27,7 +24,7 @@ public class ReferralsController : ControllerBase
         _logger = logger;
     }
 
-    [HttpPost("$process-message")]
+    [HttpPost("/$process-message")]
     [SwaggerProcessMessageRequest]
     public async Task<IActionResult> CreateReferral()
     {

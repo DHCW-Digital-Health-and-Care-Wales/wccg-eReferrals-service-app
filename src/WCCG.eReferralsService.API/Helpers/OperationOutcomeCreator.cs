@@ -13,7 +13,7 @@ public static class OperationOutcomeCreator
         {
             Severity = OperationOutcome.IssueSeverity.Error,
             Code = issueType,
-            Details = new CodeableConcept(error.System, error.Code, error.Display),
+            Details = new CodeableConcept(BaseFhirHttpError.System, error.Code, error.Display),
             Diagnostics = error.DiagnosticsMessage
         }).ToList();
 
@@ -27,6 +27,6 @@ public static class OperationOutcomeCreator
 
     public static OperationOutcome CreateOperationOutcome(BaseFhirException fhirException)
     {
-        return CreateOperationOutcome(fhirException.IssueType, [.. fhirException.Errors]);
+        return CreateOperationOutcome(fhirException.IssueType, fhirException.Errors.ToArray());
     }
 }

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using WCCG.eReferralsService.API.Constants;
-using WCCG.eReferralsService.API.Controllers.v1;
+using WCCG.eReferralsService.API.Controllers;
 using WCCG.eReferralsService.API.Services;
 using WCCG.eReferralsService.API.Validators;
 using WCCG.eReferralsService.Unit.Tests.Extensions;

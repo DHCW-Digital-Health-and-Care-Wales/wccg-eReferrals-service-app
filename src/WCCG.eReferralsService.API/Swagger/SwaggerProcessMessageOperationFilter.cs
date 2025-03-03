@@ -36,7 +36,7 @@ public class SwaggerProcessMessageOperationFilter : IOperationFilter
             operation.Parameters.Add(new OpenApiParameter
             {
                 In = ParameterLocation.Header,
-                Example = new OpenApiString("XXX"),
+                Example = new OpenApiString("XXX"), //todo: add examples in valid formats
                 Required = isRequired,
                 Name = requiredHeader,
                 Schema = new OpenApiSchema { Type = "string" }

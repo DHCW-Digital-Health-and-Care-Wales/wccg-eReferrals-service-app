@@ -24,7 +24,6 @@ public class UnexpectedErrorTests
         //Assert
         error.Code.Should().Be(FhirHttpErrorCodes.ReceiverServerError);
         error.DiagnosticsMessage.Should().Be(expectedDetailsMessage);
-        error.System.Should().Be(FhirConstants.HttpErrorCodesSystem);
         error.Display.Should().Be(expectedDisplayMessage);
     }
 }

@@ -5,6 +5,7 @@ using FluentAssertions;
 using Hl7.Fhir.Model;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Net.Http.Headers;
 using WCCG.eReferralsService.API.Constants;
@@ -135,12 +136,14 @@ public class ResponseMiddlewareTests
     private static IHost StartHostWithException(Exception exception)
     {
         return HostProvider.StartHostWithEndpoint(_ => throw exception,
+            addServices: services => services.AddSingleton(new JsonSerializerOptions().ForFhirExtended()),
             configureApp: app => app.UseMiddleware<ResponseMiddleware>());
     }
 
     private static IHost StartHost()
     {
         return HostProvider.StartHostWithEndpoint(_ => Task.CompletedTask,
+            addServices: services => services.AddSingleton(new JsonSerializerOptions().ForFhirExtended()),
             configureApp: app => app.UseMiddleware<ResponseMiddleware>());
     }
 }
