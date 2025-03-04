@@ -11,7 +11,7 @@ public class FhirHttpErrorHelperTests
     private readonly IFixture _fixture = new Fixture().WithCustomizations();
 
     [Theory]
-    [InlineData(FhirHttpErrorCodes.ReceiverBadRequest, "400: The Receiver was unable to process the request.")]
+    [InlineData(FhirHttpErrorCodes.SenderBadRequest, "400: The API was unable to process the request.")]
     [InlineData(FhirHttpErrorCodes.ReceiverServerError, "500: The Receiver has encountered an error processing the request.")]
     public void GetDisplayMessageByCodeShouldReturnCorrectMessages(string code, string expectedMessage)
     {

@@ -39,18 +39,6 @@ public class ResponseMiddlewareTests
             .GetAsync();
 
         //Assert
-        response.Content.Headers.GetValues(HeaderNames.ContentType).Should()
-            .NotBeNull()
-            .And.Contain(FhirConstants.FhirMediaType);
-
-        response.Headers.GetValues(RequestHeaderKeys.RequestId).Should()
-            .NotBeNull()
-            .And.Contain(requestId);
-
-        response.Headers.GetValues(RequestHeaderKeys.CorrelationId).Should()
-            .NotBeNull()
-            .And.Contain(correlationId);
-
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
 
         var operationOutcome = JsonSerializer.Deserialize<OperationOutcome>(await response.Content.ReadAsStringAsync(),
@@ -81,6 +69,39 @@ public class ResponseMiddlewareTests
             .GetAsync();
 
         //Assert
+        response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
+
+        var operationOutcome = JsonSerializer.Deserialize<OperationOutcome>(await response.Content.ReadAsStringAsync(),
+            new JsonSerializerOptions().ForFhirExtended())!;
+        operationOutcome.Issue.Should().AllSatisfy(component =>
+        {
+            component.Code.Should().Be(OperationOutcome.IssueType.Transient);
+            component.Severity.Should().Be(OperationOutcome.IssueSeverity.Error);
+            component.Diagnostics.Should().Contain(exception.Message);
+        });
+    }
+
+    [Fact]
+    public async Task ShouldTryToAddHeadersWhenException()
+    {
+        //Arrange
+        var exception = _fixture.Create<MissingRequiredHeaderException>();
+        var requestId = _fixture.Create<string>();
+        var correlationId = _fixture.Create<string>();
+
+        var host = StartHostWithException(exception);
+
+        //Act
+        var response = await host.GetTestServer()
+            .CreateRequest(HostProvider.TestEndpoint)
+            .AddHeader(RequestHeaderKeys.RequestId, requestId)
+            .AddHeader(RequestHeaderKeys.CorrelationId, correlationId)
+            .GetAsync();
+
+        //Assert
+        response.Headers.GetValues("X-Operation-Id").Should()
+            .NotBeNullOrEmpty();
+
         response.Content.Headers.GetValues(HeaderNames.ContentType).Should()
             .NotBeNull()
             .And.Contain(FhirConstants.FhirMediaType);
@@ -92,17 +113,6 @@ public class ResponseMiddlewareTests
         response.Headers.GetValues(RequestHeaderKeys.CorrelationId).Should()
             .NotBeNull()
             .And.Contain(correlationId);
-
-        response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
-
-        var operationOutcome = JsonSerializer.Deserialize<OperationOutcome>(await response.Content.ReadAsStringAsync(),
-            new JsonSerializerOptions().ForFhirExtended())!;
-        operationOutcome.Issue.Should().AllSatisfy(component =>
-        {
-            component.Code.Should().Be(OperationOutcome.IssueType.Transient);
-            component.Severity.Should().Be(OperationOutcome.IssueSeverity.Error);
-            component.Diagnostics.Should().Contain(exception.Message);
-        });
     }
 
     [Fact]
@@ -122,6 +132,9 @@ public class ResponseMiddlewareTests
             .GetAsync();
 
         //Assert
+        response.Headers.GetValues("X-Operation-Id").Should()
+            .NotBeNullOrEmpty();
+
         response.Headers.GetValues(RequestHeaderKeys.RequestId).Should()
             .NotBeNull()
             .And.Contain(requestId);

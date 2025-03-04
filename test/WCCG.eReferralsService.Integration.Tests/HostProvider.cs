@@ -24,6 +24,7 @@ public static class HostProvider
                     .ConfigureServices(services =>
                     {
                         services.AddRouting();
+                        services.AddApplicationInsightsTelemetry(options => options.ConnectionString = "test");
                         addServices?.Invoke(services);
                     })
                     .Configure(app =>

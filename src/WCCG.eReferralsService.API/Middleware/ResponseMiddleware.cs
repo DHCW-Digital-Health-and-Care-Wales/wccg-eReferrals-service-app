@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Net;
 using System.Text;
 using System.Text.Json;
@@ -27,6 +28,7 @@ public class ResponseMiddleware
     public async Task InvokeAsync(HttpContext context)
     {
         AddResponseHeaders(context);
+        AddOperationIdHeader(context);
 
         try
         {
@@ -51,6 +53,9 @@ public class ResponseMiddleware
                 statusCode = HttpStatusCode.BadRequest;
                 body = OperationOutcomeCreator.CreateOperationOutcome(missingRequiredHeaderException);
                 break;
+
+            //todo: Add other cases
+
             default:
                 _logger.UnexpectedError(exception);
 
@@ -75,5 +80,10 @@ public class ResponseMiddleware
         {
             context.Response.Headers.TryAdd(RequestHeaderKeys.CorrelationId, correlationId);
         }
+    }
+
+    private static void AddOperationIdHeader(HttpContext context)
+    {
+        context.Response.Headers.TryAdd("X-Operation-Id", Activity.Current?.TraceId.ToString());
     }
 }

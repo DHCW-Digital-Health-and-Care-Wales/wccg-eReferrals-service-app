@@ -16,13 +16,13 @@ public class HeaderValidationErrorTests
         //Arrange
         var headerName = _fixture.Create<string>();
         var expectedDetailsMessage = $"Missing required header: {headerName}";
-        const string expectedDisplayMessage = "400: The Receiver was unable to process the request.";
+        const string expectedDisplayMessage = "400: The API was unable to process the request.";
 
         //Act
         var error = new HeaderValidationError(headerName);
 
         //Assert
-        error.Code.Should().Be(FhirHttpErrorCodes.ReceiverBadRequest);
+        error.Code.Should().Be(FhirHttpErrorCodes.SenderBadRequest);
         error.DiagnosticsMessage.Should().Be(expectedDetailsMessage);
         error.Display.Should().Be(expectedDisplayMessage);
     }

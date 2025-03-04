@@ -6,7 +6,7 @@ public static class FhirHttpErrorHelper
 {
     private static readonly Dictionary<string, string> CodeDisplayDictionary = new()
     {
-        { FhirHttpErrorCodes.ReceiverBadRequest, "400: The Receiver was unable to process the request." },
+        { FhirHttpErrorCodes.SenderBadRequest, "400: The API was unable to process the request." },
         { FhirHttpErrorCodes.ReceiverServerError, "500: The Receiver has encountered an error processing the request." }
     };
 

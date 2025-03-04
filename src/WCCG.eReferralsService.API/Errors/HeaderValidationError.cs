@@ -11,6 +11,6 @@ public class HeaderValidationError : BaseFhirHttpError
         _headerName = headerName;
     }
 
-    public override string Code => FhirHttpErrorCodes.ReceiverBadRequest;
+    public override string Code => FhirHttpErrorCodes.SenderBadRequest;
     public override string DiagnosticsMessage => $"Missing required header: {_headerName}";
 }
