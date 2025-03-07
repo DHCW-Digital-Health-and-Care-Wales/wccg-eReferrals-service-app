@@ -3,6 +3,7 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Serialization;
 using WCCG.eReferralsService.API.Constants;
 using WCCG.eReferralsService.API.Errors;
 using WCCG.eReferralsService.API.Exceptions;
@@ -42,24 +43,43 @@ public class ResponseMiddleware
 
     private async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
-        var statusCode = HttpStatusCode.InternalServerError;
+        var statusCode = HttpStatusCode.BadRequest;
         OperationOutcome body;
 
         switch (exception)
         {
-            case MissingRequiredHeaderException missingRequiredHeaderException:
-                _logger.RequiredHeadersMissingError(missingRequiredHeaderException);
+            case HeaderValidationException headerValidationException:
+                _logger.HeadersValidationError(headerValidationException);
 
-                statusCode = HttpStatusCode.BadRequest;
-                body = OperationOutcomeCreator.CreateOperationOutcome(missingRequiredHeaderException);
+                body = OperationOutcomeCreator.CreateOperationOutcome(headerValidationException);
                 break;
 
-            //todo: Add other cases
+            case BundleValidationException bundleValidationException:
+                _logger.BundleValidationError(bundleValidationException);
+
+                body = OperationOutcomeCreator.CreateOperationOutcome(bundleValidationException);
+                break;
+
+            case DeserializationFailedException deserializationFailedException:
+                _logger.BundleDeserializationFailure(deserializationFailedException);
+
+                body = OperationOutcomeCreator.CreateOperationOutcome(
+                    new BundleDeserializationError(deserializationFailedException.Message));
+                break;
+
+            case JsonException jsonException:
+                _logger.InvalidJson(jsonException);
+
+                body = OperationOutcomeCreator.CreateOperationOutcome(new BundleDeserializationError(jsonException.Message));
+                break;
+
+            //todo: add HttpRequestException handling
 
             default:
                 _logger.UnexpectedError(exception);
 
-                body = OperationOutcomeCreator.CreateOperationOutcome(OperationOutcome.IssueType.Transient, new UnexpectedError(exception));
+                statusCode = HttpStatusCode.InternalServerError;
+                body = OperationOutcomeCreator.CreateOperationOutcome(new UnexpectedError(exception.Message));
                 break;
         }
 

@@ -36,4 +36,10 @@
     <ProjectReference Include="..\..\src\WCCG.eReferralsService.API\WCCG.eReferralsService.API.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="TestData\example-bundle.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

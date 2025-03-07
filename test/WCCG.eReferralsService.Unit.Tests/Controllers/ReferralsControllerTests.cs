@@ -7,7 +7,6 @@ using Moq;
 using WCCG.eReferralsService.API.Constants;
 using WCCG.eReferralsService.API.Controllers;
 using WCCG.eReferralsService.API.Services;
-using WCCG.eReferralsService.API.Validators;
 using WCCG.eReferralsService.Unit.Tests.Extensions;
 
 namespace WCCG.eReferralsService.Unit.Tests.Controllers;
@@ -22,20 +21,8 @@ public class ReferralsControllerTests
     {
         _fixture.OmitAutoProperties = true;
         _sut = _fixture.CreateWithFrozen<ReferralsController>();
-    }
 
-    [Fact]
-    public async Task ShouldCreateValidateHeaders()
-    {
-        //Arrange
-        var bundle = _fixture.Create<string>();
-        SetRequestBody(bundle);
-
-        //Act
-        await _sut.CreateReferral();
-
-        //Assert
-        _fixture.Mock<IHeaderValidator>().Verify(x => x.ValidateHeaders(_sut.HttpContext.Request.Headers));
+        _fixture.Register<IHeaderDictionary>(() => new HeaderDictionary { { _fixture.Create<string>(), _fixture.Create<string>() } });
     }
 
     [Fact]
@@ -43,24 +30,31 @@ public class ReferralsControllerTests
     {
         //Arrange
         var body = _fixture.Create<string>();
-        SetRequestBody(body);
+        var headers = _fixture.Create<IHeaderDictionary>();
 
+        SetRequestDetails(body, headers);
+
+        var headerArgs = new List<IHeaderDictionary>();
+        _fixture.Mock<IReferralService>().Setup(x => x.CreateReferralAsync(Capture.In(headerArgs), It.IsAny<string>()));
         //Act
         await _sut.CreateReferral();
 
         //Assert
-        _fixture.Mock<IReferralService>().Verify(x => x.CreateReferralAsync(body));
+        headerArgs[0].Should().ContainKeys(headers.Keys);
+        _fixture.Mock<IReferralService>().Verify(x => x.CreateReferralAsync(It.IsAny<IHeaderDictionary>(), body));
     }
 
     [Fact]
     public async Task CreateReferralShouldReturn200()
     {
         //Arrange
-        SetRequestBody(_fixture.Create<string>());
+        var body = _fixture.Create<string>();
+        var headers = _fixture.Create<IHeaderDictionary>();
+        SetRequestDetails(body, headers);
 
         var outputBundleJson = _fixture.Create<string>();
 
-        _fixture.Mock<IReferralService>().Setup(x => x.CreateReferralAsync(It.IsAny<string>()))
+        _fixture.Mock<IReferralService>().Setup(x => x.CreateReferralAsync(It.IsAny<IHeaderDictionary>(), It.IsAny<string>()))
             .ReturnsAsync(outputBundleJson);
 
         //Act
@@ -73,10 +67,16 @@ public class ReferralsControllerTests
         contentResult.ContentType.Should().Be(FhirConstants.FhirMediaType);
     }
 
-    private void SetRequestBody(string value)
+    private void SetRequestDetails(string body, IHeaderDictionary headerDictionary)
     {
         _sut.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() };
-        _sut.ControllerContext.HttpContext.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(value));
-        _sut.ControllerContext.HttpContext.Request.ContentLength = value.Length;
+
+        foreach (var keyValuePair in headerDictionary)
+        {
+            _sut.Request.Headers.Add(keyValuePair);
+        }
+
+        _sut.ControllerContext.HttpContext.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(body));
+        _sut.ControllerContext.HttpContext.Request.ContentLength = body.Length;
     }
 }

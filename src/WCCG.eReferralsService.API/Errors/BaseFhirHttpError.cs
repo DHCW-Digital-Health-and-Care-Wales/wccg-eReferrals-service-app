@@ -1,3 +1,4 @@
+using Hl7.Fhir.Model;
 using WCCG.eReferralsService.API.Constants;
 using WCCG.eReferralsService.API.Helpers;
 
@@ -9,4 +10,5 @@ public abstract class BaseFhirHttpError
     public string Display => FhirHttpErrorHelper.GetDisplayMessageByCode(Code);
     public abstract string Code { get; }
     public abstract string DiagnosticsMessage { get; }
+    public abstract OperationOutcome.IssueType IssueType { get; }
 }

@@ -1,8 +1,10 @@
 using System.Diagnostics.CodeAnalysis;
 using Azure.Identity;
+using FluentValidation;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Options;
 using WCCG.eReferralsService.API.Configuration;
+using WCCG.eReferralsService.API.Models;
 using WCCG.eReferralsService.API.Services;
 using WCCG.eReferralsService.API.Validators;
 
@@ -33,7 +35,8 @@ public static class ServiceCollectionExtensions
 
     public static void AddValidators(this IServiceCollection services)
     {
-        services.AddScoped<IHeaderValidator, HeaderValidator>();
+        services.AddScoped<IValidator<BundleModel>, BundleModelValidator>();
+        services.AddScoped<IValidator<HeadersModel>, HeadersModelValidator>();
     }
 
     public static void AddHttpClients(this IServiceCollection services)
