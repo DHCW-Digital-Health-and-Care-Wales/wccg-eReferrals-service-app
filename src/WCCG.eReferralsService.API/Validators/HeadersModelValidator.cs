@@ -1,24 +1,24 @@
-using System.Text;
+using System.Buffers.Text;
+using System.Buffers;
 using System.Text.Json;
 using FluentValidation;
 using Hl7.Fhir.Model;
 using WCCG.eReferralsService.API.Constants;
 using WCCG.eReferralsService.API.Extensions;
 using WCCG.eReferralsService.API.Models;
+using System.Text.RegularExpressions;
 
 namespace WCCG.eReferralsService.API.Validators;
 
-public class HeadersModelValidator : AbstractValidator<HeadersModel>
+public partial class HeadersModelValidator : AbstractValidator<HeadersModel>
 {
     private readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions().ForFhirExtended();
 
-    private readonly List<string> _useCaseValues =
-    [
-        "a4t2",
-        "validation",
-        "servicerequest-response",
-        "new"
-    ];
+    [GeneratedRegex(@"([a-zA-Z0-9-]+\|?)+", RegexOptions.CultureInvariant)]
+    private static partial Regex ValidUseCaseRegex();
+
+    [GeneratedRegex(@"^application/fhir\+json;\s*version=\d+(\.\d+)*$", RegexOptions.CultureInvariant)]
+    private static partial Regex ValidAcceptRegex();
 
     public HeadersModelValidator()
     {
@@ -29,82 +29,82 @@ public class HeadersModelValidator : AbstractValidator<HeadersModel>
             //Empty
             .NotEmpty()
             .WithMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.TargetIdentifier))
-            .WithErrorCode(ValidationErrorCodes.MissingRequiredHeaderCode)
+            .WithErrorCode(ValidationErrorCode.MissingRequiredHeaderCode.ToString())
             //Format
-            .Must(BeValidFhirType<Identifier>)
+            .Must(x => BeValidFhirType<Identifier>(x.AsSpan()))
             .WithMessage(ValidationMessages.InvalidFhirObject(RequestHeaderKeys.TargetIdentifier, nameof(Identifier)))
-            .WithErrorCode(ValidationErrorCodes.InvalidHeaderCode);
+            .WithErrorCode(ValidationErrorCode.InvalidHeaderCode.ToString());
 
         RuleFor(x => x.EndUserOrganisation)
             //Empty
             .NotEmpty()
             .WithMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.EndUserOrganisation))
-            .WithErrorCode(ValidationErrorCodes.MissingRequiredHeaderCode)
+            .WithErrorCode(ValidationErrorCode.MissingRequiredHeaderCode.ToString())
             //Format
-            .Must(BeValidFhirType<Organization>)
+            .Must(x => BeValidFhirType<Organization>(x.AsSpan()))
             .WithMessage(ValidationMessages.InvalidFhirObject(RequestHeaderKeys.EndUserOrganisation, nameof(Organization)))
-            .WithErrorCode(ValidationErrorCodes.InvalidHeaderCode);
+            .WithErrorCode(ValidationErrorCode.InvalidHeaderCode.ToString());
 
         RuleFor(x => x.RequestingSoftware)
             //Empty
             .NotEmpty()
             .WithMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.RequestingSoftware))
-            .WithErrorCode(ValidationErrorCodes.MissingRequiredHeaderCode)
+            .WithErrorCode(ValidationErrorCode.MissingRequiredHeaderCode.ToString())
             //Format
-            .Must(BeValidFhirType<Device>)
+            .Must(x => BeValidFhirType<Device>(x.AsSpan()))
             .WithMessage(ValidationMessages.InvalidFhirObject(RequestHeaderKeys.RequestingSoftware, nameof(Device)))
-            .WithErrorCode(ValidationErrorCodes.InvalidHeaderCode);
+            .WithErrorCode(ValidationErrorCode.InvalidHeaderCode.ToString());
 
         When(x => !string.IsNullOrWhiteSpace(x.RequestingPractitioner), () =>
         {
             RuleFor(x => x.RequestingPractitioner!)
                 //Format
-                .Must(BeValidFhirType<PractitionerRole>)
+                .Must(x => BeValidFhirType<PractitionerRole>(x.AsSpan()))
                 .WithMessage(ValidationMessages.InvalidFhirObject(RequestHeaderKeys.RequestingPractitioner, nameof(PractitionerRole)))
-                .WithErrorCode(ValidationErrorCodes.InvalidHeaderCode);
+                .WithErrorCode(ValidationErrorCode.InvalidHeaderCode.ToString());
         });
 
         RuleFor(x => x.RequestId)
             //Empty
             .NotEmpty()
             .WithMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.RequestId))
-            .WithErrorCode(ValidationErrorCodes.MissingRequiredHeaderCode)
+            .WithErrorCode(ValidationErrorCode.MissingRequiredHeaderCode.ToString())
             //Format
             .Must(BeValidGuid!)
             .WithMessage(ValidationMessages.NotGuidFormat(RequestHeaderKeys.RequestId))
-            .WithErrorCode(ValidationErrorCodes.InvalidHeaderCode);
+            .WithErrorCode(ValidationErrorCode.InvalidHeaderCode.ToString());
 
         RuleFor(x => x.CorrelationId)
             //Empty
             .NotEmpty()
             .WithMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.CorrelationId))
-            .WithErrorCode(ValidationErrorCodes.MissingRequiredHeaderCode)
+            .WithErrorCode(ValidationErrorCode.MissingRequiredHeaderCode.ToString())
             //Format
             .Must(BeValidGuid!)
             .WithMessage(ValidationMessages.NotGuidFormat(RequestHeaderKeys.CorrelationId))
-            .WithErrorCode(ValidationErrorCodes.InvalidHeaderCode);
+            .WithErrorCode(ValidationErrorCode.InvalidHeaderCode.ToString());
 
         RuleFor(x => x.UseContext)
             //Empty
             .NotEmpty()
             .WithMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.UseContext))
-            .WithErrorCode(ValidationErrorCodes.MissingRequiredHeaderCode)
+            .WithErrorCode(ValidationErrorCode.MissingRequiredHeaderCode.ToString())
             //Format
             .Must(ContainValidUseCaseValues!)
             .WithMessage(ValidationMessages.NotExpectedFormat(RequestHeaderKeys.UseContext,
                 RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.UseContext)))
-            .WithErrorCode(ValidationErrorCodes.InvalidHeaderCode);
+            .WithErrorCode(ValidationErrorCode.InvalidHeaderCode.ToString());
 
         RuleFor(x => x.Accept)
             //Empty
             .NotEmpty()
             .WithMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.Accept))
-            .WithErrorCode(ValidationErrorCodes.MissingRequiredHeaderCode)
+            .WithErrorCode(ValidationErrorCode.MissingRequiredHeaderCode.ToString())
             //Format
             .Must(HaveValidAcceptValue!)
             .WithMessage(ValidationMessages.NotExpectedFormat(RequestHeaderKeys.Accept,
                 RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept)))
-            .WithErrorCode(ValidationErrorCodes.InvalidHeaderCode);
+            .WithErrorCode(ValidationErrorCode.InvalidHeaderCode.ToString());
     }
 
     private static bool BeValidGuid(string value)
@@ -112,49 +112,36 @@ public class HeadersModelValidator : AbstractValidator<HeadersModel>
         return Guid.TryParse(value, out _);
     }
 
-    private bool BeValidFhirType<T>(string? value) where T : Base
+    private bool BeValidFhirType<T>(ReadOnlySpan<char> value) where T : Base
     {
+        var maxSize = Base64.GetMaxDecodedFromUtf8Length(value.Length);
+        var rentedBuffer = ArrayPool<byte>.Shared.Rent(maxSize);
+
         try
         {
-            var bytes = Convert.FromBase64String(value!);
-            var rawString = Encoding.UTF8.GetString(bytes);
-            JsonSerializer.Deserialize<T>(rawString, _jsonSerializerOptions);
+            if (Convert.TryFromBase64Chars(value, rentedBuffer, out var writtenBytes))
+            {
+                var jsonBytes = new ReadOnlySpan<byte>(rentedBuffer, 0, writtenBytes);
+                JsonSerializer.Deserialize<T>(jsonBytes, _jsonSerializerOptions);
 
-            return true;
+                return true;
+            }
         }
-        catch
+        finally
         {
-            return false;
+            ArrayPool<byte>.Shared.Return(rentedBuffer);
         }
+
+        return false;
     }
 
-    private bool ContainValidUseCaseValues(string value)
+    private static bool ContainValidUseCaseValues(string value)
     {
-        var parts = value.Split("|");
-        return parts.Length > 0 && parts.All(_useCaseValues.Contains);
+        return ValidUseCaseRegex().IsMatch(value);
     }
 
     private bool HaveValidAcceptValue(string value)
     {
-        var parts = value.Split(";", StringSplitOptions.TrimEntries);
-        if (parts.Length != 2)
-        {
-            return false;
-        }
-
-        if (!parts[0].Equals(FhirConstants.FhirMediaType, StringComparison.OrdinalIgnoreCase))
-        {
-            return false;
-        }
-
-        var versionParts = parts[1].Split('=', StringSplitOptions.TrimEntries);
-        if (versionParts.Length != 2 || !versionParts[0].Equals("version", StringComparison.OrdinalIgnoreCase))
-        {
-            return false;
-        }
-
-        var versionNumberParts = versionParts[1].Trim().Split('.', StringSplitOptions.TrimEntries);
-        return versionNumberParts.Length > 0
-               && versionNumberParts.All(x => int.TryParse(x, out _));
+        return ValidAcceptRegex().IsMatch(value);
     }
 }

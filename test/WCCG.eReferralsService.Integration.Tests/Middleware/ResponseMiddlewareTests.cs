@@ -28,7 +28,7 @@ public class ResponseMiddlewareTests
     {
         //Arrange
         var validationFailures = _fixture.Build<ValidationFailure>()
-            .With(x => x.ErrorCode, ValidationErrorCodes.MissingRequiredHeaderCode)
+            .With(x => x.ErrorCode, ValidationErrorCode.MissingRequiredHeaderCode.ToString)
             .CreateMany().ToList();
         var exception = new HeaderValidationException(validationFailures);
 
@@ -63,7 +63,7 @@ public class ResponseMiddlewareTests
     {
         //Arrange
         var validationFailures = _fixture.Build<ValidationFailure>()
-            .With(x => x.ErrorCode, ValidationErrorCodes.MissingRequiredHeaderCode)
+            .With(x => x.ErrorCode, ValidationErrorCode.MissingRequiredHeaderCode.ToString)
             .CreateMany().ToList();
         var exception = new BundleValidationException(validationFailures);
 

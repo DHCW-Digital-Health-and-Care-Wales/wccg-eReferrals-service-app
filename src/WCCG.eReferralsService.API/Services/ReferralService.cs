@@ -40,8 +40,6 @@ public class ReferralService : IReferralService
 
         await ValidateBundleAsync(bundle!);
 
-        //todo: Bundle trimming
-
         var response = await _httpClient.PostAsync(_pasReferralsApiConfig.CreateReferralEndpoint,
             new StringContent(requestBody, new MediaTypeHeaderValue(FhirConstants.FhirMediaType)));
 

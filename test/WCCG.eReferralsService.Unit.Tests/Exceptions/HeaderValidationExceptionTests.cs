@@ -17,11 +17,11 @@ public class HeaderValidationExceptionTests
     {
         //Arrange
         var missingRequiredHeaderValidationFailures = _fixture.Build<ValidationFailure>()
-            .With(x => x.ErrorCode, ValidationErrorCodes.MissingRequiredHeaderCode)
+            .With(x => x.ErrorCode, ValidationErrorCode.MissingRequiredHeaderCode.ToString)
             .CreateMany(2).ToList();
 
         var invalidHeaderValidationFailures = _fixture.Build<ValidationFailure>()
-            .With(x => x.ErrorCode, ValidationErrorCodes.InvalidHeaderCode)
+            .With(x => x.ErrorCode, ValidationErrorCode.InvalidHeaderCode.ToString)
             .CreateMany(3).ToList();
 
         List<ValidationFailure> validationFailures = [.. invalidHeaderValidationFailures, .. missingRequiredHeaderValidationFailures];

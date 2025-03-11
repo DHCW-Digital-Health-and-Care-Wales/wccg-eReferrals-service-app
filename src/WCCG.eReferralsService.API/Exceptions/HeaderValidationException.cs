@@ -6,10 +6,10 @@ namespace WCCG.eReferralsService.API.Exceptions;
 
 public class HeaderValidationException : BaseFhirException
 {
-    private readonly Dictionary<string, Func<string, BaseHeaderError>> _errorTypeDictionary = new()
+    private readonly Dictionary<ValidationErrorCode, Func<string, BaseHeaderError>> _errorTypeDictionary = new()
     {
-        { ValidationErrorCodes.MissingRequiredHeaderCode, message => new MissingRequiredHeaderError(message) },
-        { ValidationErrorCodes.InvalidHeaderCode, message => new InvalidHeaderError(message) }
+        { ValidationErrorCode.MissingRequiredHeaderCode, message => new MissingRequiredHeaderError(message) },
+        { ValidationErrorCode.InvalidHeaderCode, message => new InvalidHeaderError(message) }
     };
 
     private readonly IEnumerable<ValidationFailure> _validationErrors;
@@ -20,7 +20,15 @@ public class HeaderValidationException : BaseFhirException
     }
 
     public override IEnumerable<BaseFhirHttpError> Errors =>
-        _validationErrors.Select(error => _errorTypeDictionary[error.ErrorCode](error.ErrorMessage));
+        _validationErrors.Select(error =>
+        {
+            if (!Enum.TryParse<ValidationErrorCode>(error.ErrorCode, out var errorCode))
+            {
+                throw new NotSupportedException($"Wrong error code: {error.ErrorCode}.");
+            }
+
+            return _errorTypeDictionary[errorCode](error.ErrorMessage);
+        });
 
     public override string Message => $"Header(s) validation failure: {string.Join(';', _validationErrors.Select(x => x.ErrorMessage))}";
 }
