@@ -1,5 +1,6 @@
 using AutoFixture;
 using FluentAssertions;
+using Hl7.Fhir.Model;
 using WCCG.eReferralsService.API.Constants;
 using WCCG.eReferralsService.API.Errors;
 using WCCG.eReferralsService.Unit.Tests.Extensions;
@@ -14,15 +15,16 @@ public class UnexpectedErrorTests
     public void ShouldCorrectlyCreateUnexpectedError()
     {
         //Arrange
-        var exception = _fixture.Create<Exception>();
-        var expectedDetailsMessage = $"Unexpected error: {exception.Message}";
+        var exceptionMessage = _fixture.Create<string>();
+        var expectedDetailsMessage = $"Unexpected error: {exceptionMessage}";
         const string expectedDisplayMessage = "500: The Receiver has encountered an error processing the request.";
 
         //Act
-        var error = new UnexpectedError(exception);
+        var error = new UnexpectedError(exceptionMessage);
 
         //Assert
         error.Code.Should().Be(FhirHttpErrorCodes.ReceiverServerError);
+        error.IssueType.Should().Be(OperationOutcome.IssueType.Transient);
         error.DiagnosticsMessage.Should().Be(expectedDetailsMessage);
         error.Display.Should().Be(expectedDisplayMessage);
     }

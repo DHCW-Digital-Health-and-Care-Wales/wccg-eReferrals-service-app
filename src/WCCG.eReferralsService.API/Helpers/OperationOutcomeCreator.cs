@@ -7,12 +7,12 @@ namespace WCCG.eReferralsService.API.Helpers;
 
 public static class OperationOutcomeCreator
 {
-    public static OperationOutcome CreateOperationOutcome(OperationOutcome.IssueType issueType, params BaseFhirHttpError[] errors)
+    public static OperationOutcome CreateOperationOutcome(params BaseFhirHttpError[] errors)
     {
         var issues = errors.Select(error => new OperationOutcome.IssueComponent
         {
             Severity = OperationOutcome.IssueSeverity.Error,
-            Code = issueType,
+            Code = error.IssueType,
             Details = new CodeableConcept(BaseFhirHttpError.System, error.Code, error.Display),
             Diagnostics = error.DiagnosticsMessage
         }).ToList();
@@ -27,6 +27,6 @@ public static class OperationOutcomeCreator
 
     public static OperationOutcome CreateOperationOutcome(BaseFhirException fhirException)
     {
-        return CreateOperationOutcome(fhirException.IssueType, fhirException.Errors.ToArray());
+        return CreateOperationOutcome(fhirException.Errors.ToArray());
     }
 }

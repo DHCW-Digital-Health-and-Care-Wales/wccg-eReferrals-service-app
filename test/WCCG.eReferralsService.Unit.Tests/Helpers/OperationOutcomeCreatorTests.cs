@@ -1,5 +1,6 @@
 using AutoFixture;
 using FluentAssertions;
+using FluentValidation.Results;
 using Hl7.Fhir.Model;
 using WCCG.eReferralsService.API.Constants;
 using WCCG.eReferralsService.API.Errors;
@@ -17,19 +18,18 @@ public class OperationOutcomeCreatorTests
     public void CreateOperationOutcomeShouldCreateFromErrors()
     {
         //Arrange
-        var issueType = _fixture.Create<OperationOutcome.IssueType>();
-        var errors = _fixture.CreateMany<HeaderValidationError>().ToArray<BaseFhirHttpError>();
+        var errors = _fixture.CreateMany<MissingRequiredHeaderError>().ToArray<BaseFhirHttpError>();
 
         var expectedIssues = errors.Select(error => new OperationOutcome.IssueComponent
         {
             Severity = OperationOutcome.IssueSeverity.Error,
-            Code = issueType,
+            Code = error.IssueType,
             Details = new CodeableConcept(BaseFhirHttpError.System, error.Code, error.Display),
             Diagnostics = error.DiagnosticsMessage
         }).ToList();
 
         //Act
-        var result = OperationOutcomeCreator.CreateOperationOutcome(issueType, errors);
+        var result = OperationOutcomeCreator.CreateOperationOutcome(errors);
 
         //Assert
         result.Id.Should().NotBeEmpty();
@@ -41,12 +41,15 @@ public class OperationOutcomeCreatorTests
     public void CreateOperationOutcomeShouldCreateFromFhirException()
     {
         //Arrange
-        var exception = _fixture.Create<MissingRequiredHeaderException>();
+        var validationFailures = _fixture.Build<ValidationFailure>()
+            .With(x => x.ErrorCode, ValidationErrorCode.MissingRequiredHeaderCode.ToString)
+            .CreateMany().ToList();
+        var exception = new HeaderValidationException(validationFailures);
 
         var expectedIssues = exception.Errors.Select(error => new OperationOutcome.IssueComponent
         {
             Severity = OperationOutcome.IssueSeverity.Error,
-            Code = exception.IssueType,
+            Code = error.IssueType,
             Details = new CodeableConcept(BaseFhirHttpError.System, error.Code, error.Display),
             Diagnostics = error.DiagnosticsMessage
         }).ToList();

@@ -1,16 +1,18 @@
+using Hl7.Fhir.Model;
 using WCCG.eReferralsService.API.Constants;
 
 namespace WCCG.eReferralsService.API.Errors;
 
 public class UnexpectedError : BaseFhirHttpError
 {
-    private readonly Exception _exception;
+    private readonly string _exceptionMessage;
 
-    public UnexpectedError(Exception exception)
+    public UnexpectedError(string exceptionMessage)
     {
-        _exception = exception;
+        _exceptionMessage = exceptionMessage;
     }
 
     public override string Code => FhirHttpErrorCodes.ReceiverServerError;
-    public override string DiagnosticsMessage => $"Unexpected error: {_exception.Message}";
+    public override string DiagnosticsMessage => $"Unexpected error: {_exceptionMessage}";
+    public override OperationOutcome.IssueType IssueType => OperationOutcome.IssueType.Transient;
 }

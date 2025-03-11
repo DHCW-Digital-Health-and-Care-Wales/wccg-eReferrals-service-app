@@ -25,20 +25,19 @@ public class SwaggerProcessMessageOperationFilter : IOperationFilter
         AddHeaders(operation, RequestHeaderKeys.GetAllOptional(), false);
 
         AddResponses(operation);
-
         AddRequests(operation);
     }
 
     private static void AddHeaders(OpenApiOperation operation, IEnumerable<string> headers, bool isRequired)
     {
-        foreach (var requiredHeader in headers)
+        foreach (var header in headers)
         {
             operation.Parameters.Add(new OpenApiParameter
             {
                 In = ParameterLocation.Header,
-                Example = new OpenApiString("XXX"), //todo: add examples in valid formats
+                Example = new OpenApiString(RequestHeaderKeys.GetExampleValue(header)),
                 Required = isRequired,
-                Name = requiredHeader,
+                Name = header,
                 Schema = new OpenApiSchema { Type = "string" }
             });
         }
@@ -63,10 +62,10 @@ public class SwaggerProcessMessageOperationFilter : IOperationFilter
                 "200", new OpenApiResponse
                 {
                     Description = "OK",
-                    Content = new Dictionary<string, OpenApiMediaType>()
+                    Content = new Dictionary<string, OpenApiMediaType>
                     {
                         {
-                            FhirConstants.FhirMediaType, new OpenApiMediaType
+                            RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept), new OpenApiMediaType
                             {
                                 Example = new OpenApiString(
                                     File.ReadAllText("Swagger/Examples/process-message-payload&response.json")),
@@ -79,7 +78,7 @@ public class SwaggerProcessMessageOperationFilter : IOperationFilter
                 "400", new OpenApiResponse
                 {
                     Description = "Bad Request",
-                    Content = new Dictionary<string, OpenApiMediaType>()
+                    Content = new Dictionary<string, OpenApiMediaType>
                     {
                         {
                             FhirConstants.FhirMediaType, new OpenApiMediaType

@@ -2,7 +2,9 @@ using System.Net;
 using System.Text.Json;
 using AutoFixture;
 using FluentAssertions;
+using FluentValidation.Results;
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Serialization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,10 +24,15 @@ public class ResponseMiddlewareTests
     private readonly IFixture _fixture = new Fixture().WithCustomizations();
 
     [Fact]
-    public async Task ShouldHandleMissingRequiredHeaderException()
+    public async Task ShouldHandleHeaderValidationException()
     {
         //Arrange
-        var exception = _fixture.Create<MissingRequiredHeaderException>();
+        var validationFailures = _fixture.Build<ValidationFailure>()
+            .With(x => x.ErrorCode, ValidationErrorCode.MissingRequiredHeaderCode.ToString)
+            .CreateMany().ToList();
+        var exception = new HeaderValidationException(validationFailures);
+
+        var errorMessages = validationFailures.Select(x => x.ErrorMessage);
         var requestId = _fixture.Create<string>();
         var correlationId = _fixture.Create<string>();
 
@@ -47,7 +54,104 @@ public class ResponseMiddlewareTests
         {
             component.Code.Should().Be(OperationOutcome.IssueType.Required);
             component.Severity.Should().Be(OperationOutcome.IssueSeverity.Error);
-            component.Diagnostics.Should().Contain("Missing required header");
+            errorMessages.Should().Contain(component.Diagnostics);
+        });
+    }
+
+    [Fact]
+    public async Task ShouldHandleBundleValidationException()
+    {
+        //Arrange
+        var validationFailures = _fixture.Build<ValidationFailure>()
+            .With(x => x.ErrorCode, ValidationErrorCode.MissingRequiredHeaderCode.ToString)
+            .CreateMany().ToList();
+        var exception = new BundleValidationException(validationFailures);
+
+        var errorMessages = validationFailures.Select(x => x.ErrorMessage);
+        var requestId = _fixture.Create<string>();
+        var correlationId = _fixture.Create<string>();
+
+        var host = StartHostWithException(exception);
+
+        //Act
+        var response = await host.GetTestServer()
+            .CreateRequest(HostProvider.TestEndpoint)
+            .AddHeader(RequestHeaderKeys.RequestId, requestId)
+            .AddHeader(RequestHeaderKeys.CorrelationId, correlationId)
+            .GetAsync();
+
+        //Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+
+        var operationOutcome = JsonSerializer.Deserialize<OperationOutcome>(await response.Content.ReadAsStringAsync(),
+            new JsonSerializerOptions().ForFhirExtended())!;
+        operationOutcome.Issue.Should().AllSatisfy(component =>
+        {
+            component.Code.Should().Be(OperationOutcome.IssueType.Invalid);
+            component.Severity.Should().Be(OperationOutcome.IssueSeverity.Error);
+            errorMessages.Should().Contain(component.Diagnostics);
+        });
+    }
+
+    [Fact]
+    public async Task ShouldHandleDeserializationFailedException()
+    {
+        //Arrange
+        var exception = _fixture.Create<DeserializationFailedException>();
+
+        var requestId = _fixture.Create<string>();
+        var correlationId = _fixture.Create<string>();
+
+        var host = StartHostWithException(exception);
+
+        //Act
+        var response = await host.GetTestServer()
+            .CreateRequest(HostProvider.TestEndpoint)
+            .AddHeader(RequestHeaderKeys.RequestId, requestId)
+            .AddHeader(RequestHeaderKeys.CorrelationId, correlationId)
+            .GetAsync();
+
+        //Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+
+        var operationOutcome = JsonSerializer.Deserialize<OperationOutcome>(await response.Content.ReadAsStringAsync(),
+            new JsonSerializerOptions().ForFhirExtended())!;
+        operationOutcome.Issue.Should().AllSatisfy(component =>
+        {
+            component.Code.Should().Be(OperationOutcome.IssueType.Structure);
+            component.Severity.Should().Be(OperationOutcome.IssueSeverity.Error);
+            component.Diagnostics.Should().Contain(exception.Message);
+        });
+    }
+
+    [Fact]
+    public async Task ShouldHandleJsonException()
+    {
+        //Arrange
+        var exception = _fixture.Create<JsonException>();
+
+        var requestId = _fixture.Create<string>();
+        var correlationId = _fixture.Create<string>();
+
+        var host = StartHostWithException(exception);
+
+        //Act
+        var response = await host.GetTestServer()
+            .CreateRequest(HostProvider.TestEndpoint)
+            .AddHeader(RequestHeaderKeys.RequestId, requestId)
+            .AddHeader(RequestHeaderKeys.CorrelationId, correlationId)
+            .GetAsync();
+
+        //Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+
+        var operationOutcome = JsonSerializer.Deserialize<OperationOutcome>(await response.Content.ReadAsStringAsync(),
+            new JsonSerializerOptions().ForFhirExtended())!;
+        operationOutcome.Issue.Should().AllSatisfy(component =>
+        {
+            component.Code.Should().Be(OperationOutcome.IssueType.Structure);
+            component.Severity.Should().Be(OperationOutcome.IssueSeverity.Error);
+            component.Diagnostics.Should().Contain(exception.Message);
         });
     }
 
@@ -85,7 +189,7 @@ public class ResponseMiddlewareTests
     public async Task ShouldTryToAddHeadersWhenException()
     {
         //Arrange
-        var exception = _fixture.Create<MissingRequiredHeaderException>();
+        var exception = _fixture.Create<Exception>();
         var requestId = _fixture.Create<string>();
         var correlationId = _fixture.Create<string>();
 
