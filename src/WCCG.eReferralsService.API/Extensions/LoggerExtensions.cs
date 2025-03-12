@@ -23,6 +23,12 @@ public static partial class LoggerExtensions
     [LoggerMessage(Level = LogLevel.Error, Message = "Invalid JSON.")]
     public static partial void InvalidJson(this ILogger logger, JsonException exception);
 
+    [LoggerMessage(Level = LogLevel.Error, Message = "An error occurred while calling the PAS API.")]
+    public static partial void ApiCallError(this ILogger logger, HttpRequestException exception);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "PAS API returned not successful response.")]
+    public static partial void NotSuccessfulApiResponseError(this ILogger logger, NotSuccessfulApiCallException exception);
+
     [LoggerMessage(Level = LogLevel.Error, Message = "Unexpected error.")]
     public static partial void UnexpectedError(this ILogger logger, Exception exception);
 }

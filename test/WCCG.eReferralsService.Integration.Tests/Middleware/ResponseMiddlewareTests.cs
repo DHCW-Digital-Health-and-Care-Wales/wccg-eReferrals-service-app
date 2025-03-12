@@ -6,6 +6,7 @@ using FluentValidation.Results;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -150,6 +151,66 @@ public class ResponseMiddlewareTests
         operationOutcome.Issue.Should().AllSatisfy(component =>
         {
             component.Code.Should().Be(OperationOutcome.IssueType.Structure);
+            component.Severity.Should().Be(OperationOutcome.IssueSeverity.Error);
+            component.Diagnostics.Should().Contain(exception.Message);
+        });
+    }
+
+    [Theory]
+    [InlineData(HttpStatusCode.InternalServerError, HttpStatusCode.ServiceUnavailable)]
+    [InlineData(HttpStatusCode.BadRequest, HttpStatusCode.BadRequest)]
+    [InlineData(HttpStatusCode.NotFound, HttpStatusCode.NotFound)]
+    public async Task ShouldHandleNotSuccessfulApiCallException(HttpStatusCode inCode, HttpStatusCode outCode)
+    {
+        //Arrange
+        var exception = new NotSuccessfulApiCallException(inCode, _fixture.Create<ProblemDetails>());
+
+        var requestId = _fixture.Create<string>();
+        var correlationId = _fixture.Create<string>();
+
+        var host = StartHostWithException(exception);
+
+        //Act
+        var response = await host.GetTestServer()
+            .CreateRequest(HostProvider.TestEndpoint)
+            .AddHeader(RequestHeaderKeys.RequestId, requestId)
+            .AddHeader(RequestHeaderKeys.CorrelationId, correlationId)
+            .GetAsync();
+
+        //Assert
+        response.StatusCode.Should().Be(outCode);
+
+        var operationOutcome = JsonSerializer.Deserialize<OperationOutcome>(await response.Content.ReadAsStringAsync(),
+            new JsonSerializerOptions().ForFhirExtended())!;
+        operationOutcome.Issue.Should().AllSatisfy(component => { component.Severity.Should().Be(OperationOutcome.IssueSeverity.Error); });
+    }
+
+    [Fact]
+    public async Task ShouldHandleHttpRequestException()
+    {
+        //Arrange
+        var exception = _fixture.Create<HttpRequestException>();
+
+        var requestId = _fixture.Create<string>();
+        var correlationId = _fixture.Create<string>();
+
+        var host = StartHostWithException(exception);
+
+        //Act
+        var response = await host.GetTestServer()
+            .CreateRequest(HostProvider.TestEndpoint)
+            .AddHeader(RequestHeaderKeys.RequestId, requestId)
+            .AddHeader(RequestHeaderKeys.CorrelationId, correlationId)
+            .GetAsync();
+
+        //Assert
+        response.StatusCode.Should().Be(HttpStatusCode.ServiceUnavailable);
+
+        var operationOutcome = JsonSerializer.Deserialize<OperationOutcome>(await response.Content.ReadAsStringAsync(),
+            new JsonSerializerOptions().ForFhirExtended())!;
+        operationOutcome.Issue.Should().AllSatisfy(component =>
+        {
+            component.Code.Should().Be(OperationOutcome.IssueType.Transient);
             component.Severity.Should().Be(OperationOutcome.IssueSeverity.Error);
             component.Diagnostics.Should().Contain(exception.Message);
         });
