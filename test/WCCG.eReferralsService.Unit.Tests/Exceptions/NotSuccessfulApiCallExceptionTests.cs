@@ -7,6 +7,7 @@ using WCCG.eReferralsService.API.Constants;
 using WCCG.eReferralsService.API.Errors;
 using WCCG.eReferralsService.API.Exceptions;
 using WCCG.eReferralsService.Unit.Tests.Extensions;
+using FooObject = (string strValue, int intVal);
 
 namespace WCCG.eReferralsService.Unit.Tests.Exceptions;
 
@@ -35,7 +36,62 @@ public class NotSuccessfulApiCallExceptionTests
         //Assert
         exception.StatusCode.Should().Be(statusCode);
         exception.Message.Should().Be(expectedMessage);
-        exception.Errors.Should().AllSatisfy(e => e.Should().BeOfType<NotSuccessfulApiResponseError>());
+        exception.Errors.Should().AllSatisfy(e => e.Should().BeOfType<NotSuccessfulApiResponseError>()
+            .Which.Code.Should().Be(FhirHttpErrorCodes.ReceiverBadRequest));
+    }
+
+    [Fact]
+    public void ShouldCorrectlyCreateNotSuccessfulApiCallExceptionForGeneralExtension()
+    {
+        //Arrange
+        var statusCode = _fixture.Create<HttpStatusCode>();
+        var extensionDictionary = new Dictionary<string, object>
+        {
+            { _fixture.Create<string>(), _fixture.Create<FooObject>() },
+            { _fixture.Create<string>(), _fixture.Create<FooObject>() },
+            { _fixture.Create<string>(), _fixture.Create<FooObject>() }
+        };
+
+        var problemDetails = _fixture.Build<ProblemDetails>()
+            .With(x => x.Extensions, extensionDictionary!)
+            .Create();
+
+        var errorParts = extensionDictionary.Select(pair => $"{pair.Key}: {JsonSerializer.Serialize(pair.Value)}");
+        var error = new NotSuccessfulApiResponseError(FhirHttpErrorCodes.ReceiverBadRequest, string.Join(";", errorParts));
+        var expectedMessage = $"API cal returned: {statusCode}. {error.DiagnosticsMessage}.";
+
+        //Act
+        var exception = new NotSuccessfulApiCallException(statusCode, problemDetails);
+
+        //Assert
+        exception.StatusCode.Should().Be(statusCode);
+        exception.Message.Should().Be(expectedMessage);
+        exception.Errors.Should().AllSatisfy(e => e.Should().BeOfType<NotSuccessfulApiResponseError>()
+            .Which.Code.Should().Be(FhirHttpErrorCodes.ReceiverUnavailable));
+    }
+
+    [Fact]
+    public void ShouldCorrectlyCreateNotSuccessfulApiCallExceptionForUnexpectedError()
+    {
+        //Arrange
+        var statusCode = _fixture.Create<HttpStatusCode>();
+
+        var problemDetails = _fixture.Build<ProblemDetails>()
+            .With(x => x.Extensions, new Dictionary<string, object?>())
+            .With(x => x.Detail, (string?)null)
+            .Create();
+
+        var error = new NotSuccessfulApiResponseError(FhirHttpErrorCodes.ReceiverBadRequest, "Unexpected error");
+        var expectedMessage = $"API cal returned: {statusCode}. {error.DiagnosticsMessage}.";
+
+        //Act
+        var exception = new NotSuccessfulApiCallException(statusCode, problemDetails);
+
+        //Assert
+        exception.StatusCode.Should().Be(statusCode);
+        exception.Message.Should().Be(expectedMessage);
+        exception.Errors.Should().AllSatisfy(e => e.Should().BeOfType<NotSuccessfulApiResponseError>()
+            .Which.Code.Should().Be(FhirHttpErrorCodes.ReceiverUnavailable));
     }
 
     [Theory]
@@ -47,6 +103,7 @@ public class NotSuccessfulApiCallExceptionTests
         var errorMessage = _fixture.Create<string>();
 
         var problemDetails = _fixture.Build<ProblemDetails>()
+            .With(x => x.Extensions, new Dictionary<string, object?>())
             .With(x => x.Detail, errorMessage)
             .Create();
 
@@ -58,6 +115,7 @@ public class NotSuccessfulApiCallExceptionTests
         //Assert
         exception.StatusCode.Should().Be(statusCode);
         exception.Message.Should().Be(expectedMessage);
-        exception.Errors.Should().AllSatisfy(e => e.Should().BeOfType<NotSuccessfulApiResponseError>().Which.Code.Should().Be(errorCode));
+        exception.Errors.Should().AllSatisfy(e => e.Should().BeOfType<NotSuccessfulApiResponseError>()
+            .Which.Code.Should().Be(errorCode));
     }
 }
