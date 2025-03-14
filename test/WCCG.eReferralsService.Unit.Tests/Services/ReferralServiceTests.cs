@@ -221,6 +221,31 @@ public class ReferralServiceTests
     }
 
     [Fact]
+    public async Task GetReferralAsyncShouldThrowWhenInvalidGuid()
+    {
+        //Arrange
+        var referralId = "123";
+        var headers = _fixture.Create<IHeaderDictionary>();
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.Expect(HttpMethod.Get,
+                string.Format(CultureInfo.InvariantCulture, $"/{_pasReferralsApiConfig.GetReferralEndpoint}", referralId))
+            .Respond(FhirConstants.FhirMediaType, _fixture.Create<string>());
+
+        var httpClient = mockHttp.ToHttpClient();
+        httpClient.BaseAddress = new Uri("https://some.com");
+
+        var sut = CreateReferralService(httpClient);
+
+        //Act
+        var action = async () => await sut.GetReferralAsync(headers, referralId);
+
+        //Assert
+        await action.Should().ThrowAsync<RequestParameterValidationException>()
+            .WithMessage("Request parameter validation failure. Parameter name: id, Error: Id should be a valid GUID.");
+    }
+
+    [Fact]
     public async Task GetReferralAsyncShouldValidateHeaders()
     {
         //Arrange
@@ -304,6 +329,35 @@ public class ReferralServiceTests
 
         //Assert
         result.Should().Be(expectedResponse);
+    }
+
+    [Theory]
+    [InlineData(HttpStatusCode.InternalServerError)]
+    [InlineData(HttpStatusCode.BadRequest)]
+    [InlineData(HttpStatusCode.NotFound)]
+    public async Task GetReferralAsyncShouldThrowWhenNot200Response(HttpStatusCode statusCode)
+    {
+        //Arrange
+        var id = Guid.NewGuid().ToString();
+        var problemDetails = _fixture.Create<ProblemDetails>();
+
+        var headers = _fixture.Create<IHeaderDictionary>();
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.Expect(HttpMethod.Get, string.Format(CultureInfo.InvariantCulture, $"/{_pasReferralsApiConfig.GetReferralEndpoint}", id))
+            .Respond(statusCode, JsonContent.Create(problemDetails));
+
+        var httpClient = mockHttp.ToHttpClient();
+        httpClient.BaseAddress = new Uri("https://some.com");
+
+        var sut = CreateReferralService(httpClient);
+
+        //Act
+        var action = async () => await sut.GetReferralAsync(headers, id);
+
+        //Assert
+        (await action.Should().ThrowAsync<NotSuccessfulApiCallException>())
+            .Which.StatusCode.Should().Be(statusCode);
     }
 
     private ReferralService CreateReferralService(HttpClient httpClient)

@@ -186,6 +186,39 @@ public class ResponseMiddlewareTests
     }
 
     [Fact]
+    public async Task ShouldHandleRequestParameterValidationException()
+    {
+        //Arrange
+        var parameterName = _fixture.Create<string>();
+        var errorMessage = _fixture.Create<string>();
+        var exception = new RequestParameterValidationException(parameterName, errorMessage);
+
+        var requestId = _fixture.Create<string>();
+        var correlationId = _fixture.Create<string>();
+
+        var host = StartHostWithException(exception);
+
+        //Act
+        var response = await host.GetTestServer()
+            .CreateRequest(HostProvider.TestEndpoint)
+            .AddHeader(RequestHeaderKeys.RequestId, requestId)
+            .AddHeader(RequestHeaderKeys.CorrelationId, correlationId)
+            .GetAsync();
+
+        //Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+
+        var operationOutcome = JsonSerializer.Deserialize<OperationOutcome>(await response.Content.ReadAsStringAsync(),
+            new JsonSerializerOptions().ForFhirExtended())!;
+        operationOutcome.Issue.Should().AllSatisfy(component =>
+        {
+            component.Code.Should().Be(OperationOutcome.IssueType.Invalid);
+            component.Severity.Should().Be(OperationOutcome.IssueSeverity.Error);
+            component.Diagnostics.Should().Contain(parameterName).And.Contain(errorMessage);
+        });
+    }
+
+    [Fact]
     public async Task ShouldHandleHttpRequestException()
     {
         //Arrange

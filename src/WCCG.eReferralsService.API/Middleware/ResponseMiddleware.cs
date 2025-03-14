@@ -82,6 +82,12 @@ public class ResponseMiddleware
                 body = OperationOutcomeCreator.CreateOperationOutcome(notSuccessfulApiCallException);
                 break;
 
+            case RequestParameterValidationException requestParameterValidationException:
+                _logger.RequestParameterValidationError(requestParameterValidationException);
+
+                body = OperationOutcomeCreator.CreateOperationOutcome(requestParameterValidationException);
+                break;
+
             case HttpRequestException requestException:
                 _logger.ApiCallError(requestException);
 

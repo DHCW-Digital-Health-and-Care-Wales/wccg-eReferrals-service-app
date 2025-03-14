@@ -44,6 +44,7 @@ public class NotSuccessfulApiCallExceptionTests
     [InlineData(HttpStatusCode.BadRequest, FhirHttpErrorCodes.ReceiverBadRequest)]
     [InlineData(HttpStatusCode.InternalServerError, FhirHttpErrorCodes.ReceiverUnavailable)]
     [InlineData(HttpStatusCode.TooManyRequests, FhirHttpErrorCodes.TooManyRequests)]
+    [InlineData(HttpStatusCode.NotFound, FhirHttpErrorCodes.ReceiverNotFound)]
     public void ShouldCorrectlyCreateNotSuccessfulApiCallExceptionForGeneralExtension(HttpStatusCode statusCode, string errorCode)
     {
         //Arrange
@@ -100,6 +101,7 @@ public class NotSuccessfulApiCallExceptionTests
     [InlineData(HttpStatusCode.BadRequest, FhirHttpErrorCodes.ReceiverBadRequest)]
     [InlineData(HttpStatusCode.InternalServerError, FhirHttpErrorCodes.ReceiverUnavailable)]
     [InlineData(HttpStatusCode.TooManyRequests, FhirHttpErrorCodes.TooManyRequests)]
+    [InlineData(HttpStatusCode.NotFound, FhirHttpErrorCodes.ReceiverNotFound)]
     public void ShouldCorrectlyCreateNotSuccessfulApiCallExceptionForRegularError(HttpStatusCode statusCode, string errorCode)
     {
         //Arrange
