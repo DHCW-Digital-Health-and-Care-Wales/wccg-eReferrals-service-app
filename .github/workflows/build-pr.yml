@@ -62,7 +62,7 @@ jobs:
 
       - name: "Add Coverage PR Comment"
         uses: marocchino/sticky-pull-request-comment@v2
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'
         with:
           recreate: true
           path: code-coverage-results.md
@@ -76,7 +76,7 @@ jobs:
 
       - name: "Publish Test Results"
         uses: EnricoMi/publish-unit-test-result-action@v2.18.0
-        if: always()
+        if: always() && github.actor != 'dependabot[bot]'
         with:
           trx_files: "${{ github.workspace }}/**/*.trx"
           job_summary: false
