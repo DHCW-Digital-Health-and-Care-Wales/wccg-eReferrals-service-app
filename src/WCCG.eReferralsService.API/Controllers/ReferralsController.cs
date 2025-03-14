@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
 using WCCG.eReferralsService.API.Extensions;
 using WCCG.eReferralsService.API.Services;
@@ -28,6 +29,22 @@ public class ReferralsController : ControllerBase
         var body = await reader.ReadToEndAsync();
 
         var outputBundleJson = await _referralService.CreateReferralAsync(HttpContext.Request.Headers, body);
+
+        return new ContentResult
+        {
+            Content = outputBundleJson,
+            StatusCode = 200,
+            ContentType = FhirConstants.FhirMediaType
+        };
+    }
+
+    [HttpGet("ServiceRequest/{id}")]
+    [SwaggerGetReferralRequest]
+    public async Task<IActionResult> GetReferral(string id)
+    {
+        _logger.CalledMethod(nameof(GetReferral));
+
+        var outputBundleJson = await _referralService.GetReferralAsync(HttpContext.Request.Headers, id);
 
         return new ContentResult
         {

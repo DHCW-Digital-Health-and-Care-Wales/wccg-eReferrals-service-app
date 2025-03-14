@@ -55,8 +55,8 @@ WCCG.PAS.Referrals.API/
 ## Running the Project
 To run the project locally, follow these steps:
 1. Clone the repository.
-2. Don't forget `az login --tenant <YOUR_TENNANT>`
-3. Setup local configuration according to `Required configuration for local development` section
+2. Don't forget `az login --tenant <YOUR_TENNANT>`.
+3. Setup local configuration according to `Required configuration for local development` section.
 4. Rebuild and run the project.
 5. Open your web browser and navigate to `https://localhost:xxxxx/swagger/index.html` to access the SwaggerUI with API endpoints.
 
@@ -64,6 +64,11 @@ To run the project locally, follow these steps:
 Example payloads for POST endpoints can be found in the `Examples` folder. 
 
 ### POST /api/v1/Referrals/$process-message
-- Description: Creates a referral and returns enriched response 
+- Description: Creates a referral and returns enriched response.
 - Request body should be a valid FHIR Bundle JSON object. [Example Payload](./src/WCCG.PAS.Referrals.API/Examples/createReferral-example-payload.json)
-- Response is also a FHIR Bundle but enriched with new values generated while the creation process:
+- Response is also a FHIR Bundle but enriched with new values generated while the creation process.
+
+### GET /api/v1/Referrals/ServiceRequest/&#123;id&#125;
+- Description: Gets a referral by **id**.
+- Route parameter **id** should be a valid GUID.
+- Response is a FHIR Bundle generated based on database data.

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using FluentValidation;
@@ -51,6 +52,20 @@ public class ReferralService : IReferralService
 
         var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>();
         throw new NotSuccessfulApiCallException(response.StatusCode, problemDetails!);
+    }
+
+    public async Task<string> GetReferralAsync(IHeaderDictionary headers, string id)
+    {
+        //todo: add id validation
+
+        await ValidateHeadersAsync(headers);
+
+        var endpoint = string.Format(CultureInfo.InvariantCulture, _pasReferralsApiConfig.GetReferralEndpoint, id);
+        var response = await _httpClient.GetAsync(endpoint);
+
+        //todo: add not successful response handling
+
+        return await response.Content.ReadAsStringAsync();
     }
 
     private async Task ValidateHeadersAsync(IHeaderDictionary headers)
