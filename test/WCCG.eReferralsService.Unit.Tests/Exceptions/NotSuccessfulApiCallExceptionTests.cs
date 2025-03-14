@@ -118,4 +118,22 @@ public class NotSuccessfulApiCallExceptionTests
         exception.Errors.Should().AllSatisfy(e => e.Should().BeOfType<NotSuccessfulApiResponseError>()
             .Which.Code.Should().Be(errorCode));
     }
+
+    [Fact]
+    public void ShouldCorrectlyCreateNotSuccessfulApiCallExceptionForRawContent()
+    {
+        //Arrange
+        var statusCode = _fixture.Create<HttpStatusCode>();
+        var rawContent = _fixture.Create<string>();
+
+        var expectedMessage = $"API cal returned: {statusCode}. Raw content: {rawContent}";
+
+        //Act
+        var exception = new NotSuccessfulApiCallException(statusCode, rawContent);
+
+        //Assert
+        exception.StatusCode.Should().Be(statusCode);
+        exception.Message.Should().Be(expectedMessage);
+        exception.Errors.Should().AllSatisfy(e => e.Should().BeOfType<UnexpectedError>());
+    }
 }

@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using WCCG.eReferralsService.API.Configuration;
 using WCCG.eReferralsService.API.Constants;
 using WCCG.eReferralsService.API.Exceptions;
+using WCCG.eReferralsService.API.Extensions;
 using WCCG.eReferralsService.API.Models;
 using Task = System.Threading.Tasks.Task;
 
@@ -49,8 +50,16 @@ public class ReferralService : IReferralService
             return await response.Content.ReadAsStringAsync();
         }
 
-        var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>();
-        throw new NotSuccessfulApiCallException(response.StatusCode, problemDetails!);
+        throw await GetNotSuccessfulApiCallException(response);
+    }
+
+    private static async Task<Exception> GetNotSuccessfulApiCallException(HttpResponseMessage response)
+    {
+        var content = await response.Content.ReadAsStringAsync();
+
+        return content.TryDeserializeJson<ProblemDetails>(out var problemDetails)
+            ? new NotSuccessfulApiCallException(response.StatusCode, problemDetails!)
+            : new NotSuccessfulApiCallException(response.StatusCode, content);
     }
 
     private async Task ValidateHeadersAsync(IHeaderDictionary headers)

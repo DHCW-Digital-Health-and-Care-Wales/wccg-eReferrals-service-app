@@ -10,6 +10,8 @@ public class NotSuccessfulApiCallException : BaseFhirException
 {
     private const string ValidationErrorsKey = "validationErrors";
 
+    private string ExceptionMessage { get; }
+
     public HttpStatusCode StatusCode { get; init; }
 
     private readonly Dictionary<HttpStatusCode, string> _fhirErrorCodeDictionary = new()
@@ -22,11 +24,22 @@ public class NotSuccessfulApiCallException : BaseFhirException
     public NotSuccessfulApiCallException(HttpStatusCode statusCode, ProblemDetails problemDetails)
     {
         StatusCode = statusCode;
-        Errors = GetErrors(problemDetails);
+
+        var errors = GetErrors(problemDetails).ToList();
+        Errors = errors;
+
+        ExceptionMessage = $"API cal returned: {statusCode}. {string.Join(';', errors.Select(x => x.DiagnosticsMessage))}.";
+    }
+
+    public NotSuccessfulApiCallException(HttpStatusCode statusCode, string rawContent)
+    {
+        StatusCode = statusCode;
+        Errors = [new UnexpectedError("PAS API call failed.")];
+        ExceptionMessage = $"API cal returned: {statusCode}. Raw content: {rawContent}";
     }
 
     public override IEnumerable<BaseFhirHttpError> Errors { get; }
-    public override string Message => $"API cal returned: {StatusCode}. {string.Join(';', Errors.Select(x => x.DiagnosticsMessage))}.";
+    public override string Message => ExceptionMessage;
 
     private IEnumerable<BaseFhirHttpError> GetErrors(ProblemDetails problemDetails)
     {
