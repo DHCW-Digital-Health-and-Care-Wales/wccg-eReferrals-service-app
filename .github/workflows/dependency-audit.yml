@@ -32,11 +32,4 @@ jobs:
         run: dotnet tool install --global dotnet-outdated-tool
 
       - name: "Check for outdated packages"
-        run: dotnet outdated --fail-on-updates --transitive --transitive-depth 1 --output-format json --output outdated-report.json
-
-      - name: "Upload outdated package report"
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: outdated-packages-report
-          path: outdated-report.json
+        run: dotnet outdated --fail-on-updates
