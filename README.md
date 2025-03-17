@@ -61,14 +61,36 @@ To run the project locally, follow these steps:
 5. Open your web browser and navigate to `https://localhost:xxxxx/swagger/index.html` to access the SwaggerUI with API endpoints.
 
 ## API Endpoints
-Example payloads for POST endpoints can be found in the `Examples` folder. 
+Example payloads, responses and errors can be found in the `Swagger/Examples` folder. 
 
-### POST /api/v1/Referrals/$process-message
-- Description: Creates a referral and returns enriched response.
-- Request body should be a valid FHIR Bundle JSON object. [Example Payload](./src/WCCG.PAS.Referrals.API/Examples/createReferral-example-payload.json)
-- Response is also a FHIR Bundle but enriched with new values generated while the creation process.
+### POST /$process-message
 
-### GET /api/v1/Referrals/ServiceRequest/&#123;id&#125;
-- Description: Gets a referral by **id**.
-- Route parameter **id** should be a valid GUID.
-- Response is a FHIR Bundle generated based on database data.
+#### Description
+Creates a referral and returns enriched response.
+
+#### Request details
+Request body should be a valid FHIR Bundle JSON object. [Example Payload](./src/WCCG.eReferralsService.API/Swagger/Examples/process-message-payload&response.json)
+
+#### Responses
+  - 200 - FHIR Bundle but enriched with new values generated while the creation process. [Example](./src/WCCG.eReferralsService.API/Swagger/Examples/process-message-payload&response.json)
+  - 400 - Headers of bundle validation errors [Example](./src/WCCG.eReferralsService.API/Swagger/Examples/process-message-bad-request.json)
+  - 429 - Too many requests [Example](./src/WCCG.eReferralsService.API/Swagger/Examples/common-too-many-requests.json)
+  - 500 - Internal error [Example](./src/WCCG.eReferralsService.API/Swagger/Examples/common-internal-server-error.json)
+  - 503 - PAS API Unavailable or returned 500 [Example](./src/WCCG.eReferralsService.API/Swagger/Examples/common-external-server-error.json)
+
+### GET /ServiceRequest/&#123;id&#125;
+
+#### Description
+Gets a referral by **id**.
+
+#### Request details
+Route parameter **id** should be a valid GUID.
+
+#### Responses
+  - 200 - FHIR Bundle generated from DB data. [Example](./src/WCCG.eReferralsService.API/Swagger/Examples/get-referral-ok-response.json)
+  - 400 - Headers of id validation errors [Example](./src/WCCG.eReferralsService.API/Swagger/Examples/get-referral-bad-request.json)
+  - 404 - Referral with provided id wasn't found [Example](./src/WCCG.eReferralsService.API/Swagger/Examples/get-referral-not-found.json)
+  - 429 - Too many requests [Example](./src/WCCG.eReferralsService.API/Swagger/Examples/common-too-many-requests.json)
+  - 500 - Internal error [Example](./src/WCCG.eReferralsService.API/Swagger/Examples/common-internal-server-error.json)
+  - 503 - PAS API Unavailable or returned 500 [Example](./src/WCCG.eReferralsService.API/Swagger/Examples/common-external-server-error.json)
+

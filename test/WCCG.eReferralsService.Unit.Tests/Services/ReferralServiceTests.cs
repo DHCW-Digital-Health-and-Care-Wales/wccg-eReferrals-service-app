@@ -217,8 +217,6 @@ public class ReferralServiceTests
         var action = async () => await sut.CreateReferralAsync(headers, bundleJson);
 
         //Assert
-
-
         var exception = (await action.Should().ThrowAsync<NotSuccessfulApiCallException>()).Subject.ToList();
         exception[0].StatusCode.Should().Be(statusCode);
         exception[0].Errors.Should().AllSatisfy(e => e.Should().BeOfType<NotSuccessfulApiResponseError>());
@@ -254,16 +252,17 @@ public class ReferralServiceTests
         exception[0].Errors.Should().AllSatisfy(e => e.Should().BeOfType<UnexpectedError>());
     }
 
-    [Fact]
-    public async Task GetReferralAsyncShouldThrowWhenInvalidGuid()
+    [Theory]
+    [InlineData("123")]
+    [InlineData(null)]
+    public async Task GetReferralAsyncShouldThrowWhenInvalidGuid(string? invalidGuid)
     {
         //Arrange
-        var referralId = "123";
         var headers = _fixture.Create<IHeaderDictionary>();
 
         var mockHttp = new MockHttpMessageHandler();
         mockHttp.Expect(HttpMethod.Get,
-                string.Format(CultureInfo.InvariantCulture, $"/{_pasReferralsApiConfig.GetReferralEndpoint}", referralId))
+                string.Format(CultureInfo.InvariantCulture, $"/{_pasReferralsApiConfig.GetReferralEndpoint}", invalidGuid))
             .Respond(FhirConstants.FhirMediaType, _fixture.Create<string>());
 
         var httpClient = mockHttp.ToHttpClient();
@@ -272,7 +271,7 @@ public class ReferralServiceTests
         var sut = CreateReferralService(httpClient);
 
         //Act
-        var action = async () => await sut.GetReferralAsync(headers, referralId);
+        var action = async () => await sut.GetReferralAsync(headers, invalidGuid);
 
         //Assert
         await action.Should().ThrowAsync<RequestParameterValidationException>()

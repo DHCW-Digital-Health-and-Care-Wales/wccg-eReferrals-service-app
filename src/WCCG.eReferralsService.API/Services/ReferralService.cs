@@ -42,7 +42,7 @@ public class ReferralService : IReferralService
 
         await ValidateBundleAsync(bundle!);
 
-        var response = await _httpClient.PostAsync(_pasReferralsApiConfig.CreateReferralEndpoint,
+        using var response = await _httpClient.PostAsync(_pasReferralsApiConfig.CreateReferralEndpoint,
             new StringContent(requestBody, new MediaTypeHeaderValue(FhirConstants.FhirMediaType)));
 
         if (response.IsSuccessStatusCode)
@@ -53,7 +53,7 @@ public class ReferralService : IReferralService
         throw await GetNotSuccessfulApiCallException(response);
     }
 
-    public async Task<string> GetReferralAsync(IHeaderDictionary headers, string id)
+    public async Task<string> GetReferralAsync(IHeaderDictionary headers, string? id)
     {
         if (!Guid.TryParse(id, out _))
         {
@@ -63,15 +63,14 @@ public class ReferralService : IReferralService
         await ValidateHeadersAsync(headers);
 
         var endpoint = string.Format(CultureInfo.InvariantCulture, _pasReferralsApiConfig.GetReferralEndpoint, id);
-        var response = await _httpClient.GetAsync(endpoint);
+        using var response = await _httpClient.GetAsync(endpoint);
 
         if (response.IsSuccessStatusCode)
         {
             return await response.Content.ReadAsStringAsync();
         }
 
-        var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>();
-        throw new NotSuccessfulApiCallException(response.StatusCode, problemDetails!);
+        throw await GetNotSuccessfulApiCallException(response);
     }
 
     private static async Task<Exception> GetNotSuccessfulApiCallException(HttpResponseMessage response)

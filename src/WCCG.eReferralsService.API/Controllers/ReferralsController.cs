@@ -39,7 +39,7 @@ public class ReferralsController : ControllerBase
 
     [HttpGet("ServiceRequest/{id}")]
     [SwaggerGetReferralRequest]
-    public async Task<IActionResult> GetReferral(string id)
+    public async Task<IActionResult> GetReferral(string? id)
     {
         _logger.CalledMethod(nameof(GetReferral));
 
