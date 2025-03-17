@@ -1,4 +1,3 @@
-using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
 using WCCG.eReferralsService.API.Extensions;
 using WCCG.eReferralsService.API.Services;
