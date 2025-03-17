@@ -2,6 +2,7 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using FluentValidation;
 using Hl7.Fhir.Model;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using WCCG.eReferralsService.API.Configuration;
 using WCCG.eReferralsService.API.Constants;
@@ -43,7 +44,27 @@ public class ReferralService : IReferralService
         var response = await _httpClient.PostAsync(_pasReferralsApiConfig.CreateReferralEndpoint,
             new StringContent(requestBody, new MediaTypeHeaderValue(FhirConstants.FhirMediaType)));
 
-        return await response.Content.ReadAsStringAsync();
+        if (response.IsSuccessStatusCode)
+        {
+            return await response.Content.ReadAsStringAsync();
+        }
+
+        throw await GetNotSuccessfulApiCallException(response);
+    }
+
+    private static async Task<Exception> GetNotSuccessfulApiCallException(HttpResponseMessage response)
+    {
+        var content = await response.Content.ReadAsStringAsync();
+
+        try
+        {
+            var problemDetails = JsonSerializer.Deserialize<ProblemDetails>(content);
+            return new NotSuccessfulApiCallException(response.StatusCode, problemDetails!);
+        }
+        catch (JsonException)
+        {
+            return new NotSuccessfulApiCallException(response.StatusCode, content);
+        }
     }
 
     private async Task ValidateHeadersAsync(IHeaderDictionary headers)

@@ -73,7 +73,21 @@ public class ResponseMiddleware
                 body = OperationOutcomeCreator.CreateOperationOutcome(new BundleDeserializationError(jsonException.Message));
                 break;
 
-            //todo: add HttpRequestException handling
+            case NotSuccessfulApiCallException notSuccessfulApiCallException:
+                _logger.NotSuccessfulApiResponseError(notSuccessfulApiCallException);
+
+                statusCode = notSuccessfulApiCallException.StatusCode == HttpStatusCode.InternalServerError
+                    ? HttpStatusCode.ServiceUnavailable
+                    : notSuccessfulApiCallException.StatusCode;
+                body = OperationOutcomeCreator.CreateOperationOutcome(notSuccessfulApiCallException);
+                break;
+
+            case HttpRequestException requestException:
+                _logger.ApiCallError(requestException);
+
+                statusCode = HttpStatusCode.ServiceUnavailable;
+                body = OperationOutcomeCreator.CreateOperationOutcome(new ApiCallError(requestException.Message));
+                break;
 
             default:
                 _logger.UnexpectedError(exception);

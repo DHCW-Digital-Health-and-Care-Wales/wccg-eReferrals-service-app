@@ -35,7 +35,7 @@ public static class RequestHeaderKeys
         {
             RequestingPractitioner,
             "eyJyZXNvdXJjZVR5cGUiOiJQcmFjdGl0aW9uZXJSb2xlIiwiaWRlbnRpZmllciI6W3sic3lzdGVtIjoiaHR0cHM6Ly9maGlyLm5ocy51ay9JZC9zZHMtcm9sZS1wcm9maWxlLWlkIiwidmFsdWUiOiIxMDAzMzQ5OTM1MTQifV0sImNvZGUiOlt7ImNvZGluZyI6W3sic3lzdGVtIjoiaHR0cDovL3Nub21lZC5pbmZvL3NjdCIsImNvZGUiOiI2MjI0NzAwMSIsImRpc3BsYXkiOiJHZW5lcmFsIHByYWN0aXRpb25lciJ9XX1dfQ=="
-        },
+        }
     };
 
     public static IEnumerable<string> GetAllRequired()
