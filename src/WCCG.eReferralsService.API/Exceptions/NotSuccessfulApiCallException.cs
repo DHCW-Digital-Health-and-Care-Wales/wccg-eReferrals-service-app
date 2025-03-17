@@ -9,8 +9,7 @@ namespace WCCG.eReferralsService.API.Exceptions;
 public class NotSuccessfulApiCallException : BaseFhirException
 {
     private const string ValidationErrorsKey = "validationErrors";
-
-    public HttpStatusCode StatusCode { get; init; }
+    private string ExceptionMessage { get; }
 
     private readonly Dictionary<HttpStatusCode, string> _fhirErrorCodeDictionary = new()
     {
@@ -20,14 +19,26 @@ public class NotSuccessfulApiCallException : BaseFhirException
         //todo: add NotFound for GetReferral
     };
 
+    public HttpStatusCode StatusCode { get; init; }
+    public override IEnumerable<BaseFhirHttpError> Errors { get; }
+    public override string Message => ExceptionMessage;
+
     public NotSuccessfulApiCallException(HttpStatusCode statusCode, ProblemDetails problemDetails)
     {
         StatusCode = statusCode;
-        Errors = GetErrors(problemDetails);
+
+        var errors = GetErrors(problemDetails).ToList();
+        Errors = errors;
+
+        ExceptionMessage = $"API cal returned: {(int)statusCode}. {string.Join(';', errors.Select(x => x.DiagnosticsMessage))}.";
     }
 
-    public override IEnumerable<BaseFhirHttpError> Errors { get; }
-    public override string Message => $"API cal returned: {StatusCode}. {string.Join(';', Errors.Select(x => x.DiagnosticsMessage))}.";
+    public NotSuccessfulApiCallException(HttpStatusCode statusCode, string rawContent)
+    {
+        StatusCode = statusCode;
+        Errors = [new UnexpectedError("PAS API call failed.")];
+        ExceptionMessage = $"API cal returned: {(int)statusCode}. Raw content: {rawContent}";
+    }
 
     private IEnumerable<BaseFhirHttpError> GetErrors(ProblemDetails problemDetails)
     {

@@ -50,8 +50,7 @@ public class ReferralService : IReferralService
             return await response.Content.ReadAsStringAsync();
         }
 
-        var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>();
-        throw new NotSuccessfulApiCallException(response.StatusCode, problemDetails!);
+        throw await GetNotSuccessfulApiCallException(response);
     }
 
     public async Task<string> GetReferralAsync(IHeaderDictionary headers, string id)
@@ -66,6 +65,21 @@ public class ReferralService : IReferralService
         //todo: add not successful response handling
 
         return await response.Content.ReadAsStringAsync();
+    }
+
+    private static async Task<Exception> GetNotSuccessfulApiCallException(HttpResponseMessage response)
+    {
+        var content = await response.Content.ReadAsStringAsync();
+
+        try
+        {
+            var problemDetails = JsonSerializer.Deserialize<ProblemDetails>(content);
+            return new NotSuccessfulApiCallException(response.StatusCode, problemDetails!);
+        }
+        catch (JsonException)
+        {
+            return new NotSuccessfulApiCallException(response.StatusCode, content);
+        }
     }
 
     private async Task ValidateHeadersAsync(IHeaderDictionary headers)

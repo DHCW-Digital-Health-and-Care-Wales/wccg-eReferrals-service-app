@@ -15,6 +15,7 @@ using Moq;
 using RichardSzalay.MockHttp;
 using WCCG.eReferralsService.API.Configuration;
 using WCCG.eReferralsService.API.Constants;
+using WCCG.eReferralsService.API.Errors;
 using WCCG.eReferralsService.API.Exceptions;
 using WCCG.eReferralsService.API.Extensions;
 using WCCG.eReferralsService.API.Models;
@@ -195,7 +196,7 @@ public class ReferralServiceTests
     [InlineData(HttpStatusCode.InternalServerError)]
     [InlineData(HttpStatusCode.BadRequest)]
     [InlineData(HttpStatusCode.NotFound)]
-    public async Task CreateReferralAsyncShouldThrowWhenNot200Response(HttpStatusCode statusCode)
+    public async Task CreateReferralAsyncShouldThrowWhenNot200ResponseWithProblemDetails(HttpStatusCode statusCode)
     {
         //Arrange
         var bundleJson = JsonSerializer.Serialize(_fixture.Create<Bundle>(), _jsonSerializerOptions);
@@ -216,8 +217,41 @@ public class ReferralServiceTests
         var action = async () => await sut.CreateReferralAsync(headers, bundleJson);
 
         //Assert
-        (await action.Should().ThrowAsync<NotSuccessfulApiCallException>())
-            .Which.StatusCode.Should().Be(statusCode);
+
+
+        var exception = (await action.Should().ThrowAsync<NotSuccessfulApiCallException>()).Subject.ToList();
+        exception[0].StatusCode.Should().Be(statusCode);
+        exception[0].Errors.Should().AllSatisfy(e => e.Should().BeOfType<NotSuccessfulApiResponseError>());
+    }
+
+    [Theory]
+    [InlineData(HttpStatusCode.InternalServerError)]
+    [InlineData(HttpStatusCode.BadRequest)]
+    [InlineData(HttpStatusCode.NotFound)]
+    public async Task CreateReferralAsyncShouldThrowWhenNotJsonAndNot200Response(HttpStatusCode statusCode)
+    {
+        //Arrange
+        var bundleJson = JsonSerializer.Serialize(_fixture.Create<Bundle>(), _jsonSerializerOptions);
+        var stringContent = _fixture.Create<string>();
+
+        var headers = _fixture.Create<IHeaderDictionary>();
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.Expect(HttpMethod.Post, $"/{_pasReferralsApiConfig.CreateReferralEndpoint}")
+            .Respond(statusCode, new StringContent(stringContent));
+
+        var httpClient = mockHttp.ToHttpClient();
+        httpClient.BaseAddress = new Uri("https://some.com");
+
+        var sut = CreateReferralService(httpClient);
+
+        //Act
+        var action = async () => await sut.CreateReferralAsync(headers, bundleJson);
+
+        //Assert
+        var exception = (await action.Should().ThrowAsync<NotSuccessfulApiCallException>()).Subject.ToList();
+        exception[0].StatusCode.Should().Be(statusCode);
+        exception[0].Errors.Should().AllSatisfy(e => e.Should().BeOfType<UnexpectedError>());
     }
 
     [Fact]
