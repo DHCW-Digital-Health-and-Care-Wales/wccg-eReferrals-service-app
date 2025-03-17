@@ -28,7 +28,7 @@ public class NotSuccessfulApiCallExceptionTests
             .Create();
 
         var errors = errorMessages.Select(e => new NotSuccessfulApiResponseError(FhirHttpErrorCodes.ReceiverBadRequest, e));
-        var expectedMessage = $"API cal returned: {statusCode}. {string.Join(';', errors.Select(x => x.DiagnosticsMessage))}.";
+        var expectedMessage = $"API cal returned: {(int)statusCode}. {string.Join(';', errors.Select(x => x.DiagnosticsMessage))}.";
 
         //Act
         var exception = new NotSuccessfulApiCallException(statusCode, problemDetails);
@@ -58,7 +58,7 @@ public class NotSuccessfulApiCallExceptionTests
 
         var errorParts = extensionDictionary.Select(pair => $"{pair.Key}: {JsonSerializer.Serialize(pair.Value)}");
         var error = new NotSuccessfulApiResponseError(FhirHttpErrorCodes.ReceiverBadRequest, string.Join(";", errorParts));
-        var expectedMessage = $"API cal returned: {statusCode}. {error.DiagnosticsMessage}.";
+        var expectedMessage = $"API cal returned: {(int)statusCode}. {error.DiagnosticsMessage}.";
 
         //Act
         var exception = new NotSuccessfulApiCallException(statusCode, problemDetails);
@@ -82,7 +82,7 @@ public class NotSuccessfulApiCallExceptionTests
             .Create();
 
         var error = new NotSuccessfulApiResponseError(FhirHttpErrorCodes.ReceiverBadRequest, "Unexpected error");
-        var expectedMessage = $"API cal returned: {statusCode}. {error.DiagnosticsMessage}.";
+        var expectedMessage = $"API cal returned: {(int)statusCode}. {error.DiagnosticsMessage}.";
 
         //Act
         var exception = new NotSuccessfulApiCallException(statusCode, problemDetails);
@@ -107,7 +107,7 @@ public class NotSuccessfulApiCallExceptionTests
             .With(x => x.Detail, errorMessage)
             .Create();
 
-        var expectedMessage = $"API cal returned: {statusCode}. Receiver error. {errorMessage}.";
+        var expectedMessage = $"API cal returned: {(int)statusCode}. Receiver error. {errorMessage}.";
 
         //Act
         var exception = new NotSuccessfulApiCallException(statusCode, problemDetails);
@@ -126,7 +126,7 @@ public class NotSuccessfulApiCallExceptionTests
         var statusCode = _fixture.Create<HttpStatusCode>();
         var rawContent = _fixture.Create<string>();
 
-        var expectedMessage = $"API cal returned: {statusCode}. Raw content: {rawContent}";
+        var expectedMessage = $"API cal returned: {(int)statusCode}. Raw content: {rawContent}";
 
         //Act
         var exception = new NotSuccessfulApiCallException(statusCode, rawContent);
