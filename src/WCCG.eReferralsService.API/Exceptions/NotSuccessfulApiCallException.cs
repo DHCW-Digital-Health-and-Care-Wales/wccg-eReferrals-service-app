@@ -29,14 +29,14 @@ public class NotSuccessfulApiCallException : BaseFhirException
         var errors = GetErrors(problemDetails).ToList();
         Errors = errors;
 
-        ExceptionMessage = $"API cal returned: {statusCode}. {string.Join(';', errors.Select(x => x.DiagnosticsMessage))}.";
+        ExceptionMessage = $"API cal returned: {(int)statusCode}. {string.Join(';', errors.Select(x => x.DiagnosticsMessage))}.";
     }
 
     public NotSuccessfulApiCallException(HttpStatusCode statusCode, string rawContent)
     {
         StatusCode = statusCode;
         Errors = [new UnexpectedError("PAS API call failed.")];
-        ExceptionMessage = $"API cal returned: {statusCode}. Raw content: {rawContent}";
+        ExceptionMessage = $"API cal returned: {(int)statusCode}. Raw content: {rawContent}";
     }
 
     private IEnumerable<BaseFhirHttpError> GetErrors(ProblemDetails problemDetails)
