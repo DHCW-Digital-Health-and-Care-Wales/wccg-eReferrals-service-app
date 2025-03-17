@@ -55,16 +55,23 @@ public class ReferralService : IReferralService
 
     public async Task<string> GetReferralAsync(IHeaderDictionary headers, string id)
     {
-        //todo: add id validation
+        if (!Guid.TryParse(id, out _))
+        {
+            throw new RequestParameterValidationException(nameof(id), "Id should be a valid GUID");
+        }
 
         await ValidateHeadersAsync(headers);
 
         var endpoint = string.Format(CultureInfo.InvariantCulture, _pasReferralsApiConfig.GetReferralEndpoint, id);
         var response = await _httpClient.GetAsync(endpoint);
 
-        //todo: add not successful response handling
+        if (response.IsSuccessStatusCode)
+        {
+            return await response.Content.ReadAsStringAsync();
+        }
 
-        return await response.Content.ReadAsStringAsync();
+        var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+        throw new NotSuccessfulApiCallException(response.StatusCode, problemDetails!);
     }
 
     private static async Task<Exception> GetNotSuccessfulApiCallException(HttpResponseMessage response)

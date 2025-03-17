@@ -106,7 +106,36 @@ public class SwaggerOperationFilter : IOperationFilter
                     }
                 }
             },
-            //todo: add more for error handling ticket
+            {
+                "400", new OpenApiResponse
+                {
+                    Description = "Bad Request",
+                    Content = new Dictionary<string, OpenApiMediaType>
+                    {
+                        {
+                            RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept), new OpenApiMediaType
+                            {
+                                Example = new OpenApiString(File.ReadAllText("Swagger/Examples/get-referral-bad-request.json")),
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                "404", new OpenApiResponse
+                {
+                    Description = "Not Found",
+                    Content = new Dictionary<string, OpenApiMediaType>
+                    {
+                        {
+                            RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept), new OpenApiMediaType
+                            {
+                                Example = new OpenApiString(File.ReadAllText("Swagger/Examples/get-referral-not-found.json")),
+                            }
+                        }
+                    }
+                }
+            },
             {
                 "429", new OpenApiResponse
                 {
@@ -114,7 +143,7 @@ public class SwaggerOperationFilter : IOperationFilter
                     Content = new Dictionary<string, OpenApiMediaType>
                     {
                         {
-                            FhirConstants.FhirMediaType, new OpenApiMediaType
+                            RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept), new OpenApiMediaType
                             {
                                 Example = new OpenApiString(File.ReadAllText("Swagger/Examples/common-too-many-requests.json")),
                             }
@@ -184,7 +213,7 @@ public class SwaggerOperationFilter : IOperationFilter
                     Content = new Dictionary<string, OpenApiMediaType>
                     {
                         {
-                            FhirConstants.FhirMediaType, new OpenApiMediaType
+                            RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept), new OpenApiMediaType
                             {
                                 Example = new OpenApiString(File.ReadAllText("Swagger/Examples/process-message-bad-request.json")),
                             }
@@ -199,7 +228,7 @@ public class SwaggerOperationFilter : IOperationFilter
                     Content = new Dictionary<string, OpenApiMediaType>
                     {
                         {
-                            FhirConstants.FhirMediaType, new OpenApiMediaType
+                            RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept), new OpenApiMediaType
                             {
                                 Example = new OpenApiString(File.ReadAllText("Swagger/Examples/common-too-many-requests.json")),
                             }

@@ -15,8 +15,8 @@ public class NotSuccessfulApiCallException : BaseFhirException
     {
         { HttpStatusCode.BadRequest, FhirHttpErrorCodes.ReceiverBadRequest },
         { HttpStatusCode.TooManyRequests, FhirHttpErrorCodes.TooManyRequests },
-        { HttpStatusCode.InternalServerError, FhirHttpErrorCodes.ReceiverUnavailable }
-        //todo: add NotFound for GetReferral
+        { HttpStatusCode.InternalServerError, FhirHttpErrorCodes.ReceiverUnavailable },
+        { HttpStatusCode.NotFound, FhirHttpErrorCodes.ReceiverNotFound }
     };
 
     public HttpStatusCode StatusCode { get; init; }
