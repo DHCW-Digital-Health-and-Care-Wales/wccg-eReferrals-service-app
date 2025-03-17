@@ -9,10 +9,7 @@ namespace WCCG.eReferralsService.API.Exceptions;
 public class NotSuccessfulApiCallException : BaseFhirException
 {
     private const string ValidationErrorsKey = "validationErrors";
-
     private string ExceptionMessage { get; }
-
-    public HttpStatusCode StatusCode { get; init; }
 
     private readonly Dictionary<HttpStatusCode, string> _fhirErrorCodeDictionary = new()
     {
@@ -20,6 +17,10 @@ public class NotSuccessfulApiCallException : BaseFhirException
         { HttpStatusCode.InternalServerError, FhirHttpErrorCodes.ReceiverUnavailable }
         //todo: add NotFound for GetReferral
     };
+
+    public HttpStatusCode StatusCode { get; init; }
+    public override IEnumerable<BaseFhirHttpError> Errors { get; }
+    public override string Message => ExceptionMessage;
 
     public NotSuccessfulApiCallException(HttpStatusCode statusCode, ProblemDetails problemDetails)
     {
@@ -37,9 +38,6 @@ public class NotSuccessfulApiCallException : BaseFhirException
         Errors = [new UnexpectedError("PAS API call failed.")];
         ExceptionMessage = $"API cal returned: {statusCode}. Raw content: {rawContent}";
     }
-
-    public override IEnumerable<BaseFhirHttpError> Errors { get; }
-    public override string Message => ExceptionMessage;
 
     private IEnumerable<BaseFhirHttpError> GetErrors(ProblemDetails problemDetails)
     {
