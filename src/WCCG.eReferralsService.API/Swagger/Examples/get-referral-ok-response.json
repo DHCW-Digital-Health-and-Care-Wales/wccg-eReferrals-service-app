@@ -1,21 +1,29 @@
 {
   "resourceType": "Bundle",
   "type": "message",
-  "timestamp": "2025-02-19T09:14:12.8380931+00:00",
+  "timestamp": "2025-03-13T15:44:06.43319+00:00",
   "entry": [
     {
-      "fullUrl": "urn:uuid:a9bc08ee-1437-4c20-a748-eaace6c06f7f",
+      "fullUrl": "urn:uuid:50012f25-9077-4d6e-8580-21cb7d024b5b",
       "resource": {
         "resourceType": "MessageHeader",
         "eventCoding": {
           "system": "https://fhir.nhs.uk/CodeSystem/message-events-bars",
           "code": "servicerequest-request"
         },
+        "destination": [
+          {
+            "endpoint": "https://localhost:44362/$process-message|0123456789",
+            "receiver": {
+              "reference": "urn:uuid:9bcdcb94-3349-441b-9c99-5dbedf396acd"
+            }
+          }
+        ],
         "sender": {
-          "reference": "urn:uuid:f7c3f8f1-b95f-4c13-a703-391cb3f7107c"
+          "reference": "urn:uuid:4ad41fee-e464-4264-bb63-df4a578e1edf"
         },
         "source": {
-          "endpoint": "https://senders.response.endpoint"
+          "endpoint": "https://localhost:44360"
         },
         "reason": {
           "coding": [
@@ -27,15 +35,21 @@
         },
         "focus": [
           {
-            "reference": "urn:uuid:31652c74-508d-4a22-8903-dde84ccba632"
+            "reference": "urn:uuid:7cce9924-3826-4ccd-a616-e0aa0c4594cc"
           }
-        ]
+        ],
+        "definition": "https://fhir.nhs.uk/MessageDefinition/bars-message-servicerequest-request-referral"
       }
     },
     {
-      "fullUrl": "urn:uuid:31652c74-508d-4a22-8903-dde84ccba632",
+      "fullUrl": "urn:uuid:7cce9924-3826-4ccd-a616-e0aa0c4594cc",
       "resource": {
         "resourceType": "ServiceRequest",
+        "meta": {
+          "profile": [
+            "https://fhir.nhs.uk/StructureDefinition/BARSServiceRequest-request-referral"
+          ]
+        },
         "extension": [
           {
             "url": "https://fhir.hl7.org.uk/StructureDefinition/Extension-UKCore-SourceOfServiceRequest",
@@ -43,7 +57,8 @@
               "coding": [
                 {
                   "system": "http://snomed.info/sct",
-                  "code": "xx"
+                  "code": "DE",
+                  "display": "General Dental Practice"
                 }
               ]
             }
@@ -51,12 +66,13 @@
         ],
         "identifier": [
           {
-            "system": "DHCW/LinkId",
-            "value": "xxxxxxxxxxxxxxxxxxxx"
-          },
-          {
             "system": "ReferralUniqueId",
             "value": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+          }
+        ],
+        "basedOn": [
+          {
+            "reference": "urn:uuid:7807cd3b-0739-4448-8388-a7e11ec1728a"
           }
         ],
         "status": "active",
@@ -66,7 +82,8 @@
             "coding": [
               {
                 "system": "https://fhir.nhs.uk/CodeSystem/message-category-servicerequest",
-                "code": "xxxxxxxx"
+                "code": "referral",
+                "display": "Transfer of Care"
               }
             ]
           }
@@ -77,7 +94,7 @@
             "coding": [
               {
                 "system": "dhcw/WlistCodes",
-                "code": "xx"
+                "code": "O"
               }
             ]
           },
@@ -85,7 +102,7 @@
             "coding": [
               {
                 "system": "dhcw/IntentReferValues",
-                "code": "x"
+                "code": "6"
               }
             ]
           },
@@ -101,7 +118,7 @@
             "coding": [
               {
                 "system": "dhcw/Datonsys",
-                "code": "2030-06-15"
+                "code": "2025-03-13T11:19:37.1431198+00:00"
               }
             ]
           },
@@ -115,30 +132,27 @@
           }
         ],
         "subject": {
-          "reference": "urn:uuid:d76799d6-703c-4ff1-a8ba-4c618c2b1fbb"
+          "reference": "urn:uuid:95b13079-a4fd-4581-b85b-a2896617e007"
         },
         "encounter": {
-          "reference": "urn:uuid:97bab4ef-8d2c-4de6-a100-4326fe9e36cd"
+          "reference": "urn:uuid:f86e0375-4f03-4033-9684-12b24dcb095c"
         },
         "occurrenceTiming": {
           "event": [
-            "2030-06-15T09:14:12.8371094Z"
+            "2030-06-15T09:14:12.8371094+00:00"
           ],
           "repeat": {
             "period": 6,
             "periodUnit": "d"
           }
         },
-        "authoredOn": "2030-06-15T09:14:12.8360738Z",
+        "authoredOn": "2030-06-15T09:14:12.8360738+00:00",
         "requester": {
-          "reference": "urn:uuid:a9705e43-23da-4583-b52e-fe5ccdd8d782"
+          "reference": "urn:uuid:137d9e0b-f59c-4a3b-8ffc-a6a91a83739d"
         },
         "performer": [
           {
-            "reference": "urn:uuid:5ff49111-b40f-47ea-a484-81072d0ce118"
-          },
-          {
-            "reference": "urn:uuid:e428e758-1443-4858-ab0c-bb0c8d9f852a"
+            "reference": "urn:uuid:57ced8ac-a707-49ae-8041-27a78bf1ab80"
           }
         ],
         "locationCode": [
@@ -154,7 +168,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:d76799d6-703c-4ff1-a8ba-4c618c2b1fbb",
+      "fullUrl": "urn:uuid:95b13079-a4fd-4581-b85b-a2896617e007",
       "resource": {
         "resourceType": "Patient",
         "meta": {
@@ -209,7 +223,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:e428e758-1443-4858-ab0c-bb0c8d9f852a",
+      "fullUrl": "urn:uuid:af4d10a6-75bb-4ec6-8f4a-24e9612075c8",
       "resource": {
         "resourceType": "Practitioner",
         "id": "ReceivingClinician",
@@ -227,7 +241,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:a9705e43-23da-4583-b52e-fe5ccdd8d782",
+      "fullUrl": "urn:uuid:137d9e0b-f59c-4a3b-8ffc-a6a91a83739d",
       "resource": {
         "resourceType": "Practitioner",
         "id": "RequestingPractitioner",
@@ -238,14 +252,14 @@
         },
         "identifier": [
           {
-            "system": "https://fhir.hl7.org.uk/Id/gmc-number",
+            "system": "https://fhir.hl7.org.uk/Id/gdc-number",
             "value": "XXXXXXXX"
           }
         ]
       }
     },
     {
-      "fullUrl": "urn:uuid:5ff49111-b40f-47ea-a484-81072d0ce118",
+      "fullUrl": "urn:uuid:57ced8ac-a707-49ae-8041-27a78bf1ab80",
       "resource": {
         "resourceType": "Organization",
         "id": "DhaCode",
@@ -263,7 +277,7 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:f7c3f8f1-b95f-4c13-a703-391cb3f7107c",
+      "fullUrl": "urn:uuid:4ad41fee-e464-4264-bb63-df4a578e1edf",
       "resource": {
         "resourceType": "Organization",
         "id": "ReferringPractice",
@@ -281,7 +295,25 @@
       }
     },
     {
-      "fullUrl": "urn:uuid:97bab4ef-8d2c-4de6-a100-4326fe9e36cd",
+      "fullUrl": "urn:uuid:9bcdcb94-3349-441b-9c99-5dbedf396acd",
+      "resource": {
+        "resourceType": "Organization",
+        "id": "Destination",
+        "meta": {
+          "profile": [
+            "https://fhir.nhs.wales/StructureDefinition/DataStandardsWales-Organization"
+          ]
+        },
+        "identifier": [
+          {
+            "system": "https://fhir.nhs.uk/Id/ods-organization-code",
+            "value": "XXXXX"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:f86e0375-4f03-4033-9684-12b24dcb095c",
       "resource": {
         "resourceType": "Encounter",
         "meta": {
@@ -291,14 +323,16 @@
         },
         "status": "finished",
         "class": {
-          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
-          "code": "XXX"
+          "system": "http://snomed.info/sct",
+          "code": "XXXXXXXXXXXXXXX",
+          "display": "Referral to dental service"
         },
         "serviceType": {
           "coding": [
             {
               "system": "dhcw/SPEC",
-              "code": "XXXXXX"
+              "code": "XXXXXX",
+              "display": "Referral to dental service"
             }
           ]
         },
@@ -312,13 +346,13 @@
         },
         "appointment": [
           {
-            "reference": "urn:uuid:315deedf-c21b-4295-9435-6474f89f8794"
+            "reference": "urn:uuid:091f6176-149a-47db-b4a5-33e2cddebed7"
           }
         ]
       }
     },
     {
-      "fullUrl": "urn:uuid:315deedf-c21b-4295-9435-6474f89f8794",
+      "fullUrl": "urn:uuid:091f6176-149a-47db-b4a5-33e2cddebed7",
       "resource": {
         "resourceType": "Appointment",
         "meta": {
@@ -330,16 +364,104 @@
           {
             "url": "BookingOrganization",
             "valueReference": {
-              "reference": "urn:uuid:f7c3f8f1-b95f-4c13-a703-391cb3f7107c"
+              "reference": "urn:uuid:4ad41fee-e464-4264-bb63-df4a578e1edf"
             }
           }
         ],
         "status": "fulfilled",
-        "created": "2030-06-15T09:14:12.8360738Z",
+        "created": "2025-03-13T11:19:37.1431198+00:00",
         "participant": [
           {
             "actor": {
-              "reference": "urn:uuid:d76799d6-703c-4ff1-a8ba-4c618c2b1fbb"
+              "reference": "urn:uuid:95b13079-a4fd-4581-b85b-a2896617e007"
+            },
+            "status": "accepted"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:7807cd3b-0739-4448-8388-a7e11ec1728a",
+      "resource": {
+        "resourceType": "CarePlan",
+        "meta": {
+          "profile": [
+            "https://fhir.hl7.org.uk/StructureDefinition/UKCore-CarePlan"
+          ]
+        },
+        "status": "completed",
+        "intent": "plan",
+        "subject": {
+          "reference": "urn:uuid:95b13079-a4fd-4581-b85b-a2896617e007"
+        },
+        "encounter": {
+          "reference": "urn:uuid:f86e0375-4f03-4033-9684-12b24dcb095c"
+        }
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:bbbe5f83-aadd-40cf-8e7d-6839f5529f54",
+      "resource": {
+        "resourceType": "Encounter",
+        "meta": {
+          "profile": [
+            "https://fhir.nhs.wales/StructureDefinition/DataStandardsWales-Encounter"
+          ]
+        },
+        "status": "planned",
+        "class": {
+          "system": "http://snomed.info/sct",
+          "code": "XXXXXXXXX",
+          "display": "outpatient"
+        },
+        "serviceType": {
+          "coding": [
+            {
+              "system": "dhcw/SPEC",
+              "code": "XXXXXX",
+              "display": "Referral to dental service"
+            }
+          ]
+        },
+        "priority": {
+          "coding": [
+            {
+              "system": "DHCW/lttrPriority",
+              "code": "X"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "urn:uuid:95b13079-a4fd-4581-b85b-a2896617e007"
+        },
+        "appointment": [
+          {
+            "reference": "urn:uuid:1ffac106-5e00-45d9-8944-3d3c2fd66f41"
+          }
+        ]
+      }
+    },
+    {
+      "fullUrl": "urn:uuid:1ffac106-5e00-45d9-8944-3d3c2fd66f41",
+      "resource": {
+        "resourceType": "Appointment",
+        "meta": {
+          "profile": [
+            "https://fhir.hl7.org.uk/StructureDefinition/UKCore-Appointment"
+          ]
+        },
+        "status": "waitlist",
+        "created": "2025-03-13T15:44:06.43319+00:00",
+        "participant": [
+          {
+            "actor": {
+              "reference": "urn:uuid:95b13079-a4fd-4581-b85b-a2896617e007"
+            },
+            "status": "accepted"
+          },
+          {
+            "actor": {
+              "reference": "urn:uuid:af4d10a6-75bb-4ec6-8f4a-24e9612075c8"
             },
             "status": "accepted"
           }

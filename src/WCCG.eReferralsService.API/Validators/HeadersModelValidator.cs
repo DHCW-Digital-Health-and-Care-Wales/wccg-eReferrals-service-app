@@ -127,6 +127,10 @@ public partial class HeadersModelValidator : AbstractValidator<HeadersModel>
                 return true;
             }
         }
+        catch
+        {
+            return false;
+        }
         finally
         {
             ArrayPool<byte>.Shared.Return(rentedBuffer);

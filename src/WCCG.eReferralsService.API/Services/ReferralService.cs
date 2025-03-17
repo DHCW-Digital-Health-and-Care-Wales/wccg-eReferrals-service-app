@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using FluentValidation;
@@ -41,8 +42,28 @@ public class ReferralService : IReferralService
 
         await ValidateBundleAsync(bundle!);
 
-        var response = await _httpClient.PostAsync(_pasReferralsApiConfig.CreateReferralEndpoint,
+        using var response = await _httpClient.PostAsync(_pasReferralsApiConfig.CreateReferralEndpoint,
             new StringContent(requestBody, new MediaTypeHeaderValue(FhirConstants.FhirMediaType)));
+
+        if (response.IsSuccessStatusCode)
+        {
+            return await response.Content.ReadAsStringAsync();
+        }
+
+        throw await GetNotSuccessfulApiCallException(response);
+    }
+
+    public async Task<string> GetReferralAsync(IHeaderDictionary headers, string? id)
+    {
+        if (!Guid.TryParse(id, out _))
+        {
+            throw new RequestParameterValidationException(nameof(id), "Id should be a valid GUID");
+        }
+
+        await ValidateHeadersAsync(headers);
+
+        var endpoint = string.Format(CultureInfo.InvariantCulture, _pasReferralsApiConfig.GetReferralEndpoint, id);
+        using var response = await _httpClient.GetAsync(endpoint);
 
         if (response.IsSuccessStatusCode)
         {

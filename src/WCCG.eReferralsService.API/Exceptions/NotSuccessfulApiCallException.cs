@@ -14,8 +14,9 @@ public class NotSuccessfulApiCallException : BaseFhirException
     private readonly Dictionary<HttpStatusCode, string> _fhirErrorCodeDictionary = new()
     {
         { HttpStatusCode.BadRequest, FhirHttpErrorCodes.ReceiverBadRequest },
-        { HttpStatusCode.InternalServerError, FhirHttpErrorCodes.ReceiverUnavailable }
-        //todo: add NotFound for GetReferral
+        { HttpStatusCode.TooManyRequests, FhirHttpErrorCodes.TooManyRequests },
+        { HttpStatusCode.InternalServerError, FhirHttpErrorCodes.ReceiverUnavailable },
+        { HttpStatusCode.NotFound, FhirHttpErrorCodes.ReceiverNotFound }
     };
 
     public HttpStatusCode StatusCode { get; init; }
@@ -50,7 +51,12 @@ public class NotSuccessfulApiCallException : BaseFhirException
         if (problemDetails.Extensions.Count > 0)
         {
             var errorParts = problemDetails.Extensions.Select(pair => $"{pair.Key}: {JsonSerializer.Serialize(pair.Value)}");
-            return [new NotSuccessfulApiResponseError(FhirHttpErrorCodes.ReceiverUnavailable, string.Join(";", errorParts))];
+            return
+            [
+                new NotSuccessfulApiResponseError(
+                    _fhirErrorCodeDictionary.GetValueOrDefault(StatusCode, FhirHttpErrorCodes.ReceiverUnavailable),
+                    string.Join(";", errorParts))
+            ];
         }
 
         if (problemDetails.Detail is null)

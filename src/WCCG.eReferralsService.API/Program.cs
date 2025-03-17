@@ -15,7 +15,7 @@ builder.Services.AddSingleton<IValidateOptions<PasReferralsApiConfig>, ValidateP
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddSwaggerGen(options => { options.OperationFilter<SwaggerProcessMessageOperationFilter>(); });
+builder.Services.AddSwaggerGen(options => { options.OperationFilter<SwaggerOperationFilter>(); });
 
 builder.Services.AddApplicationInsights(builder.Environment.IsDevelopment(), builder.Configuration);
 

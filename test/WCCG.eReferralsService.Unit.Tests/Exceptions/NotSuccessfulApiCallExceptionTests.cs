@@ -40,11 +40,14 @@ public class NotSuccessfulApiCallExceptionTests
             .Which.Code.Should().Be(FhirHttpErrorCodes.ReceiverBadRequest));
     }
 
-    [Fact]
-    public void ShouldCorrectlyCreateNotSuccessfulApiCallExceptionForGeneralExtension()
+    [Theory]
+    [InlineData(HttpStatusCode.BadRequest, FhirHttpErrorCodes.ReceiverBadRequest)]
+    [InlineData(HttpStatusCode.InternalServerError, FhirHttpErrorCodes.ReceiverUnavailable)]
+    [InlineData(HttpStatusCode.TooManyRequests, FhirHttpErrorCodes.TooManyRequests)]
+    [InlineData(HttpStatusCode.NotFound, FhirHttpErrorCodes.ReceiverNotFound)]
+    public void ShouldCorrectlyCreateNotSuccessfulApiCallExceptionForGeneralExtension(HttpStatusCode statusCode, string errorCode)
     {
         //Arrange
-        var statusCode = _fixture.Create<HttpStatusCode>();
         var extensionDictionary = new Dictionary<string, object>
         {
             { _fixture.Create<string>(), _fixture.Create<FooObject>() },
@@ -67,7 +70,7 @@ public class NotSuccessfulApiCallExceptionTests
         exception.StatusCode.Should().Be(statusCode);
         exception.Message.Should().Be(expectedMessage);
         exception.Errors.Should().AllSatisfy(e => e.Should().BeOfType<NotSuccessfulApiResponseError>()
-            .Which.Code.Should().Be(FhirHttpErrorCodes.ReceiverUnavailable));
+            .Which.Code.Should().Be(errorCode));
     }
 
     [Fact]
@@ -97,6 +100,8 @@ public class NotSuccessfulApiCallExceptionTests
     [Theory]
     [InlineData(HttpStatusCode.BadRequest, FhirHttpErrorCodes.ReceiverBadRequest)]
     [InlineData(HttpStatusCode.InternalServerError, FhirHttpErrorCodes.ReceiverUnavailable)]
+    [InlineData(HttpStatusCode.TooManyRequests, FhirHttpErrorCodes.TooManyRequests)]
+    [InlineData(HttpStatusCode.NotFound, FhirHttpErrorCodes.ReceiverNotFound)]
     public void ShouldCorrectlyCreateNotSuccessfulApiCallExceptionForRegularError(HttpStatusCode statusCode, string errorCode)
     {
         //Arrange
