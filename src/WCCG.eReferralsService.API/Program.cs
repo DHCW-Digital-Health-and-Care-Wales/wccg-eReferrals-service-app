@@ -1,16 +1,21 @@
 using System.Text.Json;
 using Microsoft.Extensions.Options;
 using WCCG.eReferralsService.API.Configuration.OptionValidators;
-using WCCG.eReferralsService.API.Configuration;
 using WCCG.eReferralsService.API.Extensions;
 using WCCG.eReferralsService.API.Middleware;
 using WCCG.eReferralsService.API.Swagger;
+using WCCG.eReferralsService.API.Configuration;
+using WCCG.eReferralsService.API.Configuration.Resilience;
 
 var builder = WebApplication.CreateBuilder(args);
 
 //PasReferralsApiConfig
 builder.Services.AddOptions<PasReferralsApiConfig>().Bind(builder.Configuration.GetSection(PasReferralsApiConfig.SectionName));
 builder.Services.AddSingleton<IValidateOptions<PasReferralsApiConfig>, ValidatePasReferralsApiConfigOptions>();
+
+//Resilience
+builder.Services.AddOptions<ResilienceConfig>().Bind(builder.Configuration.GetSection(ResilienceConfig.SectionName));
+builder.Services.AddSingleton<IValidateOptions<ResilienceConfig>, ValidateResilienceConfigOptions>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
