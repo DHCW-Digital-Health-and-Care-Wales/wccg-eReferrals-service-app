@@ -17,8 +17,7 @@ public partial class HeadersModelValidator : AbstractValidator<HeadersModel>
     [GeneratedRegex(@"([a-zA-Z0-9-]+\|?)+", RegexOptions.CultureInvariant)]
     private static partial Regex ValidUseCaseRegex();
 
-    [GeneratedRegex(@"^application/fhir\+json;\s*version=\d+(\.\d+)*$", RegexOptions.CultureInvariant)]
-    private static partial Regex ValidAcceptRegex();
+    private const string ValidAcceptValue = "application/fhir+json; version=1.2.0";
 
     public HeadersModelValidator()
     {
@@ -101,7 +100,7 @@ public partial class HeadersModelValidator : AbstractValidator<HeadersModel>
             .WithMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.Accept))
             .WithErrorCode(ValidationErrorCode.MissingRequiredHeaderCode.ToString())
             //Format
-            .Must(HaveValidAcceptValue!)
+            .Equal(ValidAcceptValue, StringComparer.OrdinalIgnoreCase)
             .WithMessage(ValidationMessages.NotExpectedFormat(RequestHeaderKeys.Accept,
                 RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept)))
             .WithErrorCode(ValidationErrorCode.InvalidHeaderCode.ToString());
@@ -142,10 +141,5 @@ public partial class HeadersModelValidator : AbstractValidator<HeadersModel>
     private static bool ContainValidUseCaseValues(string value)
     {
         return ValidUseCaseRegex().IsMatch(value);
-    }
-
-    private bool HaveValidAcceptValue(string value)
-    {
-        return ValidAcceptRegex().IsMatch(value);
     }
 }
