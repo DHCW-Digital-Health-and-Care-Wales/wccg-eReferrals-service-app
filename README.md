@@ -10,7 +10,7 @@ Make sure you have the following installed and set up:
 
 ## Required configuration for local development
 To configure the project, follow these steps:
-1. Open [appsettings.Development.json](appsettings.Development.json) or user secrets file and configure BaseUrl for PAS Referrals API.
+1. Open [appsettings.Development.json](./src/WCCG.eReferralsService.API/appsettings.Development.json) or user secrets file and configure BaseUrl for PAS Referrals API.
 ```
 "PasReferralsApi": {
     "BaseUrl": "<YOUR_URL>"
@@ -59,6 +59,20 @@ To run the project locally, follow these steps:
 3. Setup local configuration according to `Required configuration for local development` section.
 4. Rebuild and run the project.
 5. Open your web browser and navigate to `https://localhost:xxxxx/swagger/index.html` to access the SwaggerUI with API endpoints.
+
+## Resilience
+All HTTP requests using resilience policy, which can be configured in [appsettings.json](./src/WCCG.eReferralsService.API/appsettings.json):
+```
+ "Resilience": {
+    "TotalTimeoutSeconds": 30, // Totat execution timeout
+    "AttemptTimeoutSeconds": 10, // Timeout of a single request attempt
+    "Retry": {
+      "IsExponentialDelay": true, // Is delay between retries increases exponentialy?
+      "DelaySeconds": 2, // Delay between retries (first delay, when IsExponentialDelay is true, as next delay will be longer)
+      "MaxRetries": 3 // Maximum number of retries
+    }
+  }
+```
 
 ## API Endpoints
 Example payloads, responses and errors can be found in the `Swagger/Examples` folder. 

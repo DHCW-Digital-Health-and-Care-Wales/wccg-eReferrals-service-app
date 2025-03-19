@@ -10,19 +10,13 @@ public class ResilienceConfig
     public static string SectionName => "Resilience";
 
     [ValidateObjectMembers]
-    public required RateLimiterConfig RateLimiter { get; set; }
-
-    [ValidateObjectMembers]
     public required RetryConfig Retry { get; set; }
 
-    [ValidateObjectMembers]
-    public required CircuitBreakerConfig CircuitBreaker { get; set; }
-
     [Required]
-    [Range(0, int.MaxValue)]
+    [Range(0, 60)]
     public required int TotalTimeoutSeconds { get; set; }
 
     [Required]
-    [Range(0, int.MaxValue)]
+    [Range(0, 60)]
     public required int AttemptTimeoutSeconds { get; set; }
 }

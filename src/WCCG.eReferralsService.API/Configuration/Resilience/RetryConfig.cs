@@ -8,10 +8,10 @@ public class RetryConfig
     public bool IsExponentialDelay { get; set; }
 
     [Required]
-    [Range(0, int.MaxValue)]
+    [Range(0, 60)]
     public int DelaySeconds { get; set; }
 
     [Required]
-    [Range(0, int.MaxValue)]
+    [Range(0, 10)]
     public int MaxRetries { get; set; }
 }

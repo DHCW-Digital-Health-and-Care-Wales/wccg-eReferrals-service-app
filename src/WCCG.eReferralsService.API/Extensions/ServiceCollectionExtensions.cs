@@ -1,14 +1,11 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
-using System.Threading.RateLimiting;
 using Azure.Identity;
 using FluentValidation;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Options;
 using Polly;
-using Polly.CircuitBreaker;
-using Polly.RateLimiting;
 using Polly.Retry;
 using Polly.Timeout;
 using WCCG.eReferralsService.API.Configuration;
@@ -64,15 +61,7 @@ public static class ServiceCollectionExtensions
         var resilienceConfig = context.ServiceProvider.GetRequiredService<IOptions<ResilienceConfig>>().Value;
 
         builder
-            .AddRateLimiter(new RateLimiterStrategyOptions
-            {
-                DefaultRateLimiterOptions = new ConcurrencyLimiterOptions
-                {
-                    PermitLimit = resilienceConfig.RateLimiter.PermitLimit,
-                    QueueLimit = resilienceConfig.RateLimiter.QueueLimit
-                }
-            })
-            .AddTimeout(TimeSpan.FromSeconds(30))
+            .AddTimeout(TimeSpan.FromSeconds(resilienceConfig.TotalTimeoutSeconds))
             .AddRetry(new RetryStrategyOptions<HttpResponseMessage>
             {
                 BackoffType = resilienceConfig.Retry.IsExponentialDelay
@@ -91,13 +80,6 @@ public static class ServiceCollectionExtensions
                         or HttpStatusCode.BadGateway
                         or HttpStatusCode.ServiceUnavailable
                         or HttpStatusCode.GatewayTimeout)
-            })
-            .AddCircuitBreaker(new CircuitBreakerStrategyOptions<HttpResponseMessage>
-            {
-                FailureRatio = (double)resilienceConfig.CircuitBreaker.FailureRatioPercent / 100,
-                MinimumThroughput = resilienceConfig.CircuitBreaker.MinimumThroughput,
-                SamplingDuration = TimeSpan.FromSeconds(resilienceConfig.CircuitBreaker.SamplingDurationSeconds),
-                BreakDuration = TimeSpan.FromSeconds(resilienceConfig.CircuitBreaker.BreakDurationSeconds)
             })
             .AddTimeout(TimeSpan.FromSeconds(resilienceConfig.AttemptTimeoutSeconds));
     }
