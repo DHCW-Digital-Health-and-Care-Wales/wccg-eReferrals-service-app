@@ -425,12 +425,15 @@ public class HeadersModelValidatorTests
             .WithErrorCode(ValidationErrorCode.InvalidHeaderCode.ToString());
     }
 
-    [Fact]
-    public void ShouldNotContainErrorWhenAcceptValid()
+    [Theory]
+    [InlineData("application/fhir+json; version=1.2.0")]
+    [InlineData("application/fhir+json;version=1.2.0")]
+    [InlineData("version=1.2.0;    application/fhir+json")]
+    public void ShouldNotContainErrorWhenAcceptValid(string value)
     {
         //Arrange
         var model = _fixture.Build<HeadersModel>()
-            .With(x => x.Accept, "application/fhir+json; version=1.2.0")
+            .With(x => x.Accept, value)
             .Create();
 
         //Act
