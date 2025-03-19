@@ -31,7 +31,7 @@ public static class RequestHeaderKeys
         { RequestId, "c1ab3fba-6bae-4ba4-b257-5a87c44d4a91" },
         { CorrelationId, "9562466f-c982-4bd5-bb0e-255e9f5e6689" },
         { UseContext, "a4t2|validation|servicerequest-response|new" },
-        { Accept, "application/fhir+json; version=1.0" },
+        { Accept, "application/fhir+json; version=1.2.0" },
         {
             RequestingPractitioner,
             "eyJyZXNvdXJjZVR5cGUiOiJQcmFjdGl0aW9uZXJSb2xlIiwiaWRlbnRpZmllciI6W3sic3lzdGVtIjoiaHR0cHM6Ly9maGlyLm5ocy51ay9JZC9zZHMtcm9sZS1wcm9maWxlLWlkIiwidmFsdWUiOiIxMDAzMzQ5OTM1MTQifV0sImNvZGUiOlt7ImNvZGluZyI6W3sic3lzdGVtIjoiaHR0cDovL3Nub21lZC5pbmZvL3NjdCIsImNvZGUiOiI2MjI0NzAwMSIsImRpc3BsYXkiOiJHZW5lcmFsIHByYWN0aXRpb25lciJ9XX1dfQ=="

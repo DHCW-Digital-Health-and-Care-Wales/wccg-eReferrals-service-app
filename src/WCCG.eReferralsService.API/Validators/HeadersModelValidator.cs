@@ -7,6 +7,8 @@ using WCCG.eReferralsService.API.Constants;
 using WCCG.eReferralsService.API.Extensions;
 using WCCG.eReferralsService.API.Models;
 using System.Text.RegularExpressions;
+using Range = System.Range;
+using System;
 
 namespace WCCG.eReferralsService.API.Validators;
 
@@ -17,8 +19,8 @@ public partial class HeadersModelValidator : AbstractValidator<HeadersModel>
     [GeneratedRegex(@"([a-zA-Z0-9-]+\|?)+", RegexOptions.CultureInvariant)]
     private static partial Regex ValidUseCaseRegex();
 
-    [GeneratedRegex(@"^application/fhir\+json;\s*version=\d+(\.\d+)*$", RegexOptions.CultureInvariant)]
-    private static partial Regex ValidAcceptRegex();
+    private const string AcceptTypePart = "application/fhir+json";
+    private const string AcceptVersionPart = "version=1.2.0";
 
     public HeadersModelValidator()
     {
@@ -101,7 +103,7 @@ public partial class HeadersModelValidator : AbstractValidator<HeadersModel>
             .WithMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.Accept))
             .WithErrorCode(ValidationErrorCode.MissingRequiredHeaderCode.ToString())
             //Format
-            .Must(HaveValidAcceptValue!)
+            .Must(BeValidAcceptValue!)
             .WithMessage(ValidationMessages.NotExpectedFormat(RequestHeaderKeys.Accept,
                 RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept)))
             .WithErrorCode(ValidationErrorCode.InvalidHeaderCode.ToString());
@@ -144,8 +146,23 @@ public partial class HeadersModelValidator : AbstractValidator<HeadersModel>
         return ValidUseCaseRegex().IsMatch(value);
     }
 
-    private bool HaveValidAcceptValue(string value)
+    private static bool BeValidAcceptValue(string value)
     {
-        return ValidAcceptRegex().IsMatch(value);
+        var valueSpan = value.AsSpan();
+
+        var separatorIndex = valueSpan.IndexOf(';');
+        if (separatorIndex < 0 || valueSpan.Count(';') > 1)
+        {
+            return false;
+        }
+
+        var firstPart = valueSpan[..separatorIndex].Trim();
+        var secondPart = valueSpan[(separatorIndex + 1)..].Trim();
+
+        return
+            (firstPart.Equals(AcceptTypePart.AsSpan(), StringComparison.OrdinalIgnoreCase) &&
+             secondPart.Equals(AcceptVersionPart.AsSpan(), StringComparison.OrdinalIgnoreCase)) ||
+            (secondPart.Equals(AcceptTypePart.AsSpan(), StringComparison.OrdinalIgnoreCase) &&
+             firstPart.Trim().Equals(AcceptVersionPart.AsSpan(), StringComparison.OrdinalIgnoreCase));
     }
 }

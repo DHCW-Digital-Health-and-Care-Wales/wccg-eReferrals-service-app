@@ -426,15 +426,14 @@ public class HeadersModelValidatorTests
     }
 
     [Theory]
-    [InlineData("application/fhir+json; version=1.2.0.9")]
     [InlineData("application/fhir+json; version=1.2.0")]
-    [InlineData("application/fhir+json; version=2.4")]
-    [InlineData("application/fhir+json; version=3")]
-    public void ShouldNotContainErrorWhenAcceptValid(string accept)
+    [InlineData("application/fhir+json;version=1.2.0")]
+    [InlineData("version=1.2.0;    application/fhir+json")]
+    public void ShouldNotContainErrorWhenAcceptValid(string value)
     {
         //Arrange
         var model = _fixture.Build<HeadersModel>()
-            .With(x => x.Accept, accept)
+            .With(x => x.Accept, value)
             .Create();
 
         //Act
