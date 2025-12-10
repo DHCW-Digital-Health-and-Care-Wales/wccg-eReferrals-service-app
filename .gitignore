@@ -18,6 +18,7 @@ riderModule.iml
 
 #Visual Studio
 .vs/
+.vscode/
 
 # Build results
 [Dd]ebug/
