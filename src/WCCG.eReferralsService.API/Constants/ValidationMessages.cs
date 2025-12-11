@@ -31,4 +31,9 @@ public static class ValidationMessages
     {
         return $"The required FHIR bundle entity '{resourceName}' with ID: '{id}' is missing";
     }
+
+    public static string MinCardinality(string resourceName, int min)
+    {
+        return $"The FHIR bundle must contain at least {min} '{resourceName}' resources";
+    }
 }

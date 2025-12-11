@@ -11,6 +11,10 @@ public class BundleModelValidator : AbstractValidator<BundleModel>
     {
         ClassLevelCascadeMode = CascadeMode.Continue;
 
+        RuleFor(x => x.MessageHeader)
+            .NotNull()
+            .WithMessage(ValidationMessages.MissingBundleEntity(nameof(MessageHeader)));
+
         RuleFor(x => x.ServiceRequest)
             .NotNull()
             .WithMessage(ValidationMessages.MissingBundleEntity(nameof(ServiceRequest)));
@@ -23,24 +27,28 @@ public class BundleModelValidator : AbstractValidator<BundleModel>
             .NotNull()
             .WithMessage(ValidationMessages.MissingBundleEntity(nameof(Encounter)));
 
-        RuleFor(x => x.Appointment)
+        RuleFor(x => x.CarePlan)
             .NotNull()
-            .WithMessage(ValidationMessages.MissingBundleEntity(nameof(Appointment)));
+            .WithMessage(ValidationMessages.MissingBundleEntity(nameof(CarePlan)));
 
-        RuleFor(x => x.RequestingPractitioner)
+        RuleFor(x => x.HealthcareService)
             .NotNull()
-            .WithMessage(ValidationMessages.MissingBundleEntity(nameof(Practitioner), FhirConstants.RequestingPractitionerId));
+            .WithMessage(ValidationMessages.MissingBundleEntity(nameof(HealthcareService)));
 
-        RuleFor(x => x.ReceivingClinicianPractitioner)
-            .NotNull()
-            .WithMessage(ValidationMessages.MissingBundleEntity(nameof(Practitioner), FhirConstants.ReceivingClinicianId));
+        RuleFor(x => x.Organizations)
+            .Must(list => list.Count >= 2)
+            .WithMessage(ValidationMessages.MinCardinality(nameof(Organization), 2));
 
-        RuleFor(x => x.DhaOrganization)
-            .NotNull()
-            .WithMessage(ValidationMessages.MissingBundleEntity(nameof(Organization), FhirConstants.DhaCodeId));
+        RuleFor(x => x.Practitioners)
+            .Must(list => list.Count >= 1)
+            .WithMessage(ValidationMessages.MinCardinality(nameof(Practitioner), 1));
 
-        RuleFor(x => x.ReferringPracticeOrganization)
-            .NotNull()
-            .WithMessage(ValidationMessages.MissingBundleEntity(nameof(Organization), FhirConstants.ReferringPracticeId));
+        RuleFor(x => x.PractitionerRoles)
+            .Must(list => list.Count >= 1)
+            .WithMessage(ValidationMessages.MinCardinality(nameof(PractitionerRole), 1));
+
+        RuleFor(x => x.Consents)
+            .Must(list => list.Count >= 1)
+            .WithMessage(ValidationMessages.MinCardinality(nameof(Consent), 1));
     }
 }
