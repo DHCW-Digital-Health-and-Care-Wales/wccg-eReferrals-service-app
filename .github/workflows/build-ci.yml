@@ -82,17 +82,18 @@ jobs:
           username: ${{ secrets.AZURE_DEV_ACR_CLIENT_ID }}
           password: ${{ secrets.AZURE_DEV_ACR_CLIENT_SECRET }}
 
-      - name: "Build and Push to ACR"
-        uses: docker/build-push-action@v6
-        id: docker_build
-        with:
-          push: true
-          context: "./src/WCCG.eReferralsService.API"
-          file: "./src/WCCG.eReferralsService.API/Dockerfile"
-          tags: |
-            "${{ vars.AZURE_DEV_ACR_REGISTRY_URL }}/${{ vars.IMAGE_NAME }}:latest"
-            "${{ vars.AZURE_DEV_ACR_REGISTRY_URL }}/${{ vars.IMAGE_NAME }}:${{ github.sha }}"
-
-      - name: Output image digest
-        run: |
-          echo "Image digest: ${{ steps.docker_build.outputs.digest }}"
+# Temporarily disabled Docker build and push steps
+#      - name: "Build and Push to ACR"
+#        uses: docker/build-push-action@v6
+#        id: docker_build
+#        with:
+#          push: true
+#          context: "./src/WCCG.eReferralsService.API"
+#          file: "./src/WCCG.eReferralsService.API/Dockerfile"
+#          tags: |
+#            "${{ vars.AZURE_DEV_ACR_REGISTRY_URL }}/${{ vars.IMAGE_NAME }}:latest"
+#            "${{ vars.AZURE_DEV_ACR_REGISTRY_URL }}/${{ vars.IMAGE_NAME }}:${{ github.sha }}"
+#
+#      - name: Output image digest
+#        run: |
+#          echo "Image digest: ${{ steps.docker_build.outputs.digest }}"
