@@ -27,14 +27,16 @@ public class BundleModelTests
         var model = BundleModel.FromBundle(bundle);
 
         //Assert
+        model.MessageHeader.Should().NotBeNull();
         model.ServiceRequest.Should().NotBeNull();
         model.Patient.Should().NotBeNull();
         model.Encounter.Should().NotBeNull();
-        model.Appointment.Should().NotBeNull();
-        model.RequestingPractitioner.Should().NotBeNull();
-        model.ReceivingClinicianPractitioner.Should().NotBeNull();
-        model.DhaOrganization.Should().NotBeNull();
-        model.ReferringPracticeOrganization.Should().NotBeNull();
+        model.CarePlan.Should().NotBeNull();
+        model.HealthcareService.Should().NotBeNull();
+        model.Organizations.Should().NotBeNull();
+        model.Practitioners.Should().NotBeNull();
+        model.PractitionerRoles.Should().NotBeNull();
+        model.Consents.Should().NotBeNull();
     }
 
     [Fact]
@@ -47,13 +49,28 @@ public class BundleModelTests
         var model = BundleModel.FromBundle(bundle);
 
         //Assert
+        model.MessageHeader.Should().BeNull();
         model.ServiceRequest.Should().BeNull();
         model.Patient.Should().BeNull();
         model.Encounter.Should().BeNull();
-        model.Appointment.Should().BeNull();
-        model.RequestingPractitioner.Should().BeNull();
-        model.ReceivingClinicianPractitioner.Should().BeNull();
-        model.DhaOrganization.Should().BeNull();
-        model.ReferringPracticeOrganization.Should().BeNull();
+        model.CarePlan.Should().BeNull();
+        model.HealthcareService.Should().BeNull();
+        model.IncidentLocation.Should().BeNull();
+
+        model.Organizations.Should().BeEmpty();
+        model.Practitioners.Should().BeEmpty();
+        model.PractitionerRoles.Should().BeEmpty();
+        model.Observations.Should().BeEmpty();
+        model.SceneSafetyFlags.Should().BeEmpty();
+        model.Flags.Should().BeEmpty();
+        model.MedicationStatements.Should().BeEmpty();
+        model.AllergyIntolerances.Should().BeEmpty();
+        model.Questionnaires.Should().BeEmpty();
+        model.QuestionnaireResponses.Should().BeEmpty();
+        model.Consents.Should().BeEmpty();
+        model.Conditions.Should().BeEmpty();
+        model.Tasks.Should().BeEmpty();
+        model.Communications.Should().BeEmpty();
+        model.Procedures.Should().BeEmpty();
     }
 }
