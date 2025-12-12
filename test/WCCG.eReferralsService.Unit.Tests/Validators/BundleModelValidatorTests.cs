@@ -20,243 +20,145 @@ public class BundleModelValidatorTests
         _sut = _fixture.CreateWithFrozen<BundleModelValidator>();
         _sut.ClassLevelCascadeMode = CascadeMode.Continue;
 
+        _fixture.Register(() => new MessageHeader { Id = _fixture.Create<string>() });
         _fixture.Register(() => new ServiceRequest { Id = _fixture.Create<string>() });
         _fixture.Register(() => new Patient { Id = _fixture.Create<string>() });
         _fixture.Register(() => new Encounter { Id = _fixture.Create<string>() });
+        _fixture.Register(() => new CarePlan { Id = _fixture.Create<string>() });
+        _fixture.Register(() => new HealthcareService { Id = _fixture.Create<string>() });
         _fixture.Register(() => new Organization { Id = _fixture.Create<string>() });
-        _fixture.Register(() => new Appointment { Id = _fixture.Create<string>() });
         _fixture.Register(() => new Practitioner { Id = _fixture.Create<string>() });
+        _fixture.Register(() => new PractitionerRole { Id = _fixture.Create<string>() });
+        _fixture.Register(() => new Consent { Id = _fixture.Create<string>() });
+    }
+
+    [Fact]
+    public void ShouldContainErrorWhenMessageHeaderNull()
+    {
+        var model = _fixture.Build<BundleModel>()
+            .Without(x => x.MessageHeader)
+            .Create();
+
+        var result = _sut.TestValidate(model);
+
+        result.ShouldHaveValidationErrorFor(x => x.MessageHeader)
+            .WithErrorMessage(ValidationMessages.MissingBundleEntity(nameof(MessageHeader)));
     }
 
     [Fact]
     public void ShouldContainErrorWhenServiceRequestNull()
     {
-        //Arrange
         var model = _fixture.Build<BundleModel>()
             .Without(x => x.ServiceRequest)
             .Create();
 
-        //Act
-        var validationResult = _sut.TestValidate(model);
+        var result = _sut.TestValidate(model);
 
-        //Assert
-        validationResult.ShouldHaveValidationErrorFor(x => x.ServiceRequest)
+        result.ShouldHaveValidationErrorFor(x => x.ServiceRequest)
             .WithErrorMessage(ValidationMessages.MissingBundleEntity(nameof(ServiceRequest)));
     }
 
     [Fact]
-    public void ShouldNotContainErrorWhenServiceRequestNotNull()
+    public void ShouldContainErrorWhenPatientNull()
     {
-        //Arrange
-        var model = _fixture.Create<BundleModel>();
-
-        //Act
-        var validationResult = _sut.TestValidate(model);
-
-        //Assert
-        validationResult.ShouldNotHaveValidationErrorFor(x => x.ServiceRequest);
-    }
-
-    [Fact]
-    public void ShouldContainErrorWhenServicePatientNull()
-    {
-        //Arrange
         var model = _fixture.Build<BundleModel>()
             .Without(x => x.Patient)
             .Create();
 
-        //Act
-        var validationResult = _sut.TestValidate(model);
+        var result = _sut.TestValidate(model);
 
-        //Assert
-        validationResult.ShouldHaveValidationErrorFor(x => x.Patient)
+        result.ShouldHaveValidationErrorFor(x => x.Patient)
             .WithErrorMessage(ValidationMessages.MissingBundleEntity(nameof(Patient)));
-    }
-
-    [Fact]
-    public void ShouldNotContainErrorWhenPatientNotNull()
-    {
-        //Arrange
-        var model = _fixture.Create<BundleModel>();
-
-        //Act
-        var validationResult = _sut.TestValidate(model);
-
-        //Assert
-        validationResult.ShouldNotHaveValidationErrorFor(x => x.Patient);
     }
 
     [Fact]
     public void ShouldContainErrorWhenEncounterNull()
     {
-        //Arrange
         var model = _fixture.Build<BundleModel>()
             .Without(x => x.Encounter)
             .Create();
 
-        //Act
-        var validationResult = _sut.TestValidate(model);
+        var result = _sut.TestValidate(model);
 
-        //Assert
-        validationResult.ShouldHaveValidationErrorFor(x => x.Encounter)
+        result.ShouldHaveValidationErrorFor(x => x.Encounter)
             .WithErrorMessage(ValidationMessages.MissingBundleEntity(nameof(Encounter)));
     }
 
     [Fact]
-    public void ShouldNotContainErrorWhenEncounterNotNull()
+    public void ShouldContainErrorWhenCarePlanNull()
     {
-        //Arrange
-        var model = _fixture.Create<BundleModel>();
-
-        //Act
-        var validationResult = _sut.TestValidate(model);
-
-        //Assert
-        validationResult.ShouldNotHaveValidationErrorFor(x => x.Encounter);
-    }
-
-    [Fact]
-    public void ShouldContainErrorWhenAppointmentNull()
-    {
-        //Arrange
         var model = _fixture.Build<BundleModel>()
-            .Without(x => x.Appointment)
+            .Without(x => x.CarePlan)
             .Create();
 
-        //Act
-        var validationResult = _sut.TestValidate(model);
+        var result = _sut.TestValidate(model);
 
-        //Assert
-        validationResult.ShouldHaveValidationErrorFor(x => x.Appointment)
-            .WithErrorMessage(ValidationMessages.MissingBundleEntity(nameof(Appointment)));
+        result.ShouldHaveValidationErrorFor(x => x.CarePlan)
+            .WithErrorMessage(ValidationMessages.MissingBundleEntity(nameof(CarePlan)));
     }
 
     [Fact]
-    public void ShouldNotContainErrorWhenAppointmentNotNull()
+    public void ShouldContainErrorWhenHealthcareServiceNull()
     {
-        //Arrange
-        var model = _fixture.Create<BundleModel>();
-
-        //Act
-        var validationResult = _sut.TestValidate(model);
-
-        //Assert
-        validationResult.ShouldNotHaveValidationErrorFor(x => x.Appointment);
-    }
-
-    [Fact]
-    public void ShouldContainErrorWhenRequestingPractitionerNull()
-    {
-        //Arrange
         var model = _fixture.Build<BundleModel>()
-            .Without(x => x.RequestingPractitioner)
+            .Without(x => x.HealthcareService)
             .Create();
 
-        //Act
-        var validationResult = _sut.TestValidate(model);
+        var result = _sut.TestValidate(model);
 
-        //Assert
-        validationResult.ShouldHaveValidationErrorFor(x => x.RequestingPractitioner)
-            .WithErrorMessage(ValidationMessages.MissingBundleEntity(nameof(Practitioner), FhirConstants.RequestingPractitionerId));
+        result.ShouldHaveValidationErrorFor(x => x.HealthcareService)
+            .WithErrorMessage(ValidationMessages.MissingBundleEntity(nameof(HealthcareService)));
     }
 
     [Fact]
-    public void ShouldNotContainErrorWhenRequestingPractitionerNotNull()
+    public void ShouldContainErrorWhenOrganizationsLessThanTwo()
     {
-        //Arrange
-        var model = _fixture.Create<BundleModel>();
-
-        //Act
-        var validationResult = _sut.TestValidate(model);
-
-        //Assert
-        validationResult.ShouldNotHaveValidationErrorFor(x => x.RequestingPractitioner);
-    }
-
-    [Fact]
-    public void ShouldContainErrorWhenReceivingClinicianPractitionerNull()
-    {
-        //Arrange
         var model = _fixture.Build<BundleModel>()
-            .Without(x => x.ReceivingClinicianPractitioner)
+            .With(x => x.Organizations, new List<Organization> { new Organization() })
             .Create();
 
-        //Act
-        var validationResult = _sut.TestValidate(model);
+        var result = _sut.TestValidate(model);
 
-        //Assert
-        validationResult.ShouldHaveValidationErrorFor(x => x.ReceivingClinicianPractitioner)
-            .WithErrorMessage(ValidationMessages.MissingBundleEntity(nameof(Practitioner), FhirConstants.ReceivingClinicianId));
+        result.ShouldHaveValidationErrorFor(x => x.Organizations)
+            .WithErrorMessage(ValidationMessages.MinCardinality(nameof(Organization), 2));
     }
 
     [Fact]
-    public void ShouldNotContainErrorWhenReceivingClinicianPractitionerNotNull()
+    public void ShouldContainErrorWhenPractitionersEmpty()
     {
-        //Arrange
-        var model = _fixture.Create<BundleModel>();
-
-        //Act
-        var validationResult = _sut.TestValidate(model);
-
-        //Assert
-        validationResult.ShouldNotHaveValidationErrorFor(x => x.ReceivingClinicianPractitioner);
-    }
-
-    [Fact]
-    public void ShouldContainErrorWhenDhaOrganizationNull()
-    {
-        //Arrange
         var model = _fixture.Build<BundleModel>()
-            .Without(x => x.DhaOrganization)
+            .With(x => x.Practitioners, new List<Practitioner>())
             .Create();
 
-        //Act
-        var validationResult = _sut.TestValidate(model);
+        var result = _sut.TestValidate(model);
 
-        //Assert
-        validationResult.ShouldHaveValidationErrorFor(x => x.DhaOrganization)
-            .WithErrorMessage(ValidationMessages.MissingBundleEntity(nameof(Organization), FhirConstants.DhaCodeId));
+        result.ShouldHaveValidationErrorFor(x => x.Practitioners)
+            .WithErrorMessage(ValidationMessages.MinCardinality(nameof(Practitioner), 1));
     }
 
     [Fact]
-    public void ShouldNotContainErrorWhenDhaOrganizationNotNull()
+    public void ShouldContainErrorWhenPractitionerRolesEmpty()
     {
-        //Arrange
-        var model = _fixture.Create<BundleModel>();
-
-        //Act
-        var validationResult = _sut.TestValidate(model);
-
-        //Assert
-        validationResult.ShouldNotHaveValidationErrorFor(x => x.DhaOrganization);
-    }
-
-    [Fact]
-    public void ShouldContainErrorWhenReferringPracticeOrganizationNull()
-    {
-        //Arrange
         var model = _fixture.Build<BundleModel>()
-            .Without(x => x.ReferringPracticeOrganization)
+            .With(x => x.PractitionerRoles, new List<PractitionerRole>())
             .Create();
 
-        //Act
-        var validationResult = _sut.TestValidate(model);
+        var result = _sut.TestValidate(model);
 
-        //Assert
-        validationResult.ShouldHaveValidationErrorFor(x => x.ReferringPracticeOrganization)
-            .WithErrorMessage(ValidationMessages.MissingBundleEntity(nameof(Organization), FhirConstants.ReferringPracticeId));
+        result.ShouldHaveValidationErrorFor(x => x.PractitionerRoles)
+            .WithErrorMessage(ValidationMessages.MinCardinality(nameof(PractitionerRole), 1));
     }
 
     [Fact]
-    public void ShouldNotContainErrorWhenReferringPracticeOrganizationNotNull()
+    public void ShouldContainErrorWhenConsentsEmpty()
     {
-        //Arrange
-        var model = _fixture.Create<BundleModel>();
+        var model = _fixture.Build<BundleModel>()
+            .With(x => x.Consents, new List<Consent>())
+            .Create();
 
-        //Act
-        var validationResult = _sut.TestValidate(model);
+        var result = _sut.TestValidate(model);
 
-        //Assert
-        validationResult.ShouldNotHaveValidationErrorFor(x => x.ReferringPracticeOrganization);
+        result.ShouldHaveValidationErrorFor(x => x.Consents)
+            .WithErrorMessage(ValidationMessages.MinCardinality(nameof(Consent), 1));
     }
 }

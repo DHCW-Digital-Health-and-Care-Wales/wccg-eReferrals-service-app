@@ -9,4 +9,6 @@ public static class FhirConstants
     public const string RequestingPractitionerId = "RequestingPractitioner";
     public const string DhaCodeId = "DhaCode";
     public const string ReferringPracticeId = "ReferringPractice";
+    public const string BarsLocationIncidentLocation = "BARSLocationIncidentLocation";
+    public const string BarsFlagSceneSafety = "BARSFlagSceneSafety";
 }
