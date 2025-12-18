@@ -20,6 +20,7 @@ using WCCG.eReferralsService.API.Exceptions;
 using WCCG.eReferralsService.API.Extensions;
 using WCCG.eReferralsService.API.Models;
 using WCCG.eReferralsService.API.Services;
+using WCCG.eReferralsService.API.Validators;
 using WCCG.eReferralsService.Unit.Tests.Extensions;
 using Task = System.Threading.Tasks.Task;
 
@@ -45,6 +46,14 @@ public class ReferralServiceTests
         });
 
         _fixture.Register<IHeaderDictionary>(() => new HeaderDictionary { { _fixture.Create<string>(), _fixture.Create<string>() } });
+
+        _fixture.Mock<IFhirBundleProfileValidator>()
+            .Setup(x => x.Validate(It.IsAny<Bundle>()))
+            .Returns(new OperationOutcome());
+
+        _fixture.Mock<IAuditLogService>()
+            .Setup(x => x.LogAsync(It.IsAny<IHeaderDictionary>(), It.IsAny<AuditEvents>()))
+            .Returns(Task.CompletedTask);
     }
 
     [Fact]
@@ -164,6 +173,55 @@ public class ReferralServiceTests
         //Assert
         (await action.Should().ThrowAsync<BundleValidationException>())
             .Which.Message.Should().Contain(string.Join(';', validationFailures.Select(x => x.ErrorMessage)));
+    }
+
+    [Fact]
+    public async Task CreateReferralAsyncShouldLogAuditEventWhenFhirProfileValidationFailed()
+    {
+        //Arrange
+        var bundle = _fixture.Create<Bundle>();
+        var bundleJson = JsonSerializer.Serialize(bundle, _jsonSerializerOptions);
+        var headers = _fixture.Create<IHeaderDictionary>();
+
+        _fixture.Mock<IValidator<HeadersModel>>()
+            .Setup(x => x.ValidateAsync(It.IsAny<HeadersModel>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ValidationResult());
+
+        _fixture.Mock<IValidator<BundleModel>>()
+            .Setup(x => x.ValidateAsync(It.IsAny<BundleModel>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ValidationResult());
+
+        var failureOutcome = new OperationOutcome
+        {
+            Issue =
+            [
+                new OperationOutcome.IssueComponent
+                {
+                    Severity = OperationOutcome.IssueSeverity.Error,
+                    Diagnostics = "Profile validation failed"
+                }
+            ]
+        };
+
+        _fixture.Mock<IFhirBundleProfileValidator>()
+            .Setup(x => x.Validate(It.IsAny<Bundle>()))
+            .Returns(failureOutcome);
+
+        var sut = CreateReferralService(new MockHttpMessageHandler().ToHttpClient());
+
+        //Act
+        var action = async () => await sut.CreateReferralAsync(headers, bundleJson);
+
+        //Assert
+        await action.Should().ThrowAsync<FhirProfileValidationException>();
+
+        _fixture.Mock<IAuditLogService>().Verify(
+            x => x.LogAsync(It.IsAny<IHeaderDictionary>(), AuditEvents.FhirProfileValidationFailed),
+            Times.Once);
+
+        _fixture.Mock<IAuditLogService>().Verify(
+            x => x.LogAsync(It.IsAny<IHeaderDictionary>(), AuditEvents.FhirProfileValidationSucceeded),
+            Times.Never);
     }
 
     [Fact]
@@ -399,7 +457,9 @@ public class ReferralServiceTests
             httpClient,
             _fixture.Mock<IOptions<PasReferralsApiConfig>>().Object,
             _fixture.Mock<IValidator<BundleModel>>().Object,
+            _fixture.Mock<IFhirBundleProfileValidator>().Object,
             _fixture.Mock<IValidator<HeadersModel>>().Object,
+            _fixture.Mock<IAuditLogService>().Object,
             _jsonSerializerOptions
         );
     }
