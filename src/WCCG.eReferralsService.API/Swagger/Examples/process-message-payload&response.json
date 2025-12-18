@@ -1,8 +1,10 @@
 {
+  "resourceType": "Bundle",
   "entry": [
     {
       "fullUrl": "urn:uuid:c89a8895-56fe-41de-b20b-fab6efa99c99",
       "resource": {
+        "resourceType": "MessageHeader",
         "definition": "https://fhir.nhs.uk/MessageDefinition/bars-message-servicerequest-request-referral",
         "destination": [
           {
@@ -35,7 +37,6 @@
             }
           ]
         },
-        "resourceType": "MessageHeader",
         "sender": {
           "reference": "urn:uuid:07939a0c-2854-46ff-9282-ad906bc93679"
         },
@@ -50,6 +51,7 @@
     {
       "fullUrl": "urn:uuid:236bb75d-90ef-461f-b71e-fde7f899802c",
       "resource": {
+        "resourceType": "ServiceRequest",
         "authoredOn": "2024-08-20T11:30:00+01:00",
         "basedOn": [
           {
@@ -94,7 +96,6 @@
         "requester": {
           "reference": "urn:uuid:7d948662-bade-450e-b6c5-9bb6ee39cb56"
         },
-        "resourceType": "ServiceRequest",
         "status": "active",
         "subject": {
           "reference": "urn:uuid:9589fb37-87a2-48d8-968f-b371429208a8"
@@ -104,6 +105,7 @@
     {
       "fullUrl": "urn:uuid:8c63d621-4d86-4f57-8699-e8e22d49935d",
       "resource": {
+        "resourceType": "Encounter",
         "class": {
           "code": "AMB",
           "display": "ambulatory",
@@ -124,7 +126,6 @@
         "period": {
           "start": "2024-08-20T11:30:00+01:00"
         },
-        "resourceType": "Encounter",
         "status": "finished",
         "subject": {
           "reference": "urn:uuid:9589fb37-87a2-48d8-968f-b371429208a8"
@@ -134,6 +135,7 @@
     {
       "fullUrl": "urn:uuid:38e9c018-adbb-4579-9cd8-45f4f890b93b",
       "resource": {
+        "resourceType": "CarePlan",
         "activity": [
           {
             "outcomeCodeableConcept": [
@@ -158,7 +160,6 @@
             "https://fhir.hl7.org.uk/StructureDefinition/UKCore-CarePlan"
           ]
         },
-        "resourceType": "CarePlan",
         "status": "completed",
         "subject": {
           "reference": "urn:uuid:9589fb37-87a2-48d8-968f-b371429208a8"
@@ -168,6 +169,7 @@
     {
       "fullUrl": "urn:uuid:c9abb059-f038-439d-b886-05e25423cdc9",
       "resource": {
+        "resourceType": "Observation",
         "category": [
           {
             "coding": [
@@ -209,17 +211,17 @@
             "reference": "urn:uuid:7d948662-bade-450e-b6c5-9bb6ee39cb56"
           }
         ],
-        "resourceType": "Observation",
         "status": "final",
         "subject": {
           "reference": "urn:uuid:9589fb37-87a2-48d8-968f-b371429208a8"
         },
-        "valueString": "Pre-proliferative – high risk"
+        "valueString": "R2MO"
       }
     },
     {
       "fullUrl": "urn:uuid:4b816945-a51b-47c4-9efd-4d7f94c8e8b4",
       "resource": {
+        "resourceType": "Condition",
         "category": [
           {
             "coding": [
@@ -258,7 +260,6 @@
           ]
         },
         "onsetDateTime": "2024-08-20",
-        "resourceType": "Condition",
         "subject": {
           "reference": "urn:uuid:9589fb37-87a2-48d8-968f-b371429208a8"
         },
@@ -275,6 +276,7 @@
     {
       "fullUrl": "urn:uuid:9589fb37-87a2-48d8-968f-b371429208a8",
       "resource": {
+        "resourceType": "Patient",
         "address": [
           {
             "city": "Overtown",
@@ -298,9 +300,9 @@
                 "valueCodeableConcept": {
                   "coding": [
                     {
-                      "code": "number-present-and-verified",
+                      "code": "01",
                       "display": "Number present and verified",
-                      "system": "https://fhir.hl7.org.uk/CodeSystem/UKCore-NHSNumberVerificationStatus"
+                      "system": "https://fhir.hl7.org.uk/CodeSystem/UKCore-NHSNumberVerificationStatusEngland"
                     }
                   ]
                 }
@@ -329,7 +331,6 @@
             "use": "official"
           }
         ],
-        "resourceType": "Patient",
         "telecom": [
           {
             "rank": 2,
@@ -355,6 +356,7 @@
     {
       "fullUrl": "urn:uuid:d5ffd0cd-ec7e-48a1-84f1-91f4c0eb8fc5",
       "resource": {
+        "resourceType": "Organization",
         "identifier": [
           {
             "system": "https://wrds.wales.nhs.uk/Secondary-Care/Organisations/NHS-Wales-Organisations",
@@ -367,13 +369,13 @@
             "https://fhir.hl7.org.uk/StructureDefinition/UKCore-Organization"
           ]
         },
-        "name": "Receiving/performing Organization",
-        "resourceType": "Organization"
+        "name": "Receiving/performing Organization"
       }
     },
     {
       "fullUrl": "urn:uuid:07939a0c-2854-46ff-9282-ad906bc93679",
       "resource": {
+        "resourceType": "Organization",
         "identifier": [
           {
             "system": "https://wrds.wales.nhs.uk/Secondary-Care/Organisations/UK-NHS-Organisations",
@@ -387,7 +389,6 @@
           ]
         },
         "name": "Sender Organization",
-        "resourceType": "Organization",
         "type": [
           {
             "coding": [
@@ -404,6 +405,7 @@
     {
       "fullUrl": "urn:uuid:7d948662-bade-450e-b6c5-9bb6ee39cb56",
       "resource": {
+        "resourceType": "Practitioner",
         "identifier": [
           {
             "system": "https://fhir.nhs.uk/Id/sds-role-profile-id",
@@ -424,7 +426,6 @@
             ]
           }
         ],
-        "resourceType": "Practitioner",
         "telecom": [
           {
             "system": "phone",
@@ -437,6 +438,7 @@
     {
       "fullUrl": "urn:uuid:b923aa53-2376-4015-a07d-afe8bf2310eb",
       "resource": {
+        "resourceType": "PractitionerRole",
         "code": [
           {
             "coding": [
@@ -460,7 +462,6 @@
         "practitioner": {
           "reference": "urn:uuid:7d948662-bade-450e-b6c5-9bb6ee39cb56"
         },
-        "resourceType": "PractitionerRole",
         "specialty": [
           {
             "coding": [
@@ -477,6 +478,7 @@
     {
       "fullUrl": "urn:uuid:94267a2d-75b3-44d9-8d46-d65b36332a31",
       "resource": {
+        "resourceType": "HealthcareService",
         "active": true,
         "identifier": [
           {
@@ -494,13 +496,13 @@
         "name": "Community Optometry Service",
         "providedBy": {
           "reference": "urn:uuid:d5ffd0cd-ec7e-48a1-84f1-91f4c0eb8fc5"
-        },
-        "resourceType": "HealthcareService"
+        }
       }
     },
     {
       "fullUrl": "urn:uuid:1e91008e-96d0-438b-873c-c6d2c007fc29",
       "resource": {
+        "resourceType": "Consent",
         "category": [
           {
             "coding": [
@@ -530,7 +532,6 @@
             }
           ]
         },
-        "resourceType": "Consent",
         "scope": {
           "coding": [
             {
@@ -550,7 +551,6 @@
     ],
     "versionId": "1.1.0"
   },
-  "resourceType": "Bundle",
   "timestamp": "2025-10-24T11:30:00+01:00",
   "type": "message"
 }

@@ -29,8 +29,7 @@ public class BundleModelValidatorTests
         var bundleJson = File.ReadAllText("TestData/example-bundle.json");
 
         var options = new JsonSerializerOptions()
-            .ForFhir(ModelInfo.ModelInspector)
-            .UsingMode(DeserializerModes.BackwardsCompatible);
+            .ForFhir(ModelInfo.ModelInspector);
 
         var bundle = JsonSerializer.Deserialize<Bundle>(bundleJson, options)!;
         return BundleModel.FromBundle(bundle);

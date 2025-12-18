@@ -17,6 +17,9 @@ public static partial class LoggerExtensions
     [LoggerMessage(Level = LogLevel.Error, Message = "Bundle validation error.")]
     public static partial void BundleValidationError(this ILogger logger, BundleValidationException exception);
 
+    [LoggerMessage(Level = LogLevel.Error, Message = "FHIR profile validation error.")]
+    public static partial void FhirProfileValidationError(this ILogger logger, FhirProfileValidationException exception);
+
     [LoggerMessage(Level = LogLevel.Error, Message = "Request parameter validation error.")]
     public static partial void RequestParameterValidationError(this ILogger logger, RequestParameterValidationException exception);
 

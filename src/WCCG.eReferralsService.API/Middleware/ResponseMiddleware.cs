@@ -60,6 +60,12 @@ public class ResponseMiddleware
                 body = OperationOutcomeCreator.CreateOperationOutcome(bundleValidationException);
                 break;
 
+            case FhirProfileValidationException fhirProfileValidationException:
+                _logger.FhirProfileValidationError(fhirProfileValidationException);
+
+                body = OperationOutcomeCreator.CreateOperationOutcome(fhirProfileValidationException);
+                break;
+
             case DeserializationFailedException deserializationFailedException:
                 _logger.BundleDeserializationFailure(deserializationFailedException);
 
