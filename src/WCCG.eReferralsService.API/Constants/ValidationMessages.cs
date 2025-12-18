@@ -2,6 +2,16 @@ namespace WCCG.eReferralsService.API.Constants;
 
 public static class ValidationMessages
 {
+    private static string ToFhirName(string propertyName)
+    {
+        if (string.IsNullOrEmpty(propertyName))
+        {
+            return propertyName;
+        }
+
+        return char.ToLowerInvariant(propertyName[0]) + propertyName[1..];
+    }
+
     public static string InvalidFhirObject(string headerName, string typeName)
     {
         return $"Header '{headerName}' is not a valid '{typeName}' encoded FHIR object";
@@ -27,13 +37,8 @@ public static class ValidationMessages
         return $"The required FHIR bundle entity '{resourceName}' is missing";
     }
 
-    public static string MissingBundleEntity(string resourceName, string id)
+    public static string MissingEntityField<TResource>(string propertyName)
     {
-        return $"The required FHIR bundle entity '{resourceName}' with ID: '{id}' is missing";
-    }
-
-    public static string MinCardinality(string resourceName, int min)
-    {
-        return $"The FHIR bundle must contain at least {min} '{resourceName}' resources";
+        return $"{typeof(TResource).Name}.{ToFhirName(propertyName)} is required";
     }
 }

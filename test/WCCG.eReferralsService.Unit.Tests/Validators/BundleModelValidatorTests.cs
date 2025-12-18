@@ -1,7 +1,10 @@
 using AutoFixture;
+using FluentAssertions;
 using FluentValidation;
 using FluentValidation.TestHelper;
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Serialization;
+using System.Text.Json;
 using WCCG.eReferralsService.API.Constants;
 using WCCG.eReferralsService.API.Models;
 using WCCG.eReferralsService.API.Validators;
@@ -19,25 +22,35 @@ public class BundleModelValidatorTests
     {
         _sut = _fixture.CreateWithFrozen<BundleModelValidator>();
         _sut.ClassLevelCascadeMode = CascadeMode.Continue;
+    }
 
-        _fixture.Register(() => new MessageHeader { Id = _fixture.Create<string>() });
-        _fixture.Register(() => new ServiceRequest { Id = _fixture.Create<string>() });
-        _fixture.Register(() => new Patient { Id = _fixture.Create<string>() });
-        _fixture.Register(() => new Encounter { Id = _fixture.Create<string>() });
-        _fixture.Register(() => new CarePlan { Id = _fixture.Create<string>() });
-        _fixture.Register(() => new HealthcareService { Id = _fixture.Create<string>() });
-        _fixture.Register(() => new Organization { Id = _fixture.Create<string>() });
-        _fixture.Register(() => new Practitioner { Id = _fixture.Create<string>() });
-        _fixture.Register(() => new PractitionerRole { Id = _fixture.Create<string>() });
-        _fixture.Register(() => new Consent { Id = _fixture.Create<string>() });
+    private static BundleModel CreateValidModelFromExampleBundle()
+    {
+        var bundleJson = File.ReadAllText("TestData/example-bundle.json");
+
+        var options = new JsonSerializerOptions()
+            .ForFhir(ModelInfo.ModelInspector)
+            .UsingMode(DeserializerModes.BackwardsCompatible);
+
+        var bundle = JsonSerializer.Deserialize<Bundle>(bundleJson, options)!;
+        return BundleModel.FromBundle(bundle);
+    }
+
+    [Fact]
+    public void ExampleBundleShouldBeValid()
+    {
+        var model = CreateValidModelFromExampleBundle();
+
+        var result = _sut.TestValidate(model);
+
+        result.ShouldNotHaveAnyValidationErrors();
     }
 
     [Fact]
     public void ShouldContainErrorWhenMessageHeaderNull()
     {
-        var model = _fixture.Build<BundleModel>()
-            .Without(x => x.MessageHeader)
-            .Create();
+        var model = CreateValidModelFromExampleBundle();
+        model.MessageHeader = null;
 
         var result = _sut.TestValidate(model);
 
@@ -48,9 +61,8 @@ public class BundleModelValidatorTests
     [Fact]
     public void ShouldContainErrorWhenServiceRequestNull()
     {
-        var model = _fixture.Build<BundleModel>()
-            .Without(x => x.ServiceRequest)
-            .Create();
+        var model = CreateValidModelFromExampleBundle();
+        model.ServiceRequest = null;
 
         var result = _sut.TestValidate(model);
 
@@ -61,9 +73,8 @@ public class BundleModelValidatorTests
     [Fact]
     public void ShouldContainErrorWhenPatientNull()
     {
-        var model = _fixture.Build<BundleModel>()
-            .Without(x => x.Patient)
-            .Create();
+        var model = CreateValidModelFromExampleBundle();
+        model.Patient = null;
 
         var result = _sut.TestValidate(model);
 
@@ -74,9 +85,8 @@ public class BundleModelValidatorTests
     [Fact]
     public void ShouldContainErrorWhenEncounterNull()
     {
-        var model = _fixture.Build<BundleModel>()
-            .Without(x => x.Encounter)
-            .Create();
+        var model = CreateValidModelFromExampleBundle();
+        model.Encounter = null;
 
         var result = _sut.TestValidate(model);
 
@@ -87,9 +97,8 @@ public class BundleModelValidatorTests
     [Fact]
     public void ShouldContainErrorWhenCarePlanNull()
     {
-        var model = _fixture.Build<BundleModel>()
-            .Without(x => x.CarePlan)
-            .Create();
+        var model = CreateValidModelFromExampleBundle();
+        model.CarePlan = null;
 
         var result = _sut.TestValidate(model);
 
@@ -100,9 +109,8 @@ public class BundleModelValidatorTests
     [Fact]
     public void ShouldContainErrorWhenHealthcareServiceNull()
     {
-        var model = _fixture.Build<BundleModel>()
-            .Without(x => x.HealthcareService)
-            .Create();
+        var model = CreateValidModelFromExampleBundle();
+        model.HealthcareService = null;
 
         var result = _sut.TestValidate(model);
 
@@ -111,54 +119,65 @@ public class BundleModelValidatorTests
     }
 
     [Fact]
-    public void ShouldContainErrorWhenOrganizationsLessThanTwo()
+    public void ShouldContainErrorWhenPatientNhsNumberMissing()
     {
-        var model = _fixture.Build<BundleModel>()
-            .With(x => x.Organizations, new List<Organization> { new Organization() })
-            .Create();
+        var model = CreateValidModelFromExampleBundle();
+
+        // Remove NHS number identifier
+        model.Patient!.Identifier = model.Patient.Identifier
+            .Where(i => !string.Equals(i.System, "https://fhir.nhs.uk/Id/nhs-number", StringComparison.OrdinalIgnoreCase))
+            .ToList();
 
         var result = _sut.TestValidate(model);
 
-        result.ShouldHaveValidationErrorFor(x => x.Organizations)
-            .WithErrorMessage(ValidationMessages.MinCardinality(nameof(Organization), 2));
+        result.Errors.Should().Contain(e => e.ErrorMessage == "Patient.identifier is required");
     }
 
     [Fact]
-    public void ShouldContainErrorWhenPractitionersEmpty()
+    public void ShouldContainErrorWhenServiceRequestBasedOnMissing()
     {
-        var model = _fixture.Build<BundleModel>()
-            .With(x => x.Practitioners, new List<Practitioner>())
-            .Create();
+        var model = CreateValidModelFromExampleBundle();
+
+        model.ServiceRequest!.BasedOn = [];
 
         var result = _sut.TestValidate(model);
 
-        result.ShouldHaveValidationErrorFor(x => x.Practitioners)
-            .WithErrorMessage(ValidationMessages.MinCardinality(nameof(Practitioner), 1));
+        result.Errors.Should().Contain(e => e.ErrorMessage == "ServiceRequest.basedOn is required");
     }
 
     [Fact]
-    public void ShouldContainErrorWhenPractitionerRolesEmpty()
+    public void ShouldContainErrorWhenServiceRequestOccurrencePeriodMissing()
     {
-        var model = _fixture.Build<BundleModel>()
-            .With(x => x.PractitionerRoles, new List<PractitionerRole>())
-            .Create();
+        var model = CreateValidModelFromExampleBundle();
+
+        model.ServiceRequest!.Occurrence = null;
 
         var result = _sut.TestValidate(model);
 
-        result.ShouldHaveValidationErrorFor(x => x.PractitionerRoles)
-            .WithErrorMessage(ValidationMessages.MinCardinality(nameof(PractitionerRole), 1));
+        result.Errors.Should().Contain(e => e.ErrorMessage == "ServiceRequest.occurrencePeriod is required");
     }
 
     [Fact]
-    public void ShouldContainErrorWhenConsentsEmpty()
+    public void ShouldContainErrorWhenEncounterPeriodMissing()
     {
-        var model = _fixture.Build<BundleModel>()
-            .With(x => x.Consents, new List<Consent>())
-            .Create();
+        var model = CreateValidModelFromExampleBundle();
+
+        model.Encounter!.Period = null;
 
         var result = _sut.TestValidate(model);
 
-        result.ShouldHaveValidationErrorFor(x => x.Consents)
-            .WithErrorMessage(ValidationMessages.MinCardinality(nameof(Consent), 1));
+        result.Errors.Should().Contain(e => e.ErrorMessage == "Encounter.period is required");
+    }
+
+    [Fact]
+    public void ShouldContainErrorWhenPatientAddressMissing()
+    {
+        var model = CreateValidModelFromExampleBundle();
+
+        model.Patient!.Address = [];
+
+        var result = _sut.TestValidate(model);
+
+        result.Errors.Should().Contain(e => e.ErrorMessage == "Patient.address is required");
     }
 }
