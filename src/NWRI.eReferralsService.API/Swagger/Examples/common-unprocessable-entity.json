@@ -9,7 +9,7 @@
   "issue": [
     {
       "severity": "error",
-      "code": "transient",
+      "code": "processing",
       "details": {
         "coding": [
           {
