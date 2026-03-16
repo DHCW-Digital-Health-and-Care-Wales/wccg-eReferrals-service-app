@@ -61,14 +61,14 @@ public class NotSuccessfulApiCallException : BaseFhirException
             return
             [
                 new NotSuccessfulApiResponseError(
-                    _fhirErrorCodeDictionary.GetValueOrDefault(StatusCode, FhirHttpErrorCodes.ReceiverUnavailable),
+                    _fhirErrorCodeDictionary.GetValueOrDefault(StatusCode, FhirHttpErrorCodes.ReceiverUnprocessableEntity),
                     string.Join(";", errorParts))
             ];
         }
 
         if (problemDetails.Detail is null)
         {
-            return [new NotSuccessfulApiResponseError(FhirHttpErrorCodes.ReceiverUnavailable, "Unexpected error")];
+            return [new NotSuccessfulApiResponseError(FhirHttpErrorCodes.ReceiverUnprocessableEntity, "Unexpected error")];
         }
 
         return
