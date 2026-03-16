@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using NWRI.eReferralsService.API.Configuration;
-using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.Errors;
 using NWRI.eReferralsService.API.Exceptions;
 using NWRI.eReferralsService.API.Models.WPAS.Requests;
@@ -135,10 +134,10 @@ public class WpasApiClientTests
     }
 
     [Theory]
-    [InlineData(HttpStatusCode.InternalServerError, FhirHttpErrorCodes.ReceiverServerError)]
-    [InlineData(HttpStatusCode.BadRequest, FhirHttpErrorCodes.ReceiverBadRequest)]
-    [InlineData(HttpStatusCode.NotFound, FhirHttpErrorCodes.ReceiverNotFound)]
-    public async Task CreateReferralAsyncShouldThrowWhenNonJsonContent(HttpStatusCode statusCode, string errorCode)
+    [InlineData(HttpStatusCode.InternalServerError)]
+    [InlineData(HttpStatusCode.BadRequest)]
+    [InlineData(HttpStatusCode.NotFound)]
+    public async Task CreateReferralAsyncShouldThrowWhenNonJsonContent(HttpStatusCode statusCode)
     {
         // Arrange
         var requestBody = WpasCreateReferralRequestBuilder.CreateValid();
@@ -159,12 +158,7 @@ public class WpasApiClientTests
         // Assert
         var exception = (await action.Should().ThrowAsync<NotSuccessfulApiCallException>()).Subject.ToList();
         exception[0].StatusCode.Should().Be(statusCode);
-        exception[0].Errors.Should().AllSatisfy(e =>
-        {
-            e.Should().BeOfType<NotSuccessfulApiResponseError>();
-            e.Code.Should().Be(errorCode);
-            e.DiagnosticsMessage.Should().Contain(rawContent);
-        });
+        exception[0].Errors.Should().AllSatisfy(e => e.Should().BeOfType<UnexpectedError>());
     }
 
     [Fact]

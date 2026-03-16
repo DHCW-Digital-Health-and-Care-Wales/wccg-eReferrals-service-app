@@ -15,12 +15,11 @@ public class NotSuccessfulApiCallExceptionTests
 {
     private readonly IFixture _fixture = new Fixture().WithCustomizations();
 
-    [Theory]
-    [InlineData(HttpStatusCode.InternalServerError, FhirHttpErrorCodes.ReceiverServerError)]
-    [InlineData(HttpStatusCode.BadRequest, FhirHttpErrorCodes.ReceiverBadRequest)]
-    public void ShouldCorrectlyCreateNotSuccessfulApiCallExceptionForValidationErrors(HttpStatusCode statusCode, string errorCode)
+    [Fact]
+    public void ShouldCorrectlyCreateNotSuccessfulApiCallExceptionForValidationErrors()
     {
         //Arrange
+        var statusCode = _fixture.Create<HttpStatusCode>();
         var errorMessages = _fixture.CreateMany<string>().ToList();
         var errorMessagesJson = JsonSerializer.Serialize(errorMessages);
 
@@ -28,7 +27,7 @@ public class NotSuccessfulApiCallExceptionTests
             .With(x => x.Extensions, new Dictionary<string, object?> { { "validationErrors", errorMessagesJson } })
             .Create();
 
-        var errors = errorMessages.Select(e => new NotSuccessfulApiResponseError(errorCode, e));
+        var errors = errorMessages.Select(e => new NotSuccessfulApiResponseError(FhirHttpErrorCodes.ReceiverBadRequest, e));
         var expectedMessage = $"API call returned: {(int)statusCode}. {string.Join(';', errors.Select(x => x.DiagnosticsMessage))}.";
 
         //Act
@@ -38,12 +37,12 @@ public class NotSuccessfulApiCallExceptionTests
         exception.StatusCode.Should().Be(statusCode);
         exception.Message.Should().Be(expectedMessage);
         exception.Errors.Should().AllSatisfy(e => e.Should().BeOfType<NotSuccessfulApiResponseError>()
-            .Which.Code.Should().Be(errorCode));
+            .Which.Code.Should().Be(FhirHttpErrorCodes.ReceiverBadRequest));
     }
 
     [Theory]
     [InlineData(HttpStatusCode.BadRequest, FhirHttpErrorCodes.ReceiverBadRequest)]
-    [InlineData(HttpStatusCode.InternalServerError, FhirHttpErrorCodes.ReceiverServerError)]
+    [InlineData(HttpStatusCode.InternalServerError, FhirHttpErrorCodes.ReceiverUnavailable)]
     [InlineData(HttpStatusCode.TooManyRequests, FhirHttpErrorCodes.TooManyRequests)]
     [InlineData(HttpStatusCode.NotFound, FhirHttpErrorCodes.ReceiverNotFound)]
     public void ShouldCorrectlyCreateNotSuccessfulApiCallExceptionForGeneralExtension(HttpStatusCode statusCode, string errorCode)
@@ -74,14 +73,12 @@ public class NotSuccessfulApiCallExceptionTests
             .Which.Code.Should().Be(errorCode));
     }
 
-    [Theory]
-    [InlineData(HttpStatusCode.InternalServerError, FhirHttpErrorCodes.ReceiverServerError)]
-    [InlineData(HttpStatusCode.BadRequest, FhirHttpErrorCodes.ReceiverBadRequest)]
-    [InlineData(HttpStatusCode.NotFound, FhirHttpErrorCodes.ReceiverNotFound)]
-    [InlineData(HttpStatusCode.Created, FhirHttpErrorCodes.ReceiverUnprocessableEntity)]
-    public void ShouldCorrectlyCreateNotSuccessfulApiCallExceptionForUnexpectedError(HttpStatusCode statusCode, string errorCode)
+    [Fact]
+    public void ShouldCorrectlyCreateNotSuccessfulApiCallExceptionForUnexpectedError()
     {
         //Arrange
+        var statusCode = _fixture.Create<HttpStatusCode>();
+
         var problemDetails = _fixture.Build<ProblemDetails>()
             .With(x => x.Extensions, new Dictionary<string, object?>())
             .With(x => x.Detail, (string?)null)
@@ -97,12 +94,12 @@ public class NotSuccessfulApiCallExceptionTests
         exception.StatusCode.Should().Be(statusCode);
         exception.Message.Should().Be(expectedMessage);
         exception.Errors.Should().AllSatisfy(e => e.Should().BeOfType<NotSuccessfulApiResponseError>()
-            .Which.Code.Should().Be(errorCode));
+            .Which.Code.Should().Be(FhirHttpErrorCodes.ReceiverUnavailable));
     }
 
     [Theory]
     [InlineData(HttpStatusCode.BadRequest, FhirHttpErrorCodes.ReceiverBadRequest)]
-    [InlineData(HttpStatusCode.InternalServerError, FhirHttpErrorCodes.ReceiverServerError)]
+    [InlineData(HttpStatusCode.InternalServerError, FhirHttpErrorCodes.ReceiverUnavailable)]
     [InlineData(HttpStatusCode.TooManyRequests, FhirHttpErrorCodes.TooManyRequests)]
     [InlineData(HttpStatusCode.NotFound, FhirHttpErrorCodes.ReceiverNotFound)]
     public void ShouldCorrectlyCreateNotSuccessfulApiCallExceptionForRegularError(HttpStatusCode statusCode, string errorCode)
@@ -127,13 +124,11 @@ public class NotSuccessfulApiCallExceptionTests
             .Which.Code.Should().Be(errorCode));
     }
 
-    [Theory]
-    [InlineData(HttpStatusCode.InternalServerError, FhirHttpErrorCodes.ReceiverServerError)]
-    [InlineData(HttpStatusCode.BadRequest, FhirHttpErrorCodes.ReceiverBadRequest)]
-    [InlineData(HttpStatusCode.NotFound, FhirHttpErrorCodes.ReceiverNotFound)]
-    public void ShouldCorrectlyCreateNotSuccessfulApiCallExceptionForRawContent(HttpStatusCode statusCode, string errorCode)
+    [Fact]
+    public void ShouldCorrectlyCreateNotSuccessfulApiCallExceptionForRawContent()
     {
         //Arrange
+        var statusCode = _fixture.Create<HttpStatusCode>();
         var rawContent = _fixture.Create<string>();
 
         var expectedMessage = $"API call returned: {(int)statusCode}. Raw content: {rawContent}";
@@ -144,11 +139,6 @@ public class NotSuccessfulApiCallExceptionTests
         //Assert
         exception.StatusCode.Should().Be(statusCode);
         exception.Message.Should().Be(expectedMessage);
-        exception.Errors.Should().AllSatisfy(e =>
-        {
-            e.Should().BeOfType<NotSuccessfulApiResponseError>();
-            e.Code.Should().Be(errorCode);
-            e.DiagnosticsMessage.Should().Contain(rawContent);
-        });
+        exception.Errors.Should().AllSatisfy(e => e.Should().BeOfType<UnexpectedError>());
     }
 }
