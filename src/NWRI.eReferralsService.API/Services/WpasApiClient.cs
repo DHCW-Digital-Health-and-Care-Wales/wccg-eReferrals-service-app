@@ -68,20 +68,6 @@ public sealed class WpasApiClient : IWpasApiClient
     private static async Task<Exception> GetNotSuccessfulApiCallExceptionAsync(HttpResponseMessage response, CancellationToken cancellationToken)
     {
         var content = await response.Content.ReadAsStringAsync(cancellationToken);
-
-        try
-        {
-            var problemDetails = JsonSerializer.Deserialize<ProblemDetails>(content);
-            if (problemDetails != null)
-            {
-                return new NotSuccessfulApiCallException(response.StatusCode, problemDetails);
-            }
-        }
-        catch (JsonException)
-        {
-            // Ignore deserialization errors and fallback to plain content
-        }
-
-        return new NotSuccessfulApiCallException(response.StatusCode, content);
+        return new NotSuccessfulWpasApiCallException(response.StatusCode, content);
     }
 }

@@ -128,9 +128,9 @@ public class WpasApiClientTests
         var action = async () => await sut.CreateReferralAsync(requestBody, CancellationToken.None);
 
         // Assert
-        var exception = (await action.Should().ThrowAsync<NotSuccessfulApiCallException>()).Subject.ToList();
+        var exception = (await action.Should().ThrowAsync<NotSuccessfulWpasApiCallException>()).Subject.ToList();
         exception[0].StatusCode.Should().Be(statusCode);
-        exception[0].Errors.Should().AllSatisfy(e => e.Should().BeOfType<NotSuccessfulApiResponseError>());
+        exception[0].Errors.Should().AllSatisfy(e => e.Should().BeOfType<NotSuccessfulWpasApiResponseError>());
     }
 
     [Theory]
@@ -156,9 +156,9 @@ public class WpasApiClientTests
         var action = async () => await sut.CreateReferralAsync(requestBody, CancellationToken.None);
 
         // Assert
-        var exception = (await action.Should().ThrowAsync<NotSuccessfulApiCallException>()).Subject.ToList();
+        var exception = (await action.Should().ThrowAsync<NotSuccessfulWpasApiCallException>()).Subject.ToList();
         exception[0].StatusCode.Should().Be(statusCode);
-        exception[0].Errors.Should().AllSatisfy(e => e.Should().BeOfType<UnexpectedError>());
+        exception[0].Errors.Should().AllSatisfy(e => e.Should().BeOfType<NotSuccessfulWpasApiResponseError>());
     }
 
     [Fact]

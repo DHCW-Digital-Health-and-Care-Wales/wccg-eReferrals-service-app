@@ -166,13 +166,13 @@ public class ResponseMiddlewareTests
     }
 
     [Theory]
-    [InlineData(HttpStatusCode.InternalServerError, HttpStatusCode.ServiceUnavailable)]
-    [InlineData(HttpStatusCode.BadRequest, HttpStatusCode.BadRequest)]
-    [InlineData(HttpStatusCode.NotFound, HttpStatusCode.NotFound)]
+    [InlineData(HttpStatusCode.InternalServerError, HttpStatusCode.InternalServerError)]
+    [InlineData(HttpStatusCode.BadRequest, HttpStatusCode.InternalServerError)]
+    [InlineData(HttpStatusCode.NotFound, HttpStatusCode.InternalServerError)]
     public async Task ShouldHandleNotSuccessfulApiCallException(HttpStatusCode inCode, HttpStatusCode outCode)
     {
         //Arrange
-        var exception = new NotSuccessfulApiCallException(inCode, _fixture.Create<ProblemDetails>());
+        var exception = new NotSuccessfulWpasApiCallException(inCode, _fixture.Create<string>());
 
         var requestId = _fixture.Create<string>();
         var correlationId = _fixture.Create<string>();

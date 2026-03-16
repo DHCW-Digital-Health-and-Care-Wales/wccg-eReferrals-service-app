@@ -93,16 +93,13 @@ public class ResponseMiddleware
                 body = OperationOutcomeCreator.CreateOperationOutcome(new BundleDeserializationError(jsonException.Message));
                 break;
 
-            case NotSuccessfulApiCallException notSuccessfulApiCallException:
-                _logger.NotSuccessfulApiResponseError(notSuccessfulApiCallException);
+            case NotSuccessfulWpasApiCallException notSuccessfulWpasApiCallException:
+                _logger.NotSuccessfulApiResponseError(notSuccessfulWpasApiCallException);
 
-                statusCode = notSuccessfulApiCallException.StatusCode == HttpStatusCode.InternalServerError
-                    ? HttpStatusCode.ServiceUnavailable
-                    : notSuccessfulApiCallException.StatusCode;
+                statusCode = HttpStatusCode.InternalServerError;
+                _eventLogger.LogError(new EventCatalogue.IntWpasConnectionFailError(), notSuccessfulWpasApiCallException);
 
-                _eventLogger.LogError(new EventCatalogue.IntWpasConnectionFailError(), notSuccessfulApiCallException);
-
-                body = OperationOutcomeCreator.CreateOperationOutcome(notSuccessfulApiCallException);
+                body = OperationOutcomeCreator.CreateOperationOutcome(notSuccessfulWpasApiCallException);
                 break;
 
             case RequestParameterValidationException requestParameterValidationException:

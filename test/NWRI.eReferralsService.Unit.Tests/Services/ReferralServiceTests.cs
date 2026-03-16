@@ -596,7 +596,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
             _jsonSerializerOptions);
 
         var headers = _fixture.Create<IHeaderDictionary>();
-        var problemDetails = _fixture.Create<ProblemDetails>();
+        var rawContent = _fixture.Create<string>();
 
         _fixture.Mock<IValidator<HeadersModel>>()
             .Setup(x => x.ValidateAsync(It.IsAny<HeadersModel>(), It.IsAny<CancellationToken>()))
@@ -608,7 +608,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
 
         _fixture.Mock<IWpasApiClient>()
             .Setup(x => x.CancelReferralAsync(It.IsAny<WpasCancelReferralRequest>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new NotSuccessfulApiCallException(statusCode, problemDetails));
+            .ThrowsAsync(new NotSuccessfulWpasApiCallException(statusCode, rawContent));
 
         var sut = CreateReferralService();
 
@@ -616,7 +616,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
         var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
 
         // Assert
-        (await action.Should().ThrowAsync<NotSuccessfulApiCallException>())
+        (await action.Should().ThrowAsync<NotSuccessfulWpasApiCallException>())
             .Which.StatusCode.Should().Be(statusCode);
     }
 
