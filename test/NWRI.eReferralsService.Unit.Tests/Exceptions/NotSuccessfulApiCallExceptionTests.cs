@@ -94,7 +94,7 @@ public class NotSuccessfulApiCallExceptionTests
         exception.StatusCode.Should().Be(statusCode);
         exception.Message.Should().Be(expectedMessage);
         exception.Errors.Should().AllSatisfy(e => e.Should().BeOfType<NotSuccessfulApiResponseError>()
-            .Which.Code.Should().Be(FhirHttpErrorCodes.ReceiverUnavailable));
+            .Which.Code.Should().Be(FhirHttpErrorCodes.ReceiverUnprocessableEntity));
     }
 
     [Theory]
