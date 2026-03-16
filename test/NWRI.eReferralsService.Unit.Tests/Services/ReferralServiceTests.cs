@@ -316,7 +316,41 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
         var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
 
         // Assert
-        await action.Should().ThrowAsync<InvalidOperationException>();
+        (await action.Should().ThrowAsync<RequestParameterValidationException>())
+            .Which.Message.Should().Contain($"No ServiceRequest with profile '{FhirConstants.BarsServiceRequestReferral}' found in the request bundle.");
+        _fixture.Mock<IWpasApiClient>().Verify(x => x.CreateReferralAsync(It.IsAny<WpasCreateReferralRequest>(), It.IsAny<CancellationToken>()), Times.Never);
+        _fixture.Mock<IWpasApiClient>().Verify(x => x.CancelReferralAsync(It.IsAny<WpasCancelReferralRequest>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ProcessMessageAsyncShouldThrowWhenProfiledServiceRequestIsNotUnique()
+    {
+        // Arrange
+        var bundle = CreateMessageBundle(FhirConstants.BarsMessageReasonNew);
+        bundle.Entry.Add(new Bundle.EntryComponent
+        {
+            Resource = new ServiceRequest
+            {
+                Id = "sr-2",
+                Meta = new Meta
+                {
+                    Profile = [FhirConstants.BarsServiceRequestReferral]
+                },
+                StatusElement = new Code<RequestStatus>(RequestStatus.Active)
+            }
+        });
+
+        var bundleJson = JsonSerializer.Serialize(bundle, _jsonSerializerOptions);
+        var headers = _fixture.Create<IHeaderDictionary>();
+
+        var sut = CreateReferralService();
+
+        // Act
+        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
+
+        // Assert
+        (await action.Should().ThrowAsync<RequestParameterValidationException>())
+            .Which.Message.Should().Contain("ServiceRequest cannot be uniquely identified in the request bundle.");
         _fixture.Mock<IWpasApiClient>().Verify(x => x.CreateReferralAsync(It.IsAny<WpasCreateReferralRequest>(), It.IsAny<CancellationToken>()), Times.Never);
         _fixture.Mock<IWpasApiClient>().Verify(x => x.CancelReferralAsync(It.IsAny<WpasCancelReferralRequest>(), It.IsAny<CancellationToken>()), Times.Never);
     }

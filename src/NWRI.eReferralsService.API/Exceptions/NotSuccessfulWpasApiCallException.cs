@@ -16,6 +16,6 @@ public class NotSuccessfulWpasApiCallException : BaseFhirException
     {
         StatusCode = statusCode;
         Errors = [new NotSuccessfulWpasApiResponseError()];
-        ExceptionMessage = $"API call returned: {(int)statusCode}. Raw content: {rawContent}";
+        ExceptionMessage = $"WPAS API call failed with status code: {(int)statusCode}. Raw content: {rawContent}";
     }
 }

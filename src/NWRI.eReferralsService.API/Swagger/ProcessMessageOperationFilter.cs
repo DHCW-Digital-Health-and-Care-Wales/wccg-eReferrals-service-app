@@ -44,7 +44,7 @@ public sealed class ProcessMessageOperationFilter : IOperationFilter
     {
         operation.Responses = new OpenApiResponses
         {
-            ["201"] = SwaggerHelpers.CreateFhirResponseWithExample(
+            ["200"] = SwaggerHelpers.CreateFhirResponseWithExample(
                 "Created",
                 "Swagger/Examples/process-message-created-response.json"),
             ["400"] = SwaggerHelpers.CreateFhirResponseWithExample(

@@ -17,12 +17,12 @@ public class NotSuccessfulWpasApiCallExceptionTests
     [InlineData(HttpStatusCode.InternalServerError)]
     [InlineData(HttpStatusCode.TooManyRequests)]
     [InlineData(HttpStatusCode.NotFound)]
-    public void ShouldCorrectlyCreateNotSuccessfulApiCallException(HttpStatusCode statusCode)
+    public void ShouldCorrectlyCreateNotSuccessfulWpasApiCallException(HttpStatusCode statusCode)
     {
         var errorMessage = _fixture.Create<string>();
 
         // Arrange
-        var expectedMessage = $"API call returned: {(int)statusCode}. Raw content: {errorMessage}";
+        var expectedMessage = $"WPAS API call failed with status code: {(int)statusCode}. Raw content: {errorMessage}";
 
         // Act
         var exception = new NotSuccessfulWpasApiCallException(statusCode, errorMessage);

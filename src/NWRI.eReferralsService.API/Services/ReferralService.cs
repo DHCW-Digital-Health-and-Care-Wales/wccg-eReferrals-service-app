@@ -121,6 +121,16 @@ public class ReferralService : IReferralService
             .FirstOrDefault(c => string.Equals(c.System, FhirConstants.BarsMessageReasonSystem, StringComparison.OrdinalIgnoreCase))
             ?.Code;
 
-    private static ServiceRequest GetReferralServiceRequest(Bundle bundle) =>
-        bundle.ResourcesByProfile<ServiceRequest>(FhirConstants.BarsServiceRequestReferral).Single();
+    private static ServiceRequest GetReferralServiceRequest(Bundle bundle)
+    {
+        try
+        {
+            return bundle.ResourcesByProfile<ServiceRequest>(FhirConstants.BarsServiceRequestReferral).SingleOrDefault()
+                   ?? throw new RequestParameterValidationException("ServiceRequest", $"No ServiceRequest with profile '{FhirConstants.BarsServiceRequestReferral}' found in the request bundle.");
+        }
+        catch (InvalidOperationException)
+        {
+            throw new RequestParameterValidationException("ServiceRequest", "ServiceRequest cannot be uniquely identified in the request bundle.");
+        }
+    }
 }
