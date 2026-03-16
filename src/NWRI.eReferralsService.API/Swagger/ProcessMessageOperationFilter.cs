@@ -58,7 +58,7 @@ public sealed class ProcessMessageOperationFilter : IOperationFilter
                 "Swagger/Examples/common-internal-server-error.json"),
             ["503"] = SwaggerHelpers.CreateFhirResponseWithExample(
                 "Service Unavailable",
-                "Swagger/Examples/common-external-server-error.json")
+                "Swagger/Examples/common-service-unavailable.json")
         };
     }
 }

@@ -189,7 +189,7 @@ If either field is missing, or the combination does not match the supported set,
   - 400 - Request validation failed (e.g. invalid/missing headers, invalid JSON/bundle, FHIR profile/mandatory data validation, or unsupported reason/status combination). [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/process-message-bad-request.json)
   - 429 - Too many requests. [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/common-too-many-requests.json)
   - 500 - Internal error. [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/common-internal-server-error.json)
-  - 503 - WPAS API unavailable or returned 500. [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/common-external-server-error.json)
+  - 503 - WPAS API unavailable or returned 500. [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/common-service-unavailable.json)
 
 ### GET /ServiceRequest/&#123;id&#125;
 
@@ -205,7 +205,7 @@ Route parameter **id** should be a valid GUID.
   - 404 - Referral with provided id wasn't found [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/get-referral-not-found.json)
   - 429 - Too many requests [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/common-too-many-requests.json)
   - 500 - Internal error [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/common-internal-server-error.json)
-  - 503 - WPAS API Unavailable or returned 500 [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/common-external-server-error.json)
+  - 503 - WPAS API Unavailable or returned 500 [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/common-service-unavailable.json)
 
 ## Deploy Docker in Local Environment
 
