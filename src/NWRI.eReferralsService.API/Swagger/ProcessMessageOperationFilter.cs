@@ -50,9 +50,6 @@ public sealed class ProcessMessageOperationFilter : IOperationFilter
             ["400"] = SwaggerHelpers.CreateFhirResponseWithExample(
                 "Bad Request",
                 "Swagger/Examples/process-message-bad-request.json"),
-            ["422"] = SwaggerHelpers.CreateFhirResponseWithExample(
-                "Unprocessable Entity",
-                "Swagger/Examples/common-unprocessable-entity.json"),
             ["429"] = SwaggerHelpers.CreateFhirResponseWithExample(
                 "Too many requests",
                 "Swagger/Examples/common-too-many-requests.json"),
