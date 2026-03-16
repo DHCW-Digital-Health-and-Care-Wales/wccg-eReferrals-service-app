@@ -7,5 +7,5 @@ public class NotSuccessfulWpasApiResponseError : BaseFhirHttpError
 {
     public override string Code => FhirHttpErrorCodes.ReceiverServerError;
     public override string DiagnosticsMessage => "WPAS API returned an unsuccessful response.";
-    public override OperationOutcome.IssueType IssueType => OperationOutcome.IssueType.Processing;
+    public override OperationOutcome.IssueType IssueType => OperationOutcome.IssueType.Exception;
 }
