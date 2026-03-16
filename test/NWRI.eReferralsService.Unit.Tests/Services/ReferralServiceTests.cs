@@ -1,4 +1,5 @@
 using System.Net;
+using System.Reflection;
 using System.Text.Json;
 using AutoFixture;
 using FluentAssertions;
@@ -100,7 +101,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
         var receiverOrganisation = bundle.Entry
             .Select(e => e.Resource)
             .OfType<Organization>()
-            .First(o => string.Equals(o.Name, "Receiving/performing Organization", StringComparison.Ordinal));
+            .First(o => string.Equals(o.Name, FhirConstants.ReceivingPerformingOrganisationName, StringComparison.Ordinal));
         receiverOrganisation.Identifier.First().Value = "TP2V"; // invalid length: schema requires exactly 5
 
         var bundleJson = JsonSerializer.Serialize(bundle, _jsonSerializerOptions);
@@ -260,6 +261,64 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
 
         //Assert
         await action.Should().ThrowAsync<BundleValidationException>();
+    }
+
+    [Fact]
+    public async Task ProcessMessageAsyncShouldThrowWhenReasonIsMissing()
+    {
+        // Arrange
+        var bundle = CreateMessageBundle(FhirConstants.BarsMessageReasonNew);
+        var messageHeader = bundle.ResourceByType<MessageHeader>()!;
+        messageHeader.Reason = null;
+        var bundleJson = JsonSerializer.Serialize(bundle, _jsonSerializerOptions);
+        var headers = _fixture.Create<IHeaderDictionary>();
+
+        var sut = CreateReferralService();
+
+        // Act
+        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
+
+        // Assert
+        (await action.Should().ThrowAsync<RequestParameterValidationException>())
+            .Which.Message.Should().Contain("MessageHeader.reason.coding.code is required");
+    }
+
+    [Fact]
+    public void DetermineReferralWorkflowActionShouldThrowWhenServiceRequestStatusIsMissing()
+    {
+        // Arrange
+        var determineWorkflowActionMethod = typeof(ReferralService).GetMethod(
+            "DetermineReferralWorkflowAction",
+            BindingFlags.NonPublic | BindingFlags.Static)!;
+
+        // Act
+        Action action = () => determineWorkflowActionMethod.Invoke(null, [FhirConstants.BarsMessageReasonNew, null]);
+
+        // Assert
+        action.Should().Throw<TargetInvocationException>()
+            .WithInnerException<RequestParameterValidationException>()
+            .WithMessage("*ServiceRequest.status is required*");
+    }
+
+    [Fact]
+    public async Task ProcessMessageAsyncShouldThrowWhenProfiledServiceRequestIsMissing()
+    {
+        // Arrange
+        var bundle = CreateMessageBundle(FhirConstants.BarsMessageReasonNew);
+        var serviceRequest = bundle.ResourceByType<ServiceRequest>()!;
+        serviceRequest.Meta = null;
+        var bundleJson = JsonSerializer.Serialize(bundle, _jsonSerializerOptions);
+        var headers = _fixture.Create<IHeaderDictionary>();
+
+        var sut = CreateReferralService();
+
+        // Act
+        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
+
+        // Assert
+        await action.Should().ThrowAsync<InvalidOperationException>();
+        _fixture.Mock<IWpasApiClient>().Verify(x => x.CreateReferralAsync(It.IsAny<WpasCreateReferralRequest>(), It.IsAny<CancellationToken>()), Times.Never);
+        _fixture.Mock<IWpasApiClient>().Verify(x => x.CancelReferralAsync(It.IsAny<WpasCancelReferralRequest>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -642,6 +701,10 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
         var serviceRequest = new ServiceRequest
         {
             Id = serviceRequestId,
+            Meta = new Meta
+            {
+                Profile = [FhirConstants.BarsServiceRequestReferral]
+            },
             IntentElement = new Code<RequestIntent>(RequestIntent.Order),
             Subject = new ResourceReference("Patient/pat-1"),
             AuthoredOn = "2024-08-20",
@@ -725,7 +788,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
 
         var receiverOrganisation = new Organization
         {
-            Name = "Receiving/performing Organization",
+            Name = FhirConstants.ReceivingPerformingOrganisationName,
             Identifier =
             [
                 new Identifier
