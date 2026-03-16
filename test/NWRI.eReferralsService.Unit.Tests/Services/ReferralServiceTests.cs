@@ -336,6 +336,8 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
                 {
                     Profile = [FhirConstants.BarsServiceRequestReferral]
                 },
+                IntentElement = new Code<RequestIntent>(RequestIntent.Order),
+                Subject = new ResourceReference("Patient/pat-1"),
                 StatusElement = new Code<RequestStatus>(RequestStatus.Active)
             }
         });
