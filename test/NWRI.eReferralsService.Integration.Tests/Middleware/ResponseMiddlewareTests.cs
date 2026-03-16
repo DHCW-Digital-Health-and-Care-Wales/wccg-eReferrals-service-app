@@ -166,9 +166,9 @@ public class ResponseMiddlewareTests
     }
 
     [Theory]
-    [InlineData(HttpStatusCode.InternalServerError, HttpStatusCode.InternalServerError)]
-    [InlineData(HttpStatusCode.BadRequest, HttpStatusCode.UnprocessableEntity)]
-    [InlineData(HttpStatusCode.NotFound, HttpStatusCode.UnprocessableEntity)]
+    [InlineData(HttpStatusCode.InternalServerError, HttpStatusCode.ServiceUnavailable)]
+    [InlineData(HttpStatusCode.BadRequest, HttpStatusCode.BadRequest)]
+    [InlineData(HttpStatusCode.NotFound, HttpStatusCode.NotFound)]
     public async Task ShouldHandleNotSuccessfulApiCallException(HttpStatusCode inCode, HttpStatusCode outCode)
     {
         //Arrange
