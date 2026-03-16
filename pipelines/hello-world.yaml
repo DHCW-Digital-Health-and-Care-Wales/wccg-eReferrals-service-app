@@ -1,0 +1,9 @@
+trigger:
+- none
+
+pool:
+  name: NWRI-ADO-POOL
+
+steps:
+- script: echo "Hello, world!"
+  displayName: 'Print Hello World'
