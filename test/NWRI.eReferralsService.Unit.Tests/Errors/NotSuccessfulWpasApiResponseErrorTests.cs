@@ -18,7 +18,7 @@ public class NotSuccessfulWpasApiResponseErrorTests
 
         // Assert
         error.Code.Should().Be(FhirHttpErrorCodes.ReceiverServerError);
-        error.IssueType.Should().Be(OperationOutcome.IssueType.Processing);
+        error.IssueType.Should().Be(OperationOutcome.IssueType.Exception);
         error.DiagnosticsMessage.Should().Be("WPAS API returned an unsuccessful response.");
         error.Display.Should().Be(expectedDisplayMessage);
     }
