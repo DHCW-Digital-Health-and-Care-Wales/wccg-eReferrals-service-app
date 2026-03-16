@@ -9,6 +9,14 @@ namespace NWRI.eReferralsService.API.Exceptions;
 public class NotSuccessfulApiCallException : BaseFhirException
 {
     private const string ValidationErrorsKey = "validationErrors";
+    private static readonly IReadOnlyDictionary<HttpStatusCode, string> FhirErrorCodeDictionary = new Dictionary<HttpStatusCode, string>
+    {
+        { HttpStatusCode.BadRequest, FhirHttpErrorCodes.ReceiverBadRequest },
+        { HttpStatusCode.TooManyRequests, FhirHttpErrorCodes.TooManyRequests },
+        { HttpStatusCode.InternalServerError, FhirHttpErrorCodes.ReceiverServerError },
+        { HttpStatusCode.NotFound, FhirHttpErrorCodes.ReceiverNotFound }
+    };
+
     private string ExceptionMessage { get; }
 
     public HttpStatusCode StatusCode { get; init; }
@@ -88,8 +96,8 @@ public class NotSuccessfulApiCallException : BaseFhirException
 
     private static string GetFhirErrorCode(HttpStatusCode statusCode)
     {
-        return statusCode == HttpStatusCode.InternalServerError
-            ? FhirHttpErrorCodes.ReceiverServerError
+        return FhirErrorCodeDictionary.TryGetValue(statusCode, out var fhirErrorCode)
+            ? fhirErrorCode
             : FhirHttpErrorCodes.ReceiverUnprocessableEntity;
     }
 }
