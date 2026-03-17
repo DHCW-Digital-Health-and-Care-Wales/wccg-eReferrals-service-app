@@ -19,9 +19,8 @@ public class NotSuccessfulWpasApiCallExceptionTests
     [InlineData(HttpStatusCode.NotFound)]
     public void ShouldCorrectlyCreateNotSuccessfulWpasApiCallException(HttpStatusCode statusCode)
     {
-        var errorMessage = _fixture.Create<string>();
-
         // Arrange
+        var errorMessage = _fixture.Create<string>();
         var expectedMessage = $"WPAS API call failed with status code: {(int)statusCode}. Raw content: {errorMessage}";
 
         // Act

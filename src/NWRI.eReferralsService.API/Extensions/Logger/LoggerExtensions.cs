@@ -33,7 +33,7 @@ public static partial class LoggerExtensions
     public static partial void ApiCallError(this ILogger logger, HttpRequestException exception);
 
     [LoggerMessage(Level = LogLevel.Error, Message = "WPAS API returned not successful response.")]
-    public static partial void NotSuccessfulApiResponseError(this ILogger logger, NotSuccessfulWpasApiCallException exception);
+    public static partial void NotSuccessfulWpasApiResponseError(this ILogger logger, NotSuccessfulWpasApiCallException exception);
 
     [LoggerMessage(Level = LogLevel.Error, Message = "WPAS API response processing failed.")]
     public static partial void WpasResponseError(this ILogger logger, ProxyServerException exception);

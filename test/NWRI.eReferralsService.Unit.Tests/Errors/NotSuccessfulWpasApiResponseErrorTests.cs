@@ -8,7 +8,7 @@ namespace NWRI.eReferralsService.Unit.Tests.Errors;
 public class NotSuccessfulWpasApiResponseErrorTests
 {
     [Fact]
-    public void ShouldCorrectlyCreateNotSuccessfulApiResponseError()
+    public void ShouldCorrectlyCreateNotSuccessfulWpasApiResponseError()
     {
         // Arrange
         const string expectedDisplayMessage = "500: The Receiver has encountered an error processing the request.";

@@ -94,7 +94,7 @@ public class ResponseMiddleware
                 break;
 
             case NotSuccessfulWpasApiCallException notSuccessfulWpasApiCallException:
-                _logger.NotSuccessfulApiResponseError(notSuccessfulWpasApiCallException);
+                _logger.NotSuccessfulWpasApiResponseError(notSuccessfulWpasApiCallException);
 
                 statusCode = HttpStatusCode.InternalServerError;
                 _eventLogger.LogError(new EventCatalogue.IntWpasConnectionFailError(), notSuccessfulWpasApiCallException);

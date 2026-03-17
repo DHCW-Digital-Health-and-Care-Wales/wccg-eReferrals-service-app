@@ -45,8 +45,8 @@ public sealed class ProcessMessageOperationFilter : IOperationFilter
         operation.Responses = new OpenApiResponses
         {
             ["200"] = SwaggerHelpers.CreateFhirResponseWithExample(
-                "Created",
-                "Swagger/Examples/process-message-created-response.json"),
+                "OK",
+                "Swagger/Examples/process-message-ok-response.json"),
             ["400"] = SwaggerHelpers.CreateFhirResponseWithExample(
                 "Bad Request",
                 "Swagger/Examples/process-message-bad-request.json"),

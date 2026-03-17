@@ -6,6 +6,7 @@ using FluentAssertions;
 using FluentValidation;
 using FluentValidation.Results;
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Serialization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
@@ -284,20 +285,20 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
     }
 
     [Fact]
-    public void DetermineReferralWorkflowActionShouldThrowWhenServiceRequestStatusIsMissing()
+    public async Task ProcessMessageAsyncShouldThrowWhenServiceRequestStatusIsMissing()
     {
         // Arrange
-        var determineWorkflowActionMethod = typeof(ReferralService).GetMethod(
-            "DetermineReferralWorkflowAction",
-            BindingFlags.NonPublic | BindingFlags.Static)!;
+        var bundle = CreateMessageBundle(FhirConstants.BarsMessageReasonNew, null);
+        var bundleJson = JsonSerializer.Serialize(bundle, _jsonSerializerOptions);
+        var headers = _fixture.Create<IHeaderDictionary>();
+
+        var sut = CreateReferralService();
 
         // Act
-        Action action = () => determineWorkflowActionMethod.Invoke(null, [FhirConstants.BarsMessageReasonNew, null]);
+        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
 
         // Assert
-        action.Should().Throw<TargetInvocationException>()
-            .WithInnerException<RequestParameterValidationException>()
-            .WithMessage("*ServiceRequest.status is required*");
+        await action.Should().ThrowAsync<DeserializationFailedException>();
     }
 
     [Fact]

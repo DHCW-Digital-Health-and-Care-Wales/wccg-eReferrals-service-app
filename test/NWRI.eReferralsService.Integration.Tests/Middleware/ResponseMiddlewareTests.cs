@@ -169,7 +169,7 @@ public class ResponseMiddlewareTests
     [InlineData(HttpStatusCode.InternalServerError, HttpStatusCode.InternalServerError)]
     [InlineData(HttpStatusCode.BadRequest, HttpStatusCode.InternalServerError)]
     [InlineData(HttpStatusCode.NotFound, HttpStatusCode.InternalServerError)]
-    public async Task ShouldHandleNotSuccessfulApiCallException(HttpStatusCode inCode, HttpStatusCode outCode)
+    public async Task ShouldHandleNotSuccessfulWpasApiCallException(HttpStatusCode inCode, HttpStatusCode outCode)
     {
         //Arrange
         var exception = new NotSuccessfulWpasApiCallException(inCode, _fixture.Create<string>());
