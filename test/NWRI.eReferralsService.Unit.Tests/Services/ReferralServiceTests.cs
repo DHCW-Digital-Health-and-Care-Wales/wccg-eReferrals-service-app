@@ -625,6 +625,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
     [InlineData(HttpStatusCode.InternalServerError)]
     [InlineData(HttpStatusCode.BadRequest)]
     [InlineData(HttpStatusCode.NotFound)]
+    [InlineData(HttpStatusCode.NotImplemented)]
     public async Task CancelReferralShouldThrowWhenWpasReturnsNonSuccess(HttpStatusCode statusCode)
     {
         // Arrange
@@ -653,8 +654,12 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
         var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
 
         // Assert
-        (await action.Should().ThrowAsync<NotSuccessfulWpasApiCallException>())
-            .Which.StatusCode.Should().Be(statusCode);
+        var exception = (await action.Should().ThrowAsync<NotSuccessfulWpasApiCallException>()).Which;
+        var expectedStatusCode = (int)statusCode > 500 && (int)statusCode < 600
+            ? HttpStatusCode.ServiceUnavailable
+            : HttpStatusCode.InternalServerError;
+
+        exception.StatusCode.Should().Be(expectedStatusCode);
     }
 
     private ReferralService CreateReferralService()

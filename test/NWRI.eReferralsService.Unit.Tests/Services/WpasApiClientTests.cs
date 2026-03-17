@@ -106,10 +106,12 @@ public class WpasApiClientTests
     }
 
     [Theory]
-    [InlineData(HttpStatusCode.InternalServerError)]
-    [InlineData(HttpStatusCode.BadRequest)]
-    [InlineData(HttpStatusCode.NotFound)]
-    public async Task CreateReferralAsyncShouldThrowWhenNonSuccessWithProblemDetails(HttpStatusCode statusCode)
+    [InlineData(HttpStatusCode.InternalServerError, HttpStatusCode.InternalServerError, true)]
+    [InlineData(HttpStatusCode.BadRequest, HttpStatusCode.InternalServerError, true)]
+    [InlineData(HttpStatusCode.NotFound, HttpStatusCode.InternalServerError, true)]
+    [InlineData(HttpStatusCode.NotImplemented, HttpStatusCode.ServiceUnavailable, false)]
+    public async Task CreateReferralAsyncShouldThrowWhenNonSuccessWithProblemDetails(HttpStatusCode statusCode,
+        HttpStatusCode expectedStatusCode, bool shouldUseReceiverServerError)
     {
         // Arrange
         var requestBody = WpasCreateReferralRequestBuilder.CreateValid();
@@ -129,15 +131,24 @@ public class WpasApiClientTests
 
         // Assert
         var exception = (await action.Should().ThrowAsync<NotSuccessfulWpasApiCallException>()).Subject.ToList();
-        exception[0].StatusCode.Should().Be(statusCode);
-        exception[0].Errors.Should().AllSatisfy(e => e.Should().BeOfType<NotSuccessfulWpasApiResponseError>());
+        exception[0].StatusCode.Should().Be(expectedStatusCode);
+        if (shouldUseReceiverServerError)
+        {
+            exception[0].Errors.Should().AllSatisfy(e => e.Should().BeOfType<ReceiverServerError>());
+        }
+        else
+        {
+            exception[0].Errors.Should().AllSatisfy(e => e.Should().BeOfType<ReceiverUnavailableError>());
+        }
     }
 
     [Theory]
-    [InlineData(HttpStatusCode.InternalServerError)]
-    [InlineData(HttpStatusCode.BadRequest)]
-    [InlineData(HttpStatusCode.NotFound)]
-    public async Task CreateReferralAsyncShouldThrowWhenNonJsonContent(HttpStatusCode statusCode)
+    [InlineData(HttpStatusCode.InternalServerError, HttpStatusCode.InternalServerError, true)]
+    [InlineData(HttpStatusCode.BadRequest, HttpStatusCode.InternalServerError, true)]
+    [InlineData(HttpStatusCode.NotFound, HttpStatusCode.InternalServerError, true)]
+    [InlineData(HttpStatusCode.NotImplemented, HttpStatusCode.ServiceUnavailable, false)]
+    public async Task CreateReferralAsyncShouldThrowWhenNonJsonContent(HttpStatusCode statusCode,
+        HttpStatusCode expectedStatusCode, bool shouldUseReceiverServerError)
     {
         // Arrange
         var requestBody = WpasCreateReferralRequestBuilder.CreateValid();
@@ -157,8 +168,15 @@ public class WpasApiClientTests
 
         // Assert
         var exception = (await action.Should().ThrowAsync<NotSuccessfulWpasApiCallException>()).Subject.ToList();
-        exception[0].StatusCode.Should().Be(statusCode);
-        exception[0].Errors.Should().AllSatisfy(e => e.Should().BeOfType<NotSuccessfulWpasApiResponseError>());
+        exception[0].StatusCode.Should().Be(expectedStatusCode);
+        if (shouldUseReceiverServerError)
+        {
+            exception[0].Errors.Should().AllSatisfy(e => e.Should().BeOfType<ReceiverServerError>());
+        }
+        else
+        {
+            exception[0].Errors.Should().AllSatisfy(e => e.Should().BeOfType<ReceiverUnavailableError>());
+        }
     }
 
     [Fact]

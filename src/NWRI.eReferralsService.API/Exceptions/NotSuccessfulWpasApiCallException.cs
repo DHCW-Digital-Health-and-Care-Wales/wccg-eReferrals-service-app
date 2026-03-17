@@ -1,5 +1,4 @@
 using System.Net;
-using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.Errors;
 
 namespace NWRI.eReferralsService.API.Exceptions;
@@ -14,8 +13,16 @@ public class NotSuccessfulWpasApiCallException : BaseFhirException
 
     public NotSuccessfulWpasApiCallException(HttpStatusCode statusCode, string rawContent)
     {
-        StatusCode = statusCode;
-        Errors = [new NotSuccessfulWpasApiResponseError()];
+        if ((int)statusCode is > 500 and < 600)
+        {
+            StatusCode = HttpStatusCode.ServiceUnavailable;
+            Errors = [new ReceiverUnavailableError()];
+        }
+        else
+        {
+            StatusCode = HttpStatusCode.InternalServerError;
+            Errors = [new ReceiverServerError()];
+        }
         ExceptionMessage = $"WPAS API call failed with status code: {(int)statusCode}. Raw content: {rawContent}";
     }
 }

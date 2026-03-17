@@ -169,6 +169,9 @@ public class ResponseMiddlewareTests
     [InlineData(HttpStatusCode.InternalServerError, HttpStatusCode.InternalServerError)]
     [InlineData(HttpStatusCode.BadRequest, HttpStatusCode.InternalServerError)]
     [InlineData(HttpStatusCode.NotFound, HttpStatusCode.InternalServerError)]
+    [InlineData(HttpStatusCode.NotImplemented, HttpStatusCode.ServiceUnavailable)]
+    [InlineData(HttpStatusCode.GatewayTimeout, HttpStatusCode.ServiceUnavailable)]
+    [InlineData(HttpStatusCode.ServiceUnavailable, HttpStatusCode.ServiceUnavailable)]
     public async Task ShouldHandleNotSuccessfulWpasApiCallException(HttpStatusCode inCode, HttpStatusCode outCode)
     {
         //Arrange

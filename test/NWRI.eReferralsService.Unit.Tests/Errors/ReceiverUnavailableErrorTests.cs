@@ -5,19 +5,19 @@ using NWRI.eReferralsService.API.Errors;
 
 namespace NWRI.eReferralsService.Unit.Tests.Errors;
 
-public class NotSuccessfulWpasApiResponseErrorTests
+public class ReceiverUnavailableErrorTests
 {
     [Fact]
-    public void ShouldCorrectlyCreateNotSuccessfulWpasApiResponseError()
+    public void ShouldCorrectlyCreateReceiverUnavailableError()
     {
         // Arrange
-        const string expectedDisplayMessage = "500: The Receiver has encountered an error processing the request.";
+        const string expectedDisplayMessage = "503: The Receiver is currently unavailable.";
 
         // Act
-        var error = new NotSuccessfulWpasApiResponseError();
+        var error = new ReceiverUnavailableError();
 
         // Assert
-        error.Code.Should().Be(FhirHttpErrorCodes.ReceiverServerError);
+        error.Code.Should().Be(FhirHttpErrorCodes.ReceiverUnavailable);
         error.IssueType.Should().Be(OperationOutcome.IssueType.Exception);
         error.DiagnosticsMessage.Should().Be("WPAS API returned an unsuccessful response.");
         error.Display.Should().Be(expectedDisplayMessage);
