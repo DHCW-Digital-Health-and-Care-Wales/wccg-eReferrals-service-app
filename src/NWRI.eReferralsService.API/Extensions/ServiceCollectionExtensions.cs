@@ -49,7 +49,9 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<IValidator<BundleCreateReferralModel>, BundleCreateReferralModelValidator>();
         services.AddScoped<IValidator<BundleCancelReferralModel>, BundleCancelReferralModelValidator>();
-        services.AddScoped<IValidator<HeadersModel>, HeadersModelValidator>();
+        services.AddSingleton<FhirHeaderValueValidator>();
+        services.AddScoped<IValidator<HeadersModel>, ReferralHeadersModelValidator>();
+        services.AddScoped<IMetadataHeadersValidator, MetadataHeadersModelValidator>();
         services.AddSingleton<IFhirBundleProfileValidator, FhirBundleProfileValidator>();
         services.AddSingleton<WpasJsonSchemaValidator>();
     }
@@ -74,6 +76,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IReferralWorkflowProcessor, ReferralWorkflowProcessor>();
         services.AddSingleton<IFileProvider>(sp => sp.GetRequiredService<IWebHostEnvironment>().ContentRootFileProvider);
         services.AddScoped<IReferralService, ReferralService>();
+        services.AddScoped<IMetadataService, MetadataService>();
         services.AddSingleton<ICapabilityStatementService, StaticFileCapabilityStatementService>();
     }
 

@@ -12,16 +12,18 @@ using NWRI.eReferralsService.Unit.Tests.Extensions;
 
 namespace NWRI.eReferralsService.Unit.Tests.Validators;
 
-public class HeadersModelValidatorTests
+public class ReferralHeadersModelValidatorTests
 {
     private readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions().ForFhirExtended();
     private readonly IFixture _fixture = new Fixture().WithCustomizations();
 
-    private readonly HeadersModelValidator _sut;
+    private readonly ReferralHeadersModelValidator _sut;
 
-    public HeadersModelValidatorTests()
+    public ReferralHeadersModelValidatorTests()
     {
-        _sut = new HeadersModelValidator(new JsonSerializerOptions().ForFhirExtended());
+        var fhirHeaderValueValidator = new FhirHeaderValueValidator(_jsonSerializerOptions);
+
+        _sut = new ReferralHeadersModelValidator(fhirHeaderValueValidator);
         _sut.ClassLevelCascadeMode = CascadeMode.Continue;
         _sut.RuleLevelCascadeMode = CascadeMode.Stop;
 
