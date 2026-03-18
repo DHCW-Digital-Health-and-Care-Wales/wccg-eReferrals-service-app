@@ -7,5 +7,5 @@ public class ReceiverUnavailableError : BaseFhirHttpError
 {
     public override string Code => FhirHttpErrorCodes.ReceiverUnavailable;
     public override string DiagnosticsMessage => "WPAS API is currently unavailable";
-    public override OperationOutcome.IssueType IssueType => OperationOutcome.IssueType.Exception;
+    public override OperationOutcome.IssueType IssueType => OperationOutcome.IssueType.Transient;
 }

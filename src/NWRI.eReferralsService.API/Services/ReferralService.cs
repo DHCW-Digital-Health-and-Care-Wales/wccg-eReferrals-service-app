@@ -126,6 +126,6 @@ public class ReferralService : IReferralService
         {
             throw new RequestParameterValidationException("ServiceRequest", "ServiceRequest cannot be uniquely identified in the request bundle.");
         }
-        return matching.First();
+        return matching[0];
     }
 }
