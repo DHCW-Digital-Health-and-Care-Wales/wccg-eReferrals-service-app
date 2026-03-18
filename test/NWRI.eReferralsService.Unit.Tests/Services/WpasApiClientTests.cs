@@ -110,6 +110,8 @@ public class WpasApiClientTests
     [InlineData(HttpStatusCode.BadRequest, HttpStatusCode.InternalServerError, typeof(ReceiverServerError))]
     [InlineData(HttpStatusCode.NotFound, HttpStatusCode.InternalServerError, typeof(ReceiverServerError))]
     [InlineData(HttpStatusCode.NotImplemented, HttpStatusCode.ServiceUnavailable, typeof(ReceiverUnavailableError))]
+    [InlineData(HttpStatusCode.ServiceUnavailable, HttpStatusCode.ServiceUnavailable, typeof(ReceiverUnavailableError))]
+    [InlineData(HttpStatusCode.GatewayTimeout, HttpStatusCode.ServiceUnavailable, typeof(ReceiverUnavailableError))]
     public async Task CreateReferralAsyncShouldThrowWhenNonSuccess(HttpStatusCode statusCode,
         HttpStatusCode expectedStatusCode, Type expectedErrorType)
     {
