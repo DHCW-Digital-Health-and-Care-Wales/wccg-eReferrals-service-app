@@ -1,0 +1,25 @@
+{
+  "resourceType": "OperationOutcome",
+  "id": "b907e1e9-f97f-40e0-b139-9fc25824104f",
+  "meta": {
+    "profile": [
+      "https://fhir.hl7.org.uk/StructureDefinition/UKCore-OperationOutcome"
+    ]
+  },
+  "issue": [
+    {
+      "severity": "error",
+      "code": "exception",
+      "details": {
+        "coding": [
+          {
+            "system": "https://fhir.nhs.uk/CodeSystem/http-error-codes",
+            "code": "PROXY_SERVER_ERROR"
+          }
+        ],
+        "text": "500: The Proxy has encountered an error processing the request."
+      },
+      "diagnostics": "Proxy error: *error details*"
+    }
+  ]
+}

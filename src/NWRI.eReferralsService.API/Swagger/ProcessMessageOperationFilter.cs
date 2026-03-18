@@ -55,7 +55,7 @@ public sealed class ProcessMessageOperationFilter : IOperationFilter
                 "Swagger/Examples/common-too-many-requests.json"),
             ["500"] = SwaggerHelpers.CreateFhirResponseWithExample(
                 "Internal Server Error",
-                "Swagger/Examples/common-internal-server-error.json"),
+                "Swagger/Examples/common-external-server-error.json"),
             ["503"] = SwaggerHelpers.CreateFhirResponseWithExample(
                 "Service Unavailable",
                 "Swagger/Examples/common-service-unavailable.json")

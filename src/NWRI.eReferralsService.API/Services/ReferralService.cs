@@ -71,12 +71,7 @@ public class ReferralService : IReferralService
         _eventLogger.Audit(new EventCatalogue.AuditReferralAccepted(sourceSystem, userRole, response.ReferralId,
             processingStopwatch.ElapsedMilliseconds));
 
-        return GenerateResponse(bundle, serviceRequest, response.ReferralId);
-    }
-
-    private string GenerateResponse(Bundle bundle, ServiceRequest serviceRequest, string referralId)
-    {
-        serviceRequest.Id = referralId;
+        serviceRequest.Id = response.ReferralId;
         return JsonSerializer.Serialize(bundle, _jsonSerializerOptions);
     }
 
@@ -123,14 +118,15 @@ public class ReferralService : IReferralService
 
     private static ServiceRequest GetReferralServiceRequest(Bundle bundle)
     {
-        try
+        var matching = bundle.ResourcesByProfile<ServiceRequest>(FhirConstants.BarsServiceRequestReferral).ToList();
+        if (matching.Count == 0)
         {
-            return bundle.ResourcesByProfile<ServiceRequest>(FhirConstants.BarsServiceRequestReferral).SingleOrDefault()
-                   ?? throw new RequestParameterValidationException("ServiceRequest", $"No ServiceRequest with profile '{FhirConstants.BarsServiceRequestReferral}' found in the request bundle.");
+            throw new RequestParameterValidationException("ServiceRequest", $"No ServiceRequest with profile '{FhirConstants.BarsServiceRequestReferral}' found in the request bundle.");
         }
-        catch (InvalidOperationException)
+        if (matching.Count > 1)
         {
             throw new RequestParameterValidationException("ServiceRequest", "ServiceRequest cannot be uniquely identified in the request bundle.");
         }
+        return matching.First();
     }
 }
