@@ -1,5 +1,4 @@
 using System.Net;
-using System.Reflection;
 using System.Text.Json;
 using AutoFixture;
 using FluentAssertions;
@@ -8,7 +7,6 @@ using FluentValidation.Results;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Moq;

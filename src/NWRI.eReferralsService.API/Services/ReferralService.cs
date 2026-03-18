@@ -75,13 +75,8 @@ public class ReferralService : IReferralService
         return JsonSerializer.Serialize(bundle, _jsonSerializerOptions);
     }
 
-    private static ReferralWorkflowAction DetermineReferralWorkflowAction(string? messageReasonCode, RequestStatus? serviceRequestStatus)
+    private static ReferralWorkflowAction DetermineReferralWorkflowAction(string messageReasonCode, RequestStatus? serviceRequestStatus)
     {
-        if (messageReasonCode is null)
-        {
-            throw new RequestParameterValidationException("MessageHeader.reason", "MessageHeader.reason.coding.code is required");
-        }
-
         if (serviceRequestStatus is null)
         {
             throw new RequestParameterValidationException("ServiceRequest.status", "ServiceRequest.status is required");
@@ -111,10 +106,14 @@ public class ReferralService : IReferralService
         _eventLogger.Audit(new EventCatalogue.HeadersValidated());
     }
 
-    private static string? GetMessageReasonCode(Bundle bundle) =>
-        bundle.ResourceByType<MessageHeader>()?.Reason?.Coding
+    private static string GetMessageReasonCode(Bundle bundle)
+    {
+        var messageReasonCode = bundle.ResourceByType<MessageHeader>()?.Reason?.Coding
             .FirstOrDefault(c => string.Equals(c.System, FhirConstants.BarsMessageReasonSystem, StringComparison.OrdinalIgnoreCase))
             ?.Code;
+
+        return messageReasonCode ?? throw new RequestParameterValidationException("MessageHeader.reason", "MessageHeader.reason.coding.code is required");
+    }
 
     private static ServiceRequest GetReferralServiceRequest(Bundle bundle)
     {

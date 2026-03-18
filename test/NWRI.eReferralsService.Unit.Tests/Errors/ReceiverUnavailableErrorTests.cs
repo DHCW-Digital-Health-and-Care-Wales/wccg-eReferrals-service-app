@@ -19,7 +19,7 @@ public class ReceiverUnavailableErrorTests
         // Assert
         error.Code.Should().Be(FhirHttpErrorCodes.ReceiverUnavailable);
         error.IssueType.Should().Be(OperationOutcome.IssueType.Exception);
-        error.DiagnosticsMessage.Should().Be("WPAS API returned an unsuccessful response.");
+        error.DiagnosticsMessage.Should().Be("WPAS API is currently unavailable");
         error.Display.Should().Be(expectedDisplayMessage);
     }
 }

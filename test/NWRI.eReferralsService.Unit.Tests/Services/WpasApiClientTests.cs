@@ -1,10 +1,8 @@
 using System.Net;
-using System.Net.Http.Json;
 using System.Net.Mime;
 using System.Text.Json;
 using AutoFixture;
 using FluentAssertions;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using NWRI.eReferralsService.API.Configuration;

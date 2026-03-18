@@ -8,7 +8,7 @@ namespace NWRI.eReferralsService.Unit.Tests.Errors;
 public class ReceiverServerErrorTests
 {
     [Fact]
-    public void ShouldCorrectlyCreateNotSuccessfulWpasApiResponseError()
+    public void ShouldCorrectlyCreateReceiverServerError()
     {
         // Arrange
         const string expectedDisplayMessage = "500: The Receiver has encountered an error processing the request.";
@@ -19,7 +19,7 @@ public class ReceiverServerErrorTests
         // Assert
         error.Code.Should().Be(FhirHttpErrorCodes.ReceiverServerError);
         error.IssueType.Should().Be(OperationOutcome.IssueType.Exception);
-        error.DiagnosticsMessage.Should().Be("WPAS API returned an unsuccessful response.");
+        error.DiagnosticsMessage.Should().Be("WPAS API returned a server error response");
         error.Display.Should().Be(expectedDisplayMessage);
     }
 }

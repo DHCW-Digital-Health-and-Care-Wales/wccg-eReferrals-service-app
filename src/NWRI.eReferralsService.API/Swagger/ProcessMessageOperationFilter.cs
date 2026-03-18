@@ -53,9 +53,29 @@ public sealed class ProcessMessageOperationFilter : IOperationFilter
             ["429"] = SwaggerHelpers.CreateFhirResponseWithExample(
                 "Too many requests",
                 "Swagger/Examples/common-too-many-requests.json"),
-            ["500"] = SwaggerHelpers.CreateFhirResponseWithExample(
-                "Internal Server Error",
-                "Swagger/Examples/common-proxy-server-error.json"),
+            ["500"] = new OpenApiResponse
+                {
+                    Description = "Internal Server Error",
+                    Content = new Dictionary<string, OpenApiMediaType>
+                    {
+                        [FhirConstants.FhirMediaType] = new()
+                        {
+                            Examples = new Dictionary<string, OpenApiExample>
+                            {
+                                ["proxy-server-error"] = new()
+                                {
+                                    Summary = "Proxy error",
+                                    Value = new OpenApiString(File.ReadAllText("Swagger/Examples/common-proxy-server-error.json"))
+                                },
+                                ["receiver-server-error"] = new()
+                                {
+                                    Summary = "WPAS server error",
+                                    Value = new OpenApiString(File.ReadAllText("Swagger/Examples/common-external-server-error.json"))
+                                }
+                            }
+                        }
+                    }
+                },
             ["503"] = SwaggerHelpers.CreateFhirResponseWithExample(
                 "Service Unavailable",
                 "Swagger/Examples/common-service-unavailable.json")

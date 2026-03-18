@@ -1,7 +1,6 @@
 using System.Net.Http.Headers;
 using System.Net.Mime;
 using System.Text.Json;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using NWRI.eReferralsService.API.Configuration;
 using NWRI.eReferralsService.API.Exceptions;

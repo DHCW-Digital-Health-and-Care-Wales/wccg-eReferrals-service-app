@@ -19,7 +19,7 @@
         ],
         "text": "503: The Receiver is currently unavailable."
       },
-      "diagnostics": "Unexpected error: *error details*"
+      "diagnostics": "Service unavailable: *error details*"
     }
   ]
 }
