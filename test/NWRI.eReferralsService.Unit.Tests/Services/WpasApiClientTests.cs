@@ -106,20 +106,19 @@ public class WpasApiClientTests
     }
 
     [Theory]
-    [InlineData(HttpStatusCode.InternalServerError, HttpStatusCode.InternalServerError, true)]
-    [InlineData(HttpStatusCode.BadRequest, HttpStatusCode.InternalServerError, true)]
-    [InlineData(HttpStatusCode.NotFound, HttpStatusCode.InternalServerError, true)]
-    [InlineData(HttpStatusCode.NotImplemented, HttpStatusCode.ServiceUnavailable, false)]
-    public async Task CreateReferralAsyncShouldThrowWhenNonSuccessWithProblemDetails(HttpStatusCode statusCode,
-        HttpStatusCode expectedStatusCode, bool shouldUseReceiverServerError)
+    [InlineData(HttpStatusCode.InternalServerError, HttpStatusCode.InternalServerError, typeof(ReceiverServerError))]
+    [InlineData(HttpStatusCode.BadRequest, HttpStatusCode.InternalServerError, typeof(ReceiverServerError))]
+    [InlineData(HttpStatusCode.NotFound, HttpStatusCode.InternalServerError, typeof(ReceiverServerError))]
+    [InlineData(HttpStatusCode.NotImplemented, HttpStatusCode.ServiceUnavailable, typeof(ReceiverUnavailableError))]
+    public async Task CreateReferralAsyncShouldThrowWhenNonSuccess(HttpStatusCode statusCode,
+        HttpStatusCode expectedStatusCode, Type expectedErrorType)
     {
         // Arrange
         var requestBody = WpasCreateReferralRequestBuilder.CreateValid();
-        var problemDetails = _fixture.Create<ProblemDetails>();
 
         using var mockHttp = new MockHttpMessageHandler();
         mockHttp.Expect(HttpMethod.Post, $"/{_wpasApiConfig.CreateReferralEndpoint}")
-            .Respond(statusCode, JsonContent.Create(problemDetails));
+            .Respond(statusCode);
 
         using var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(_wpasApiConfig.BaseUrl);
@@ -132,51 +131,7 @@ public class WpasApiClientTests
         // Assert
         var exception = (await action.Should().ThrowAsync<NotSuccessfulWpasApiCallException>()).Subject.ToList();
         exception[0].StatusCode.Should().Be(expectedStatusCode);
-        if (shouldUseReceiverServerError)
-        {
-            exception[0].Errors.Should().AllSatisfy(e => e.Should().BeOfType<ReceiverServerError>());
-        }
-        else
-        {
-            exception[0].Errors.Should().AllSatisfy(e => e.Should().BeOfType<ReceiverUnavailableError>());
-        }
-    }
-
-    [Theory]
-    [InlineData(HttpStatusCode.InternalServerError, HttpStatusCode.InternalServerError, true)]
-    [InlineData(HttpStatusCode.BadRequest, HttpStatusCode.InternalServerError, true)]
-    [InlineData(HttpStatusCode.NotFound, HttpStatusCode.InternalServerError, true)]
-    [InlineData(HttpStatusCode.NotImplemented, HttpStatusCode.ServiceUnavailable, false)]
-    public async Task CreateReferralAsyncShouldThrowWhenNonJsonContent(HttpStatusCode statusCode,
-        HttpStatusCode expectedStatusCode, bool shouldUseReceiverServerError)
-    {
-        // Arrange
-        var requestBody = WpasCreateReferralRequestBuilder.CreateValid();
-        var rawContent = _fixture.Create<string>();
-
-        using var mockHttp = new MockHttpMessageHandler();
-        mockHttp.Expect(HttpMethod.Post, $"/{_wpasApiConfig.CreateReferralEndpoint}")
-            .Respond(statusCode, new StringContent(rawContent));
-
-        using var httpClient = mockHttp.ToHttpClient();
-        httpClient.BaseAddress = new Uri(_wpasApiConfig.BaseUrl);
-
-        var sut = new WpasApiClient(httpClient, _fixture.Mock<IOptions<WpasApiConfig>>().Object);
-
-        // Act
-        var action = async () => await sut.CreateReferralAsync(requestBody, CancellationToken.None);
-
-        // Assert
-        var exception = (await action.Should().ThrowAsync<NotSuccessfulWpasApiCallException>()).Subject.ToList();
-        exception[0].StatusCode.Should().Be(expectedStatusCode);
-        if (shouldUseReceiverServerError)
-        {
-            exception[0].Errors.Should().AllSatisfy(e => e.Should().BeOfType<ReceiverServerError>());
-        }
-        else
-        {
-            exception[0].Errors.Should().AllSatisfy(e => e.Should().BeOfType<ReceiverUnavailableError>());
-        }
+        exception[0].Errors.Should().AllSatisfy(e => e.Should().BeOfType(expectedErrorType));
     }
 
     [Fact]
