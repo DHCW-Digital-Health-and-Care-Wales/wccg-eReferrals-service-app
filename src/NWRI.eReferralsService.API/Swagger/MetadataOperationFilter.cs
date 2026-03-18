@@ -43,7 +43,7 @@ public sealed class MetadataOperationFilter : IOperationFilter
                 "Swagger/Examples/common-too-many-requests.json"),
             ["500"] = SwaggerHelpers.CreateFhirResponseWithExample(
                 "Internal Server Error",
-                "Swagger/Examples/common-external-server-error.json"),
+                "Swagger/Examples/common-proxy-server-error.json"),
             ["503"] = SwaggerHelpers.CreateFhirResponseWithExample(
                 "Service Unavailable",
                 "Swagger/Examples/common-service-unavailable.json")
