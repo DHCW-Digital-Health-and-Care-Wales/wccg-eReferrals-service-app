@@ -69,7 +69,7 @@ public sealed class ProcessMessageOperationFilter : IOperationFilter
                                 },
                                 ["receiver-server-error"] = new()
                                 {
-                                    Summary = "WPAS API server error",
+                                    Summary = "WPAS API error",
                                     Value = new OpenApiString(File.ReadAllText("Swagger/Examples/common-external-server-error.json"))
                                 }
                             }
