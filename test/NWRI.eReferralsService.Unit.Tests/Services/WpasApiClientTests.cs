@@ -1,10 +1,8 @@
 using System.Net;
-using System.Net.Http.Json;
 using System.Net.Mime;
 using System.Text.Json;
 using AutoFixture;
 using FluentAssertions;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using NWRI.eReferralsService.API.Configuration;
@@ -106,18 +104,21 @@ public class WpasApiClientTests
     }
 
     [Theory]
-    [InlineData(HttpStatusCode.InternalServerError)]
-    [InlineData(HttpStatusCode.BadRequest)]
-    [InlineData(HttpStatusCode.NotFound)]
-    public async Task CreateReferralAsyncShouldThrowWhenNonSuccessWithProblemDetails(HttpStatusCode statusCode)
+    [InlineData(HttpStatusCode.InternalServerError, HttpStatusCode.InternalServerError, typeof(ReceiverServerError))]
+    [InlineData(HttpStatusCode.BadRequest, HttpStatusCode.InternalServerError, typeof(ReceiverServerError))]
+    [InlineData(HttpStatusCode.NotFound, HttpStatusCode.InternalServerError, typeof(ReceiverServerError))]
+    [InlineData(HttpStatusCode.NotImplemented, HttpStatusCode.ServiceUnavailable, typeof(ReceiverUnavailableError))]
+    [InlineData(HttpStatusCode.ServiceUnavailable, HttpStatusCode.ServiceUnavailable, typeof(ReceiverUnavailableError))]
+    [InlineData(HttpStatusCode.GatewayTimeout, HttpStatusCode.ServiceUnavailable, typeof(ReceiverUnavailableError))]
+    public async Task CreateReferralAsyncShouldThrowWhenNonSuccess(HttpStatusCode statusCode,
+        HttpStatusCode expectedStatusCode, Type expectedErrorType)
     {
         // Arrange
         var requestBody = WpasCreateReferralRequestBuilder.CreateValid();
-        var problemDetails = _fixture.Create<ProblemDetails>();
 
         using var mockHttp = new MockHttpMessageHandler();
         mockHttp.Expect(HttpMethod.Post, $"/{_wpasApiConfig.CreateReferralEndpoint}")
-            .Respond(statusCode, JsonContent.Create(problemDetails));
+            .Respond(statusCode);
 
         using var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri(_wpasApiConfig.BaseUrl);
@@ -128,37 +129,9 @@ public class WpasApiClientTests
         var action = async () => await sut.CreateReferralAsync(requestBody, CancellationToken.None);
 
         // Assert
-        var exception = (await action.Should().ThrowAsync<NotSuccessfulApiCallException>()).Subject.ToList();
-        exception[0].StatusCode.Should().Be(statusCode);
-        exception[0].Errors.Should().AllSatisfy(e => e.Should().BeOfType<NotSuccessfulApiResponseError>());
-    }
-
-    [Theory]
-    [InlineData(HttpStatusCode.InternalServerError)]
-    [InlineData(HttpStatusCode.BadRequest)]
-    [InlineData(HttpStatusCode.NotFound)]
-    public async Task CreateReferralAsyncShouldThrowWhenNonJsonContent(HttpStatusCode statusCode)
-    {
-        // Arrange
-        var requestBody = WpasCreateReferralRequestBuilder.CreateValid();
-        var rawContent = _fixture.Create<string>();
-
-        using var mockHttp = new MockHttpMessageHandler();
-        mockHttp.Expect(HttpMethod.Post, $"/{_wpasApiConfig.CreateReferralEndpoint}")
-            .Respond(statusCode, new StringContent(rawContent));
-
-        using var httpClient = mockHttp.ToHttpClient();
-        httpClient.BaseAddress = new Uri(_wpasApiConfig.BaseUrl);
-
-        var sut = new WpasApiClient(httpClient, _fixture.Mock<IOptions<WpasApiConfig>>().Object);
-
-        // Act
-        var action = async () => await sut.CreateReferralAsync(requestBody, CancellationToken.None);
-
-        // Assert
-        var exception = (await action.Should().ThrowAsync<NotSuccessfulApiCallException>()).Subject.ToList();
-        exception[0].StatusCode.Should().Be(statusCode);
-        exception[0].Errors.Should().AllSatisfy(e => e.Should().BeOfType<UnexpectedError>());
+        var exception = (await action.Should().ThrowAsync<NotSuccessfulWpasApiCallException>()).Subject.ToList();
+        exception[0].StatusCode.Should().Be(expectedStatusCode);
+        exception[0].Errors.Should().AllSatisfy(e => e.Should().BeOfType(expectedErrorType));
     }
 
     [Fact]

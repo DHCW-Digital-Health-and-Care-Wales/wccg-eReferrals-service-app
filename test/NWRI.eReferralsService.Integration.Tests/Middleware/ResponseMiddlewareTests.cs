@@ -6,7 +6,6 @@ using FluentValidation.Results;
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Serialization;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -166,13 +165,16 @@ public class ResponseMiddlewareTests
     }
 
     [Theory]
-    [InlineData(HttpStatusCode.InternalServerError, HttpStatusCode.ServiceUnavailable)]
-    [InlineData(HttpStatusCode.BadRequest, HttpStatusCode.BadRequest)]
-    [InlineData(HttpStatusCode.NotFound, HttpStatusCode.NotFound)]
-    public async Task ShouldHandleNotSuccessfulApiCallException(HttpStatusCode inCode, HttpStatusCode outCode)
+    [InlineData(HttpStatusCode.InternalServerError, HttpStatusCode.InternalServerError)]
+    [InlineData(HttpStatusCode.BadRequest, HttpStatusCode.InternalServerError)]
+    [InlineData(HttpStatusCode.NotFound, HttpStatusCode.InternalServerError)]
+    [InlineData(HttpStatusCode.NotImplemented, HttpStatusCode.ServiceUnavailable)]
+    [InlineData(HttpStatusCode.GatewayTimeout, HttpStatusCode.ServiceUnavailable)]
+    [InlineData(HttpStatusCode.ServiceUnavailable, HttpStatusCode.ServiceUnavailable)]
+    public async Task ShouldHandleNotSuccessfulWpasApiCallException(HttpStatusCode inCode, HttpStatusCode outCode)
     {
         //Arrange
-        var exception = new NotSuccessfulApiCallException(inCode, _fixture.Create<ProblemDetails>());
+        var exception = new NotSuccessfulWpasApiCallException(inCode, _fixture.Create<string>());
 
         var requestId = _fixture.Create<string>();
         var correlationId = _fixture.Create<string>();

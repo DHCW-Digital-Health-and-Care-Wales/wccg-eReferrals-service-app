@@ -9,17 +9,17 @@
   "issue": [
     {
       "severity": "error",
-      "code": "exception",
+      "code": "transient",
       "details": {
         "coding": [
           {
             "system": "https://fhir.nhs.uk/CodeSystem/http-error-codes",
-            "code": "REC_SERVER_ERROR"
+            "code": "REC_UNAVAILABLE"
           }
         ],
-        "text": "500: The Receiver has encountered an error processing the request."
+        "text": "503: The Receiver is currently unavailable."
       },
-      "diagnostics": "Unexpected error: *error details*"
+      "diagnostics": "Service unavailable: *error details*"
     }
   ]
 }
