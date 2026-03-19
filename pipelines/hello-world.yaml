@@ -25,9 +25,13 @@ steps:
   displayName: 'Verify environment'
   
 - script: |
-    apt-get update
-    apt-get install -y netcat-openbsd
-  displayName: 'Install netcat'
+    sudo dnf install -y nmap-ncat
+  displayName: 'Install netcat (RHEL)'
+
+- script: |
+    which nc
+    nc -h
+  displayName: 'Verify netcat'
   
 - script: echo "Testing ADO connectivity to all NWRI resources"
   displayName: 'Start connectivity tests'
