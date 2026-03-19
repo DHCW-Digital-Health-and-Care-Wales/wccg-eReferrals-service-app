@@ -1,11 +1,35 @@
+#trigger:
+#- none
+
 trigger:
-- none
+  branches:
+    include:
+    - 5743
+
+#pr:
+#  branches:
+#    include:
+#    - branchA
 
 pool:
   name: NWRI-ADO-POOL
 
 steps:
-- script: echo "Hello, world!"
-  displayName: 'Print Hello World'
+- script: echo "Testing ADO connectivity to all NWRI resources"
+  displayName: 'Start connectivity tests'
 
-###
+- script: nc -zv uks-dhcw-dev-nwri-appconfig.azconfig.io 443
+  displayName: 'Testing ADO connection to Application Configuration store'
+
+- script: nc -zv uksdhcwdevnwriacr.azurecr.io 443
+  displayName: 'Testing ADO connection to Azure Container Registry'
+
+- script: nc -zv uks-dhcw-dev-nwri-kv.vault.azure.net 443
+  displayName: 'Testing ADO connection to Azure Key Vault'
+
+- script: nc -zv uksmydevnwriapp.internal.yellowtree-fadb23ed.uksouth.azurecontainerapps.io 443
+  displayName: 'Testing ADO connection to NWRI Container App'
+
+- script: nc -zv uksdhcwdevnwrisa.blob.core.windows.net 443
+  displayName: 'Testing ADO connection to NWRI Storage Account'
+   
