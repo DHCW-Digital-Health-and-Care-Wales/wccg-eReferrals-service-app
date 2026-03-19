@@ -16,6 +16,15 @@ pool:
 
 steps:
 - script: |
+    echo "OS info:"
+    cat /etc/os-release
+    echo "apt-get location:"
+    ls -l /usr/bin/apt-get || echo "not found"
+    echo "PATH:"
+    echo $PATH
+  displayName: 'Verify environment'
+  
+- script: |
     apt-get update
     apt-get install -y netcat-openbsd
   displayName: 'Install netcat'
