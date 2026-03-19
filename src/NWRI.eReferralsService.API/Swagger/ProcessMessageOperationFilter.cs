@@ -34,7 +34,7 @@ public sealed class ProcessMessageOperationFilter : IOperationFilter
                 [FhirConstants.FhirMediaType] = new OpenApiMediaType
                 {
                     Example = new OpenApiString(
-                        File.ReadAllText("Swagger/Examples/process-message-payload-and-response.json"))
+                        File.ReadAllText("Swagger/Examples/process-message-payload.json"))
                 }
             }
         };
@@ -46,19 +46,39 @@ public sealed class ProcessMessageOperationFilter : IOperationFilter
         {
             ["200"] = SwaggerHelpers.CreateFhirResponseWithExample(
                 "OK",
-                "Swagger/Examples/process-message-payload-and-response.json"),
+                "Swagger/Examples/process-message-ok-response.json"),
             ["400"] = SwaggerHelpers.CreateFhirResponseWithExample(
                 "Bad Request",
                 "Swagger/Examples/process-message-bad-request.json"),
             ["429"] = SwaggerHelpers.CreateFhirResponseWithExample(
                 "Too many requests",
                 "Swagger/Examples/common-too-many-requests.json"),
-            ["500"] = SwaggerHelpers.CreateFhirResponseWithExample(
-                "Internal Server Error",
-                "Swagger/Examples/common-internal-server-error.json"),
+            ["500"] = new OpenApiResponse
+                {
+                    Description = "Internal Server Error",
+                    Content = new Dictionary<string, OpenApiMediaType>
+                    {
+                        [FhirConstants.FhirMediaType] = new()
+                        {
+                            Examples = new Dictionary<string, OpenApiExample>
+                            {
+                                ["proxy-server-error"] = new()
+                                {
+                                    Summary = "Proxy error",
+                                    Value = new OpenApiString(File.ReadAllText("Swagger/Examples/common-proxy-server-error.json"))
+                                },
+                                ["receiver-server-error"] = new()
+                                {
+                                    Summary = "WPAS API error",
+                                    Value = new OpenApiString(File.ReadAllText("Swagger/Examples/common-external-server-error.json"))
+                                }
+                            }
+                        }
+                    }
+                },
             ["503"] = SwaggerHelpers.CreateFhirResponseWithExample(
                 "Service Unavailable",
-                "Swagger/Examples/common-external-server-error.json")
+                "Swagger/Examples/common-service-unavailable.json")
         };
     }
 }

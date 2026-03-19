@@ -98,7 +98,7 @@ internal static class SwaggerHelpers
                 "Swagger/Examples/common-too-many-requests.json"),
             ["500"] = CreateFhirResponseWithExample(
                 "Internal Server Error",
-                "Swagger/Examples/common-internal-server-error.json"),
+                "Swagger/Examples/common-proxy-server-error.json"),
             ["501"] = CreateFhirResponseWithExample(
                 "Not Implemented",
                 "Swagger/Examples/common-proxy-not-implemented.json")

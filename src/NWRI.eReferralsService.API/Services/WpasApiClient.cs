@@ -1,7 +1,6 @@
 using System.Net.Http.Headers;
 using System.Net.Mime;
 using System.Text.Json;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using NWRI.eReferralsService.API.Configuration;
 using NWRI.eReferralsService.API.Exceptions;
@@ -39,13 +38,13 @@ public sealed class WpasApiClient : IWpasApiClient
         where TResponse : WpasReferralResponse
     {
         var requestBodyJson = JsonSerializer.Serialize(requestBody);
-        using var content = new StringContent(
+        using var requestContent = new StringContent(
             requestBodyJson,
             new MediaTypeHeaderValue(MediaTypeNames.Application.Json));
 
         using var response = await _httpClient.PostAsync(
             endpoint,
-            content,
+            requestContent,
             cancellationToken);
 
         if (response.IsSuccessStatusCode)
@@ -62,26 +61,7 @@ public sealed class WpasApiClient : IWpasApiClient
             }
         }
 
-        throw await GetNotSuccessfulApiCallExceptionAsync(response, cancellationToken);
-    }
-
-    private static async Task<Exception> GetNotSuccessfulApiCallExceptionAsync(HttpResponseMessage response, CancellationToken cancellationToken)
-    {
-        var content = await response.Content.ReadAsStringAsync(cancellationToken);
-
-        try
-        {
-            var problemDetails = JsonSerializer.Deserialize<ProblemDetails>(content);
-            if (problemDetails != null)
-            {
-                return new NotSuccessfulApiCallException(response.StatusCode, problemDetails);
-            }
-        }
-        catch (JsonException)
-        {
-            // Ignore deserialization errors and fallback to plain content
-        }
-
-        return new NotSuccessfulApiCallException(response.StatusCode, content);
+        var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
+        throw new NotSuccessfulWpasApiCallException(response.StatusCode, responseContent);
     }
 }
