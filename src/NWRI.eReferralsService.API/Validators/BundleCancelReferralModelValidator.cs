@@ -2,6 +2,7 @@ using FluentValidation;
 using Hl7.Fhir.Model;
 using NWRI.eReferralsService.API.Models;
 using static NWRI.eReferralsService.API.Constants.ValidationMessages;
+using static NWRI.eReferralsService.API.Constants.FhirConstants;
 // ReSharper disable NullableWarningSuppressionIsUsed
 
 namespace NWRI.eReferralsService.API.Validators;
@@ -109,7 +110,8 @@ public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancel
             {
                 patient.RuleFor(x => x.Identifier)
                     .NotEmpty()
-                    .WithMessage(MissingEntityField<Patient>(nameof(Patient.Identifier)));
+                    .Must(ids => ids.Any(i => string.Equals(i.System, NhsNumberSystem, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(i.Value)))
+                    .WithMessage("Patient identifier with NHS number is required");
 
                 patient.RuleFor(x => x.Name)
                     .NotEmpty()

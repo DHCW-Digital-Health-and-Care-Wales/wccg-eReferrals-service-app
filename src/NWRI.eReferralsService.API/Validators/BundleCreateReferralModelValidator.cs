@@ -12,8 +12,6 @@ public class BundleCreateReferralModelValidator : AbstractValidator<BundleCreate
     private const string OccurrencePeriod = "occurrencePeriod";
     private const string EventCoding = "eventCoding";
 
-    private const string NhsNumberSystem = "https://fhir.nhs.uk/Id/nhs-number";
-
     public BundleCreateReferralModelValidator()
     {
         ClassLevelCascadeMode = CascadeMode.Continue;
@@ -203,11 +201,8 @@ public class BundleCreateReferralModelValidator : AbstractValidator<BundleCreate
             {
                 patient.RuleFor(x => x.Identifier)
                     .NotEmpty()
-                    .WithMessage(MissingEntityField<Patient>(nameof(Patient.Identifier)));
-
-                patient.RuleFor(x => x.Identifier)
-                    .Must(ids => ids.Any(i => string.Equals(i.System, NhsNumberSystem, StringComparison.OrdinalIgnoreCase)))
-                    .WithMessage("Patient NHS number identifier is required");
+                    .Must(ids => ids.Any(i => string.Equals(i.System, NhsNumberSystem, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(i.Value)))
+                    .WithMessage("Patient identifier with NHS number is required");
 
                 patient.RuleFor(x => x.Name)
                     .NotEmpty()

@@ -120,6 +120,18 @@ public class BundleCreateReferralModelValidatorTests
     }
 
     [Fact]
+    public void ShouldContainErrorWhenPatientIdentifierMissing()
+    {
+        var model = CreateValidModelFromExampleBundle();
+
+        model.Patient!.Identifier = null;
+
+        var result = _sut.TestValidate(model);
+
+        result.Errors.Should().Contain(e => e.ErrorMessage == "Patient identifier with NHS number is required");
+    }
+
+    [Fact]
     public void ShouldContainErrorWhenPatientNhsNumberMissing()
     {
         var model = CreateValidModelFromExampleBundle();
@@ -131,7 +143,7 @@ public class BundleCreateReferralModelValidatorTests
 
         var result = _sut.TestValidate(model);
 
-        result.Errors.Should().Contain(e => e.ErrorMessage == "Patient NHS number identifier is required");
+        result.Errors.Should().Contain(e => e.ErrorMessage == "Patient identifier with NHS number is required");
     }
 
     [Fact]

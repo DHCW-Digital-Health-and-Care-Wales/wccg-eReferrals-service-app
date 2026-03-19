@@ -104,6 +104,18 @@ public class BundleCancelReferralModelValidatorTests
     }
 
     [Fact]
+    public void ShouldContainErrorWhenPatientIdentifierMissing()
+    {
+        var model = CreateValidModelFromExampleBundle(CancelBundleFile);
+
+        model.Patient!.Identifier = null;
+
+        var result = _sut.TestValidate(model);
+
+        result.Errors.Should().Contain(e => e.ErrorMessage == "Patient identifier with NHS number is required");
+    }
+
+    [Fact]
     public void ShouldContainErrorWhenPatientNhsNumberMissing()
     {
         var model = CreateValidModelFromExampleBundle(CancelBundleFile);
@@ -115,7 +127,7 @@ public class BundleCancelReferralModelValidatorTests
 
         var result = _sut.TestValidate(model);
 
-        result.Errors.Should().Contain(e => e.ErrorMessage == "Patient.Identifier is required");
+        result.Errors.Should().Contain(e => e.ErrorMessage == "Patient identifier with NHS number is required");
     }
 
     [Fact]
