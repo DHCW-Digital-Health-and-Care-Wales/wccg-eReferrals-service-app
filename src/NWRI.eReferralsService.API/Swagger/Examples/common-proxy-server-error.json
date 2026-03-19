@@ -9,17 +9,17 @@
   "issue": [
     {
       "severity": "error",
-      "code": "transient",
+      "code": "exception",
       "details": {
         "coding": [
           {
             "system": "https://fhir.nhs.uk/CodeSystem/http-error-codes",
-            "code": "REC_SERVER_ERROR"
+            "code": "PROXY_SERVER_ERROR"
           }
         ],
-        "text": "500: The Receiver has encountered an error processing the request."
+        "text": "500: The Proxy has encountered an error processing the request."
       },
-      "diagnostics": "Unexpected error: *error details*"
+      "diagnostics": "Proxy error: *error details*"
     }
   ]
 }

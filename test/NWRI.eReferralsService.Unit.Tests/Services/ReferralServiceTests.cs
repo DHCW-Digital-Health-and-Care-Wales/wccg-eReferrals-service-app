@@ -5,8 +5,8 @@ using FluentAssertions;
 using FluentValidation;
 using FluentValidation.Results;
 using Hl7.Fhir.Model;
+using Hl7.Fhir.Serialization;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Moq;
@@ -100,7 +100,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
         var receiverOrganisation = bundle.Entry
             .Select(e => e.Resource)
             .OfType<Organization>()
-            .First(o => string.Equals(o.Name, "Receiving/performing Organization", StringComparison.Ordinal));
+            .First(o => string.Equals(o.Name, FhirConstants.ReceivingPerformingOrganisationName, StringComparison.Ordinal));
         receiverOrganisation.Identifier.First().Value = "TP2V"; // invalid length: schema requires exactly 5
 
         var bundleJson = JsonSerializer.Serialize(bundle, _jsonSerializerOptions);
@@ -182,10 +182,12 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
         var sut = CreateReferralService();
 
         //Act
-        var result = await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
+        var responseBundleJson = await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
+        var responseBundle = JsonSerializer.Deserialize<Bundle>(responseBundleJson, _jsonSerializerOptions)!;
+        var responseServiceRequest = responseBundle.ResourceByType<ServiceRequest>()!;
 
         //Assert
-        result.Should().Be(bundleJson);
+        responseServiceRequest.Id.Should().Be(expectedResponse.ReferralId);
         _fixture.Mock<IWpasApiClient>().Verify(x => x.CreateReferralAsync(It.IsAny<WpasCreateReferralRequest>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -261,6 +263,100 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
     }
 
     [Fact]
+    public async Task ProcessMessageAsyncShouldThrowWhenReasonIsMissing()
+    {
+        // Arrange
+        var bundle = CreateMessageBundle(FhirConstants.BarsMessageReasonNew);
+        var messageHeader = bundle.ResourceByType<MessageHeader>()!;
+        messageHeader.Reason = null;
+        var bundleJson = JsonSerializer.Serialize(bundle, _jsonSerializerOptions);
+        var headers = _fixture.Create<IHeaderDictionary>();
+
+        var sut = CreateReferralService();
+
+        // Act
+        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
+
+        // Assert
+        (await action.Should().ThrowAsync<RequestParameterValidationException>())
+            .Which.Message.Should().Contain("MessageHeader.reason.coding.code is required");
+    }
+
+    [Fact]
+    public async Task ProcessMessageAsyncShouldThrowWhenServiceRequestStatusIsMissing()
+    {
+        // Arrange
+        var bundle = CreateMessageBundle(FhirConstants.BarsMessageReasonNew, null);
+        var bundleJson = JsonSerializer.Serialize(bundle, _jsonSerializerOptions);
+        var headers = _fixture.Create<IHeaderDictionary>();
+
+        var sut = CreateReferralService();
+
+        // Act
+        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
+
+        // Assert
+        await action.Should().ThrowAsync<DeserializationFailedException>();
+    }
+
+    [Fact]
+    public async Task ProcessMessageAsyncShouldThrowWhenProfiledServiceRequestIsMissing()
+    {
+        // Arrange
+        var bundle = CreateMessageBundle(FhirConstants.BarsMessageReasonNew);
+        var serviceRequest = bundle.ResourceByType<ServiceRequest>()!;
+        serviceRequest.Meta = null;
+        var bundleJson = JsonSerializer.Serialize(bundle, _jsonSerializerOptions);
+        var headers = _fixture.Create<IHeaderDictionary>();
+
+        var sut = CreateReferralService();
+
+        // Act
+        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
+
+        // Assert
+        (await action.Should().ThrowAsync<RequestParameterValidationException>())
+            .Which.Message.Should().Contain($"No ServiceRequest with profile '{FhirConstants.BarsServiceRequestReferral}' found in the request bundle.");
+        _fixture.Mock<IWpasApiClient>().Verify(x => x.CreateReferralAsync(It.IsAny<WpasCreateReferralRequest>(), It.IsAny<CancellationToken>()), Times.Never);
+        _fixture.Mock<IWpasApiClient>().Verify(x => x.CancelReferralAsync(It.IsAny<WpasCancelReferralRequest>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task ProcessMessageAsyncShouldThrowWhenProfiledServiceRequestIsNotUnique()
+    {
+        // Arrange
+        var bundle = CreateMessageBundle(FhirConstants.BarsMessageReasonNew);
+        bundle.Entry.Add(new Bundle.EntryComponent
+        {
+            Resource = new ServiceRequest
+            {
+                Id = "sr-2",
+                Meta = new Meta
+                {
+                    Profile = [FhirConstants.BarsServiceRequestReferral]
+                },
+                IntentElement = new Code<RequestIntent>(RequestIntent.Order),
+                Subject = new ResourceReference("Patient/pat-1"),
+                StatusElement = new Code<RequestStatus>(RequestStatus.Active)
+            }
+        });
+
+        var bundleJson = JsonSerializer.Serialize(bundle, _jsonSerializerOptions);
+        var headers = _fixture.Create<IHeaderDictionary>();
+
+        var sut = CreateReferralService();
+
+        // Act
+        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
+
+        // Assert
+        (await action.Should().ThrowAsync<RequestParameterValidationException>())
+            .Which.Message.Should().Contain("ServiceRequest cannot be uniquely identified in the request bundle.");
+        _fixture.Mock<IWpasApiClient>().Verify(x => x.CreateReferralAsync(It.IsAny<WpasCreateReferralRequest>(), It.IsAny<CancellationToken>()), Times.Never);
+        _fixture.Mock<IWpasApiClient>().Verify(x => x.CancelReferralAsync(It.IsAny<WpasCancelReferralRequest>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
     public async Task CreateReferralAsyncShouldValidateHeaders()
     {
         //Arrange
@@ -328,7 +424,8 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
         await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
 
         //Assert
-        modelArgs[0].Should().BeEquivalentTo(expectedModel);
+        modelArgs[0].Should().BeEquivalentTo(expectedModel,
+            options => options.Excluding(context => context.Path.StartsWith("ServiceRequest.Id", StringComparison.Ordinal)));
         _fixture.Mock<IValidator<BundleCreateReferralModel>>().Verify(x => x.ValidateAsync(It.IsAny<BundleCreateReferralModel>(), It.IsAny<CancellationToken>()));
     }
 
@@ -408,10 +505,12 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
         var sut = CreateReferralService();
 
         //Act
-        var result = await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
+        var responseBundleJson = await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
+        var responseBundle = JsonSerializer.Deserialize<Bundle>(responseBundleJson, _jsonSerializerOptions)!;
+        var responseServiceRequest = responseBundle.ResourceByType<ServiceRequest>()!;
 
         //Assert
-        result.Should().Be(bundleJson);
+        responseServiceRequest.Id.Should().Be(expectedResponse.ReferralId);
     }
 
     [Fact]
@@ -440,10 +539,12 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
         var sut = CreateReferralService();
 
         // Act
-        var result = await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
+        var responseBundleJson = await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
+        var responseBundle = JsonSerializer.Deserialize<Bundle>(responseBundleJson, _jsonSerializerOptions)!;
+        var responseServiceRequest = responseBundle.ResourceByType<ServiceRequest>()!;
 
         // Assert
-        result.Should().Be(bundleJson);
+        responseServiceRequest.Id.Should().Be(expectedResponse.ReferralId);
         _fixture.Mock<IWpasApiClient>().Verify(x => x.CancelReferralAsync(It.IsAny<WpasCancelReferralRequest>(), It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -473,10 +574,12 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
         var sut = CreateReferralService();
 
         // Act
-        var result = await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
+        var responseBundleJson = await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
+        var responseBundle = JsonSerializer.Deserialize<Bundle>(responseBundleJson, _jsonSerializerOptions)!;
+        var responseServiceRequest = responseBundle.ResourceByType<ServiceRequest>()!;
 
         // Assert
-        result.Should().Be(bundleJson);
+        responseServiceRequest.Id.Should().Be(expectedResponse.ReferralId);
     }
 
     [Fact]
@@ -520,6 +623,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
     [InlineData(HttpStatusCode.InternalServerError)]
     [InlineData(HttpStatusCode.BadRequest)]
     [InlineData(HttpStatusCode.NotFound)]
+    [InlineData(HttpStatusCode.NotImplemented)]
     public async Task CancelReferralShouldThrowWhenWpasReturnsNonSuccess(HttpStatusCode statusCode)
     {
         // Arrange
@@ -528,7 +632,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
             _jsonSerializerOptions);
 
         var headers = _fixture.Create<IHeaderDictionary>();
-        var problemDetails = _fixture.Create<ProblemDetails>();
+        var rawContent = _fixture.Create<string>();
 
         _fixture.Mock<IValidator<HeadersModel>>()
             .Setup(x => x.ValidateAsync(It.IsAny<HeadersModel>(), It.IsAny<CancellationToken>()))
@@ -540,7 +644,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
 
         _fixture.Mock<IWpasApiClient>()
             .Setup(x => x.CancelReferralAsync(It.IsAny<WpasCancelReferralRequest>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new NotSuccessfulApiCallException(statusCode, problemDetails));
+            .ThrowsAsync(new NotSuccessfulWpasApiCallException(statusCode, rawContent));
 
         var sut = CreateReferralService();
 
@@ -548,8 +652,12 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
         var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
 
         // Assert
-        (await action.Should().ThrowAsync<NotSuccessfulApiCallException>())
-            .Which.StatusCode.Should().Be(statusCode);
+        var exception = (await action.Should().ThrowAsync<NotSuccessfulWpasApiCallException>()).Which;
+        var expectedStatusCode = (int)statusCode > 500 && (int)statusCode < 600
+            ? HttpStatusCode.ServiceUnavailable
+            : HttpStatusCode.InternalServerError;
+
+        exception.StatusCode.Should().Be(expectedStatusCode);
     }
 
     private ReferralService CreateReferralService()
@@ -633,6 +741,10 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
         var serviceRequest = new ServiceRequest
         {
             Id = serviceRequestId,
+            Meta = new Meta
+            {
+                Profile = [FhirConstants.BarsServiceRequestReferral]
+            },
             IntentElement = new Code<RequestIntent>(RequestIntent.Order),
             Subject = new ResourceReference("Patient/pat-1"),
             AuthoredOn = "2024-08-20",
@@ -716,7 +828,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
 
         var receiverOrganisation = new Organization
         {
-            Name = "Receiving/performing Organization",
+            Name = FhirConstants.ReceivingPerformingOrganisationName,
             Identifier =
             [
                 new Identifier
