@@ -123,7 +123,6 @@ public class BundleCreateReferralModelValidatorTests
     public void ShouldContainErrorWhenPatientIdentifierMissing()
     {
         var model = CreateValidModelFromExampleBundle();
-
         model.Patient!.Identifier = null;
 
         var result = _sut.TestValidate(model);

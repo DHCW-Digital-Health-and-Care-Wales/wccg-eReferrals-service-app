@@ -107,7 +107,6 @@ public class BundleCancelReferralModelValidatorTests
     public void ShouldContainErrorWhenPatientIdentifierMissing()
     {
         var model = CreateValidModelFromExampleBundle(CancelBundleFile);
-
         model.Patient!.Identifier = null;
 
         var result = _sut.TestValidate(model);
