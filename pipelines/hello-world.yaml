@@ -15,6 +15,11 @@ pool:
   name: NWRI-ADO-POOL
 
 steps:
+- script: |
+    apt-get update
+    apt-get install -y netcat-openbsd
+  displayName: 'Install netcat'
+  
 - script: echo "Testing ADO connectivity to all NWRI resources"
   displayName: 'Start connectivity tests'
 
