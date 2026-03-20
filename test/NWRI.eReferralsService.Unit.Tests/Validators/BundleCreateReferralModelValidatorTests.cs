@@ -131,13 +131,15 @@ public class BundleCreateReferralModelValidatorTests
         result.Errors.Should().NotContain(e => e.ErrorMessage == "Patient identifier with NHS number is required");
     }
 
-    [Fact]
-    public void ShouldContainErrorWhenPatientNhsNumberMissing()
+    [Theory]
+    [InlineData("https://fhir.nhs.uk/Id/nhs-number", null)]
+    [InlineData("invalid-system", "SomeValue")]
+    public void ShouldContainErrorWhenPatientNhsNumberMissing(string identifierSystem, string? identifierValue)
     {
         var model = CreateValidModelFromExampleBundle();
         model.Patient!.Identifier =
         [
-            new Identifier("https://fhir.nhs.uk/Id/nhs-number", null)
+            new Identifier(identifierSystem, identifierValue)
         ];
 
         var result = _sut.TestValidate(model);
