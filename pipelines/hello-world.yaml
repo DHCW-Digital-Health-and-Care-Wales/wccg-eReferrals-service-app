@@ -12,7 +12,8 @@ trigger:
 #    - branchA
 
 pool:
-  name: NWRI-ADO-POOL
+  #name: NWRI-ADO-POOL
+  name: UKS-DHCW-NWRI-DEV-ADOSelfHostPool
 
 steps:
 - script: |
@@ -25,21 +26,28 @@ steps:
   displayName: 'Verify environment'
   
 - script: |
-    timeout 5 bash -c "</dev/tcp/uks-dhcw-dev-nwri-appconfig.azconfig.io/443" \
-    && echo "Application Config: SUCCESS" || echo "Application Config: FAILED"
+    which nc
+    nc -h
+  displayName: 'Verify netcat'
+  
+- script: echo "Testing ADO connectivity to all NWRI resources"
+  displayName: 'Start connectivity tests'
 
-    timeout 5 bash -c "</dev/tcp/uksdhcwdevnwriacr.azurecr.io/443" \
-    && echo "ACR: SUCCESS" || echo "ACR: FAILED"
+- script: nc -zv uks-dhcw-dev-nwri-appconfig.azconfig.io 443
+  displayName: 'Testing ADO connection to Application Configuration store'
 
-    timeout 5 bash -c "</dev/tcp/uks-dhcw-dev-nwri-kv.vault.azure.net/443" \
-    && echo "Key Vault: SUCCESS" || echo "Key Vault: FAILED"
+- script: nc -zv uksdhcwdevnwriacr.azurecr.io 443
+  displayName: 'Testing ADO connection to Azure Container Registry'
 
-    timeout 5 bash -c "</dev/tcp/uksmydevnwriapp.internal.yellowtree-fadb23ed.uksouth.azurecontainerapps.io/443" \
-    && echo "Container App: SUCCESS" || echo "Container App: FAILED"
+- script: nc -zv uks-dhcw-dev-nwri-kv.vault.azure.net 443
+  displayName: 'Testing ADO connection to Azure Key Vault'
 
-    timeout 5 bash -c "</dev/tcp/uksdhcwdevnwrisa.blob.core.windows.net/443" \
-    && echo "Storage: SUCCESS" || echo "Storage: FAILED"
-  displayName: 'Connectivity tests (no nc required)'
+- script: nc -zv uksmydevnwriapp.internal.yellowtree-fadb23ed.uksouth.azurecontainerapps.io 443
+  displayName: 'Testing ADO connection to NWRI Container App'
+
+- script: nc -zv uksdhcwdevnwrisa.blob.core.windows.net 443
+  displayName: 'Testing ADO connection to NWRI Storage Account'
+   
 
 - script: |
     terraform --version
