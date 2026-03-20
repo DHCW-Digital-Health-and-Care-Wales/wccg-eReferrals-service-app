@@ -91,7 +91,7 @@ steps:
           --location $LOCATION \
           --image $IMAGE \
           --target-port 80 \
-          --ingress external
+          --ingress internal
       fi
 
       echo "Fetching app URL..."
