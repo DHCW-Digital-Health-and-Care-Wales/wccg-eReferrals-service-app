@@ -4,7 +4,15 @@ trigger:
 pool:
   name: UKS-DHCW-NWRI-DEV-ADOSelfHostPool
 
+variables:
+  containerAppName: nwri-test-app001
+  resourceGroup: UKSouth-DHCW-APP-DEV-NWRI-RG
+  acrName: uksdhcwdevnwriacr
+  acrLoginServer: uksdhcwdevnwriacr.azurecr.io
+  uamiResourceId: /subscriptions/7bda6ea8-f947-4efa-930c-c4c3f9c56d48/resourceGroups/UKSouth-DHCW-APP-DEV-NWRI-RG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/uks-dhcw-dev-nwri-umi
+
 steps:
+  # Deploy container app (same as before)
   - task: AzureContainerApps@1
     inputs:
       azureSubscription: 'Azure - NHSWales-DHCW-NWRI-Subscription'
@@ -16,10 +24,46 @@ steps:
       targetPort: '80'
       ingress: 'internal'
 
+  #  Attach User Managed Identity
+  - script: |
+      az containerapp update \
+        -n $(containerAppName) \
+        -g $(resourceGroup) \
+        --user-assigned $(uamiResourceId)
+    displayName: "Attach User Assigned Managed Identity"
+
+  #  Configure ACR to use UAMI
+  - script: |
+      az containerapp registry set \
+        -n $(containerAppName) \
+        -g $(resourceGroup) \
+        --server $(acrLoginServer) \
+        --identity $(uamiResourceId)
+    displayName: "Configure ACR with UAMI"
+
+  # Wait properly (not just sleep 10)
   - script: |
       echo "Waiting for container app to become ready..."
-      sleep 10
 
+      for i in {1..30}; do
+        STATUS=$(az containerapp show \
+          -n $(containerAppName) \
+          -g $(resourceGroup) \
+          --query "properties.latestRevisionHealthState" -o tsv)
+
+        echo "Current status: $STATUS"
+
+        if [ "$STATUS" = "Healthy" ]; then
+          echo "App is ready"
+          break
+        fi
+
+        sleep 10
+      done
+    displayName: "Wait for Container App readiness"
+
+  # Test endpoint
+  - script: |
       echo "Calling internal endpoint..."
-      curl -v http://nwri-test-app.internal.yellowtree-fadb23ed.uksouth.azurecontainerapps.io/
+      curl -v http://nwri-test-app001.internal.yellowtree-fadb23ed.uksouth.azurecontainerapps.io/
     displayName: "Curl internal Container App endpoint"
