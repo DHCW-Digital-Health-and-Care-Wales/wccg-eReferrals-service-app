@@ -13,5 +13,5 @@ steps:
       containerAppName: 'testapp'
       resourceGroup: 'UKSouth-DHCW-APP-DEV-NWRI-RG'
       containerAppEnvironment: 'uks-dhcw-dev-nwri-cae'
-      targetPort: '443'
+      targetPort: '80'
       ingress: 'internal'
