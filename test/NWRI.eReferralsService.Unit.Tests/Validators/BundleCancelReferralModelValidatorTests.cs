@@ -111,18 +111,18 @@ public class BundleCancelReferralModelValidatorTests
 
         var result = _sut.TestValidate(model);
 
-        result.Errors.Should().Contain(e => e.ErrorMessage == "Patient identifier with NHS number is required");
+        result.Errors.Should().Contain(e => e.ErrorMessage == "Patient.Identifier is required");
+        result.Errors.Should().NotContain(e => e.ErrorMessage == "Patient identifier with NHS number is required");
     }
 
     [Fact]
     public void ShouldContainErrorWhenPatientNhsNumberMissing()
     {
         var model = CreateValidModelFromExampleBundle(CancelBundleFile);
-
-        // Remove NHS number identifier
-        model.Patient!.Identifier = model.Patient.Identifier
-            .Where(i => !string.Equals(i.System, "https://fhir.nhs.uk/Id/nhs-number", StringComparison.OrdinalIgnoreCase))
-            .ToList();
+        model.Patient!.Identifier =
+        [
+            new Identifier("https://fhir.nhs.uk/Id/nhs-number", null)
+        ];
 
         var result = _sut.TestValidate(model);
 

@@ -110,8 +110,13 @@ public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancel
             {
                 patient.RuleFor(x => x.Identifier)
                     .NotEmpty()
-                    .Must(ids => ids.Any(i => string.Equals(i.System, NhsNumberSystem, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(i.Value)))
-                    .WithMessage("Patient identifier with NHS number is required");
+                    .WithMessage(MissingEntityField<Patient>(nameof(Patient.Identifier)))
+                    .DependentRules(() =>
+                    {
+                        patient.RuleFor(x => x.Identifier)
+                            .Must(ids => ids.Any(i => string.Equals(i.System, NhsNumberSystem, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(i.Value)))
+                            .WithMessage(MissingPatientNhsNumber);
+                    });
 
                 patient.RuleFor(x => x.Name)
                     .NotEmpty()

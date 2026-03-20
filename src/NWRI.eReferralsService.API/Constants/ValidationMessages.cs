@@ -2,6 +2,8 @@ namespace NWRI.eReferralsService.API.Constants;
 
 public static class ValidationMessages
 {
+    public const string MissingPatientNhsNumber = "Patient identifier with NHS number is required";
+
     public static string InvalidFhirObject(string headerName, string typeName)
     {
         return $"Header '{headerName}' is not a valid '{typeName}' encoded FHIR object";
