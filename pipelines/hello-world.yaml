@@ -111,3 +111,31 @@ steps:
       echo " Container App deployed successfully!"
       echo " URL: https://$FQDN"
       echo "======================================"
+
+# Wait for Container App readiness
+- task: AzureCLI@2
+  displayName: "Wait for Container App readiness"
+  inputs:
+    azureSubscription: 'Azure - NHSWales-DHCW-NWRI-Subscription'
+    scriptType: bash
+    scriptLocation: inlineScript
+    inlineScript: |
+      echo "Waiting for container app to become ready..."
+      for i in {1..10}; do
+        STATUS=$(az containerapp show \
+          --name $APP_NAME \
+          --resource-group $RG \
+          --query "properties.latestRevisionHealthState" -o tsv)
+        echo "Current status: $STATUS"
+        if [ "$STATUS" = "Healthy" ]; then
+          echo "App is ready"
+          break
+        fi
+        sleep 10
+      done
+
+# Test internal endpoint
+- script: |
+    echo "Calling internal endpoint..."
+    curl -v http://$APP_NAME.internal.yellowtree-fadb23ed.uksouth.azurecontainerapps.io/
+  displayName: "Curl internal Container App endpoint"
