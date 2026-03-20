@@ -25,33 +25,6 @@ steps:
     targetPort: '80'
     ingress: 'internal'
 
-# Attach User Assigned Managed Identity
-- task: AzureCLI@2
-  displayName: "Attach User Assigned Managed Identity"
-  inputs:
-    azureSubscription: 'Azure - NHSWales-DHCW-NWRI-Subscription'
-    scriptType: bash
-    scriptLocation: inlineScript
-    inlineScript: |
-      az containerapp update \
-        -n $(containerAppName) \
-        -g $(resourceGroup) \
-        --ids $(uamiResourceId)
-
-# Configure ACR with UAMI
-- task: AzureCLI@2
-  displayName: "Configure ACR with UAMI"
-  inputs:
-    azureSubscription: 'Azure - NHSWales-DHCW-NWRI-Subscription'
-    scriptType: bash
-    scriptLocation: inlineScript
-    inlineScript: |
-      az containerapp registry set \
-        -n $(containerAppName) \
-        -g $(resourceGroup) \
-        --server $(acrLoginServer) \
-        --identity $(uamiResourceId)
-
 # Wait for Container App readiness
 - task: AzureCLI@2
   displayName: "Wait for Container App readiness"
