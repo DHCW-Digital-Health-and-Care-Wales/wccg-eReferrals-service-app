@@ -1,5 +1,5 @@
 trigger:
- none
+  none
 
 pool:
   name: UKS-DHCW-NWRI-DEV-ADOSelfHostPool
@@ -15,3 +15,11 @@ steps:
       containerAppEnvironment: 'uks-dhcw-dev-nwri-cae'
       targetPort: '80'
       ingress: 'internal'
+
+  - script: |
+      echo "Waiting for container app to become ready..."
+      sleep 10
+
+      echo "Calling internal endpoint..."
+      curl -v http://testapp.internal.yellowtree-fadb23ed.uksouth.azurecontainerapps.io/
+    displayName: "Curl internal Container App endpoint"
