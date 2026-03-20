@@ -71,11 +71,13 @@ steps:
       APP_NAME="nwri-hello-world-app"
       ENV_NAME="uks-dhcw-dev-nwri-cae"
       LOCATION="uksouth"
-      IMAGE="uksdhcwdevnwriacr.azurecr.io/containerapps-helloworld:latest""
+      IMAGE="uksdhcwdevnwriacr.azurecr.io/containerapps-helloworld:latest"
 
+      echo "Importing image into ACR..."
       az acr import \
         --name uksdhcwdevnwriacr \
-        --source mcr.microsoft.com/azuredocs/containerapps-helloworld:latest
+        --source mcr.microsoft.com/azuredocs/containerapps-helloworld:latest \
+        --image containerapps-helloworld:latest
 
       echo "Checking if Container App exists..."
 
