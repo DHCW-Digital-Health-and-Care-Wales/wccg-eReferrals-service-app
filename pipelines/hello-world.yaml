@@ -60,7 +60,7 @@ steps:
 - task: AzureCLI@2
   displayName: 'Deploy Hello World to Container Apps'
   inputs:
-    azureSubscription: 'YOUR-SERVICE-CONNECTION'   
+    azureSubscription: 'Azure - NHSWales-DHCW-NWRI-Subscription'   
     scriptType: 'bash'
     scriptLocation: 'inlineScript'
     inlineScript: |
