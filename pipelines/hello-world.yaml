@@ -136,6 +136,10 @@ steps:
     scriptType: bash
     scriptLocation: inlineScript
     inlineScript: |
+      # Define variables again
+      APP_NAME="nwri-hello-world-app"
+      RG="UKSouth-DHCW-APP-DEV-NWRI-RG"
+
       echo "Waiting for container app to become ready..."
       for i in {1..10}; do
         STATUS=$(az containerapp show \
@@ -153,5 +157,5 @@ steps:
 # Test internal endpoint
 - script: |
     echo "Calling internal endpoint..."
-    curl -v http://$APP_NAME.internal.yellowtree-fadb23ed.uksouth.azurecontainerapps.io/
+    curl -v http://nwri-hello-world-app.internal.yellowtree-fadb23ed.uksouth.azurecontainerapps.io/
   displayName: "Curl internal Container App endpoint"
