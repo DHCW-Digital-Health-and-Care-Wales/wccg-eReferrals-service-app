@@ -12,58 +12,70 @@ variables:
   uamiResourceId: /subscriptions/7bda6ea8-f947-4efa-930c-c4c3f9c56d48/resourceGroups/UKSouth-DHCW-APP-DEV-NWRI-RG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/uks-dhcw-dev-nwri-umi
 
 steps:
-  # Deploy container app (same as before)
-  - task: AzureContainerApps@1
-    inputs:
-      azureSubscription: 'Azure - NHSWales-DHCW-NWRI-Subscription'
-      acrName: 'uksdhcwdevnwriacr'
-      imageToDeploy: 'uksdhcwdevnwriacr.azurecr.io/containerapps-helloworld:latest'
-      containerAppName: 'nwri-test-app'
-      resourceGroup: 'UKSouth-DHCW-APP-DEV-NWRI-RG'
-      containerAppEnvironment: 'uks-dhcw-dev-nwri-cae'
-      targetPort: '80'
-      ingress: 'internal'
 
-  #  Attach User Managed Identity
-  - script: |
+# Deploy container app
+- task: AzureContainerApps@1
+  inputs:
+    azureSubscription: 'Azure - NHSWales-DHCW-NWRI-Subscription'
+    acrName: '$(acrName)'
+    imageToDeploy: '$(acrLoginServer)/containerapps-helloworld:latest'
+    containerAppName: '$(containerAppName)'
+    resourceGroup: '$(resourceGroup)'
+    containerAppEnvironment: 'uks-dhcw-dev-nwri-cae'
+    targetPort: '80'
+    ingress: 'internal'
+
+# Attach User Assigned Managed Identity
+- task: AzureCLI@2
+  displayName: "Attach User Assigned Managed Identity"
+  inputs:
+    azureSubscription: 'Azure - NHSWales-DHCW-NWRI-Subscription'
+    scriptType: bash
+    scriptLocation: inlineScript
+    inlineScript: |
       az containerapp update \
         -n $(containerAppName) \
         -g $(resourceGroup) \
-        --ids $(uamiResourceId)
-    displayName: "Attach User Assigned Managed Identity"
+        --user-assigned $(uamiResourceId)
 
-  #  Configure ACR to use UAMI
-  - script: |
+# Configure ACR with UAMI
+- task: AzureCLI@2
+  displayName: "Configure ACR with UAMI"
+  inputs:
+    azureSubscription: 'Azure - NHSWales-DHCW-NWRI-Subscription'
+    scriptType: bash
+    scriptLocation: inlineScript
+    inlineScript: |
       az containerapp registry set \
         -n $(containerAppName) \
         -g $(resourceGroup) \
         --server $(acrLoginServer) \
         --identity $(uamiResourceId)
-    displayName: "Configure ACR with UAMI"
 
-  # Wait properly (not just sleep 10)
-  - script: |
+# Wait for Container App readiness
+- task: AzureCLI@2
+  displayName: "Wait for Container App readiness"
+  inputs:
+    azureSubscription: 'Azure - NHSWales-DHCW-NWRI-Subscription'
+    scriptType: bash
+    scriptLocation: inlineScript
+    inlineScript: |
       echo "Waiting for container app to become ready..."
-
       for i in {1..30}; do
         STATUS=$(az containerapp show \
           -n $(containerAppName) \
           -g $(resourceGroup) \
           --query "properties.latestRevisionHealthState" -o tsv)
-
         echo "Current status: $STATUS"
-
         if [ "$STATUS" = "Healthy" ]; then
           echo "App is ready"
           break
         fi
-
         sleep 10
       done
-    displayName: "Wait for Container App readiness"
 
-  # Test endpoint
-  - script: |
-      echo "Calling internal endpoint..."
-      curl -v http://nwri-test-app001.internal.yellowtree-fadb23ed.uksouth.azurecontainerapps.io/
-    displayName: "Curl internal Container App endpoint"
+# Test internal endpoint
+- script: |
+    echo "Calling internal endpoint..."
+    curl -v http://$(containerAppName).internal.yellowtree-fadb23ed.uksouth.azurecontainerapps.io/
+  displayName: "Curl internal Container App endpoint"
