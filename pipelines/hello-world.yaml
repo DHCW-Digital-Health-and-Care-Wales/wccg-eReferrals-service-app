@@ -88,7 +88,6 @@ steps:
           --name $APP_NAME \
           --resource-group $RG \
           --environment $ENV_NAME \
-          #--location $LOCATION \
           --image $IMAGE \
           --target-port 80 \
           --ingress internal
