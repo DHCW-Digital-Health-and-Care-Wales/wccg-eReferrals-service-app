@@ -71,36 +71,47 @@ steps:
       APP_NAME="nwri-hello-world-app"
       ENV_NAME="uks-dhcw-dev-nwri-cae"
       LOCATION="uksouth"
-      IMAGE="uksdhcwdevnwriacr.azurecr.io/containerapps-helloworld:latest"
+      ACR_NAME="uksdhcwdevnwriacr"
+      IMAGE_NAME="containerapps-helloworld:latest"
+      SOURCE_IMAGE="mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
+
+      echo "Checking if image exists in ACR..."
+      if az acr repository show-manifests --name $ACR_NAME --repository ${IMAGE_NAME%:*} --query "[?tags[?@=='${IMAGE_NAME#*:}']]" -o tsv | grep -q "${IMAGE_NAME#*:}"; then
+          echo "Image $IMAGE_NAME exists in ACR → deleting..."
+          az acr repository delete \
+            --name $ACR_NAME \
+            --repository ${IMAGE_NAME%:*} \
+            --tag ${IMAGE_NAME#*:} \
+            --yes
+      else
+          echo "Image $IMAGE_NAME does not exist in ACR."
+      fi
 
       echo "Importing image into ACR..."
       az acr import \
-        --name uksdhcwdevnwriacr \
-        --source mcr.microsoft.com/azuredocs/containerapps-helloworld:latest \
-        --image containerapps-helloworld:latest
+        --name $ACR_NAME \
+        --source $SOURCE_IMAGE \
+        --image $IMAGE_NAME
 
       echo "Checking if Container App exists..."
-
-      if az containerapp show --name $APP_NAME --resource-group $RG > /dev/null 2>&1
-      then
+      if az containerapp show --name $APP_NAME --resource-group $RG > /dev/null 2>&1; then
         echo "App exists → updating image..."
         az containerapp update \
           --name $APP_NAME \
           --resource-group $RG \
-          --image $IMAGE
+          --image "$ACR_NAME.azurecr.io/$IMAGE_NAME"
       else
         echo "App does not exist → creating..."
         az containerapp create \
           --name $APP_NAME \
           --resource-group $RG \
           --environment $ENV_NAME \
-          --image $IMAGE \
+          --image "$ACR_NAME.azurecr.io/$IMAGE_NAME" \
           --target-port 80 \
           --ingress internal
       fi
 
       echo "Fetching app URL..."
-
       FQDN=$(az containerapp show \
         --name $APP_NAME \
         --resource-group $RG \
@@ -111,7 +122,7 @@ steps:
       echo " Container App deployed successfully!"
       echo " URL: https://$FQDN"
       echo "======================================"
-
+      
 # Wait for Container App readiness
 - task: AzureCLI@2
   displayName: "Wait for Container App readiness"
