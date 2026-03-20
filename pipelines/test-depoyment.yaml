@@ -1,6 +1,16 @@
-trigger:
-- none
+trigger: none
 
 pool:
-  #name: NWRI-ADO-POOL
   name: UKS-DHCW-NWRI-DEV-ADOSelfHostPool
+
+steps:
+  - task: AzureContainerApps@1
+    inputs:
+      azureSubscription: 'Azure - NHSWales-DHCW-NWRI-Subscription'
+      acrName: 'uksdhcwdevnwriacr'
+      imageToDeploy: 'uksdhcwdevnwriacr.azurecr.io/containerapps-helloworld:latest'
+      containerAppName: 'testapp'
+      resourceGroup: 'UKSouth-DHCW-APP-DEV-NWRI-RG'
+      containerAppEnvironment: 'uks-dhcw-dev-nwri-cae'
+      targetPort: '443'
+      ingress: 'internal'
