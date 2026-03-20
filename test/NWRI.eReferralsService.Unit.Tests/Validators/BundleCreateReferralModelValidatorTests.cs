@@ -132,7 +132,7 @@ public class BundleCreateReferralModelValidatorTests
     }
 
     [Theory]
-    [InlineData("https://fhir.nhs.uk/Id/nhs-number", null)]
+    [InlineData(NhsNumberSystem, null)]
     [InlineData("invalid-system", "SomeValue")]
     public void ShouldContainErrorWhenPatientNhsNumberMissing(string identifierSystem, string? identifierValue)
     {

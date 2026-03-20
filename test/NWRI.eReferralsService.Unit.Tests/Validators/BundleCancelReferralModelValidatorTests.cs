@@ -9,6 +9,7 @@ using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.Models;
 using NWRI.eReferralsService.API.Validators;
 using NWRI.eReferralsService.Unit.Tests.Extensions;
+using static NWRI.eReferralsService.API.Constants.FhirConstants;
 // ReSharper disable NullableWarningSuppressionIsUsed
 
 namespace NWRI.eReferralsService.Unit.Tests.Validators;
@@ -116,7 +117,7 @@ public class BundleCancelReferralModelValidatorTests
     }
 
     [Theory]
-    [InlineData("https://fhir.nhs.uk/Id/nhs-number", null)]
+    [InlineData(NhsNumberSystem, null)]
     [InlineData("invalid-system", "SomeValue")]
     public void ShouldContainErrorWhenPatientNhsNumberMissing(string identifierSystem, string? identifierValue)
     {
