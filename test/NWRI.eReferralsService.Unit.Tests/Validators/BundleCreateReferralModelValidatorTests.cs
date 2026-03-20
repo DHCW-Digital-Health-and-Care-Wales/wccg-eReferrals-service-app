@@ -128,7 +128,7 @@ public class BundleCreateReferralModelValidatorTests
         var result = _sut.TestValidate(model);
 
         result.Errors.Should().Contain(e => e.ErrorMessage == "Patient.Identifier is required");
-        result.Errors.Should().NotContain(e => e.ErrorMessage == "Patient identifier with NHS number is required");
+        result.Errors.Should().NotContain(e => e.ErrorMessage == "Patient NHS number identifier is required");
     }
 
     [Theory]
@@ -144,7 +144,7 @@ public class BundleCreateReferralModelValidatorTests
 
         var result = _sut.TestValidate(model);
 
-        result.Errors.Should().Contain(e => e.ErrorMessage == "Patient identifier with NHS number is required");
+        result.Errors.Should().Contain(e => e.ErrorMessage == "Patient NHS number identifier is required");
     }
 
     [Fact]
