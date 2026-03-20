@@ -1,10 +1,10 @@
-#trigger:
-#- none
-
 trigger:
-  branches:
-    include:
-    - 5743
+- none
+
+#trigger:
+#  branches:
+ #   include:
+#    - 5743
 
 #pr:
 #  branches:
@@ -88,7 +88,7 @@ steps:
           --name $APP_NAME \
           --resource-group $RG \
           --environment $ENV_NAME \
-          --location $LOCATION \
+          #--location $LOCATION \
           --image $IMAGE \
           --target-port 80 \
           --ingress internal
