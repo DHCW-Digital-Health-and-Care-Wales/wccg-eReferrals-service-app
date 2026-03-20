@@ -52,7 +52,6 @@ steps:
 - script: nc -zv uksdhcwdevnwrisa.blob.core.windows.net 443
   displayName: 'Testing ADO connection to NWRI Storage Account'
    
-
 - script: |
     terraform --version
   displayName: 'Check Terraform version'
@@ -67,6 +66,7 @@ steps:
 
       set -e
 
+      # Variables
       RG="UKSouth-DHCW-APP-DEV-NWRI-RG"
       APP_NAME="nwri-hello-world-app"
       ENV_NAME="uks-dhcw-dev-nwri-cae"
@@ -76,7 +76,13 @@ steps:
       SOURCE_IMAGE="mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
 
       echo "Checking if image exists in ACR..."
-      if az acr repository show-manifests --name $ACR_NAME --repository ${IMAGE_NAME%:*} --query "[?tags[?@=='${IMAGE_NAME#*:}']]" -o tsv | grep -q "${IMAGE_NAME#*:}"; then
+      EXISTS=$(az acr repository show-tags \
+        --name $ACR_NAME \
+        --repository ${IMAGE_NAME%:*} \
+        --query "contains(@, '${IMAGE_NAME#*:}')" \
+        -o tsv)
+
+      if [ "$EXISTS" == "true" ]; then
           echo "Image $IMAGE_NAME exists in ACR → deleting..."
           az acr repository delete \
             --name $ACR_NAME \
@@ -122,7 +128,7 @@ steps:
       echo " Container App deployed successfully!"
       echo " URL: https://$FQDN"
       echo "======================================"
-      
+
 # Wait for Container App readiness
 - task: AzureCLI@2
   displayName: "Wait for Container App readiness"
