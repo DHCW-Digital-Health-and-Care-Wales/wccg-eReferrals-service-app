@@ -1,1 +1,6 @@
+trigger:
+- none
 
+pool:
+  #name: NWRI-ADO-POOL
+  name: UKS-DHCW-NWRI-DEV-ADOSelfHostPool
