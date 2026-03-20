@@ -87,7 +87,6 @@ steps:
           az acr repository delete \
             --name $ACR_NAME \
             --repository ${IMAGE_NAME%:*} \
-            --tag ${IMAGE_NAME#*:} \
             --yes
       else
           echo "Image $IMAGE_NAME does not exist in ACR."
