@@ -29,7 +29,7 @@ steps:
       az containerapp update \
         -n $(containerAppName) \
         -g $(resourceGroup) \
-        --user-assigned $(uamiResourceId)
+        --ids $(uamiResourceId)
     displayName: "Attach User Assigned Managed Identity"
 
   #  Configure ACR to use UAMI
