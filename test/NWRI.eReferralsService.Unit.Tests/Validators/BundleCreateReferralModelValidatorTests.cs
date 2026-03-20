@@ -143,7 +143,6 @@ public class BundleCreateReferralModelValidatorTests
         ];
 
         var result = _sut.TestValidate(model);
-
         result.Errors.Should().Contain(e => e.ErrorMessage == "Patient NHS number identifier is required");
     }
 

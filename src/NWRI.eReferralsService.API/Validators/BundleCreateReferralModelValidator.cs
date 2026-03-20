@@ -245,14 +245,26 @@ public class BundleCreateReferralModelValidator : AbstractValidator<BundleCreate
 
         RuleFor(x => x.Organizations!)
             .NotEmpty()
-            .WithMessage(MissingBundleEntity(nameof(Organization)));
+            .WithMessage(MissingBundleEntity(nameof(Organization)))
+            .DependentRules(() =>
+            {
+                RuleForEach(x => x.Organizations!)
+                    .ChildRules(organization =>
+                    {
+                        organization.RuleFor(x => x.Identifier)
+                            .NotEmpty()
+                            .WithMessage(MissingEntityField<Organization>(nameof(Organization.Identifier)));
+                    });
+            });
 
         RuleFor(x => x.Organizations!)
-            .Must(orgs => orgs is not null && orgs.Any(o => StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, ReceivingPerformingOrganisationName)))
+            .Must(orgs => orgs is not null &&
+                          orgs.Any(o => StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, ReceivingPerformingOrganisationName)))
             .WithMessage($"Organization with name '{ReceivingPerformingOrganisationName}' is required");
 
         RuleFor(x => x.Organizations!)
-            .Must(orgs => orgs is not null && orgs.Any(o => StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, SenderOrganisationName)))
+            .Must(orgs => orgs is not null &&
+                          orgs.Any(o => StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, SenderOrganisationName)))
             .WithMessage($"Organization with name '{SenderOrganisationName}' is required");
     }
 }
