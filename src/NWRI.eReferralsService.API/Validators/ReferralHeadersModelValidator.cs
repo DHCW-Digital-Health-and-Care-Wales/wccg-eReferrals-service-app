@@ -1,63 +1,26 @@
 using FluentValidation;
 using Hl7.Fhir.Model;
 using NWRI.eReferralsService.API.Constants;
+using NWRI.eReferralsService.API.Helpers;
 using NWRI.eReferralsService.API.Models;
 
 namespace NWRI.eReferralsService.API.Validators;
 
-public sealed class ReferralHeadersModelValidator : AbstractValidator<HeadersModel>
+public sealed class ReferralHeadersModelValidator : AbstractValidator<HeadersModel>, IReferralHeadersModelValidator
 {
-    public ReferralHeadersModelValidator(FhirHeaderValueValidator fhirHeaderValueValidator)
+    public ReferralHeadersModelValidator(FhirBase64Decoder fhirBase64Decoder)
     {
         ClassLevelCascadeMode = CascadeMode.Continue;
         RuleLevelCascadeMode = CascadeMode.Stop;
+
+        Include(new CommonHeadersModelValidator(fhirBase64Decoder));
 
         RuleFor(x => x.TargetIdentifier)
             .NotEmpty()
             .WithMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.TargetIdentifier))
             .WithErrorCode(nameof(ValidationErrorCode.MissingRequiredHeaderCode))
-            .Must(fhirHeaderValueValidator.IsValid<Identifier>)
+            .Must(fhirBase64Decoder.IsValid<Identifier>)
             .WithMessage(ValidationMessages.InvalidFhirObject(RequestHeaderKeys.TargetIdentifier, nameof(Identifier)))
-            .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
-
-        RuleFor(x => x.EndUserOrganisation)
-            .NotEmpty()
-            .WithMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.EndUserOrganisation))
-            .WithErrorCode(nameof(ValidationErrorCode.MissingRequiredHeaderCode))
-            .Must(fhirHeaderValueValidator.IsValid<Organization>)
-            .WithMessage(ValidationMessages.InvalidFhirObject(RequestHeaderKeys.EndUserOrganisation, nameof(Organization)))
-            .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
-
-        RuleFor(x => x.RequestingSoftware)
-            .NotEmpty()
-            .WithMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.RequestingSoftware))
-            .WithErrorCode(nameof(ValidationErrorCode.MissingRequiredHeaderCode))
-            .Must(fhirHeaderValueValidator.IsValid<Device>)
-            .WithMessage(ValidationMessages.InvalidFhirObject(RequestHeaderKeys.RequestingSoftware, nameof(Device)))
-            .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
-
-        When(x => !string.IsNullOrWhiteSpace(x.RequestingPractitioner), () =>
-        {
-            RuleFor(x => x.RequestingPractitioner)
-                .Must(fhirHeaderValueValidator.IsValid<PractitionerRole>)
-                .WithMessage(ValidationMessages.InvalidFhirObject(RequestHeaderKeys.RequestingPractitioner, nameof(PractitionerRole)))
-                .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
-        });
-
-        RuleFor(x => x.RequestId)
-            .NotEmpty()
-            .WithMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.RequestId))
-            .WithErrorCode(nameof(ValidationErrorCode.MissingRequiredHeaderCode))
-            .Must(HeadersValidationHelpers.BeValidGuid)
-            .WithMessage(ValidationMessages.NotGuidFormat(RequestHeaderKeys.RequestId))
-            .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
-
-        RuleFor(x => x.CorrelationId)
-            .NotEmpty()
-            .WithMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.CorrelationId))
-            .WithErrorCode(nameof(ValidationErrorCode.MissingRequiredHeaderCode))
-            .Must(HeadersValidationHelpers.BeValidGuid)
-            .WithMessage(ValidationMessages.NotGuidFormat(RequestHeaderKeys.CorrelationId))
             .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
 
         RuleFor(x => x.UseContext)
@@ -68,16 +31,6 @@ public sealed class ReferralHeadersModelValidator : AbstractValidator<HeadersMod
             .WithMessage(ValidationMessages.NotExpectedFormat(
                 RequestHeaderKeys.UseContext,
                 RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.UseContext)))
-            .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
-
-        RuleFor(x => x.Accept)
-            .NotEmpty()
-            .WithMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.Accept))
-            .WithErrorCode(nameof(ValidationErrorCode.MissingRequiredHeaderCode))
-            .Must(HeadersValidationHelpers.BeValidAcceptValue)
-            .WithMessage(ValidationMessages.NotExpectedFormat(
-                RequestHeaderKeys.Accept,
-                RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept)))
             .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
     }
 }

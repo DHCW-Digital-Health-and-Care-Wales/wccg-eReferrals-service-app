@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 
 namespace NWRI.eReferralsService.API.Validators;
 
-public partial class HeadersValidationHelpers
+public static partial class HeadersValidationHelpers
 {
     [GeneratedRegex(@"([a-zA-Z0-9-]+\|?)+", RegexOptions.CultureInvariant)]
     private static partial Regex ValidUseCaseRegex();
