@@ -35,9 +35,6 @@ steps:
 - script: nc -zv uks-dhcw-dev-nwri-kv.vault.azure.net 443
   displayName: 'Testing ADO connection to Azure Key Vault'
 
-- script: nc -zv uksmydevnwriapp.internal.yellowtree-fadb23ed.uksouth.azurecontainerapps.io 443
-  displayName: 'Testing ADO connection to NWRI Container App'
-
 - script: nc -zv uksdhcwdevnwrisa.blob.core.windows.net 443
   displayName: 'Testing ADO connection to NWRI Storage Account'
    
@@ -156,6 +153,7 @@ steps:
       done
 
 # Test internal endpoint
+# Warning: make sure the endpoint/url used below is the same in the container apps blade.
 - script: |
     echo "Calling internal endpoint..."
     curl -v http://nwri-hello-world-app.internal.yellowtree-fadb23ed.uksouth.azurecontainerapps.io/
