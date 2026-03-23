@@ -70,8 +70,8 @@ public class BookingsControllerTests
         var query = new GetBookingSlotQuery
         {
             Status = "free",
-            Start = new[] { "ge2022-03-01T12:00:00+00:00", "le2022-03-01T13:30:00+00:00" },
-            Include = new[] { "Slot:schedule", "Schedule:actor:HealthcareService" }
+            Start = ["ge2022-03-01T12:00:00+00:00", "le2022-03-01T13:30:00+00:00"],
+            Include = ["Slot:schedule", "Schedule:actor:HealthcareService"]
         };
 
         // Act

@@ -51,7 +51,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
             .ReturnsAsync(new ProfileValidationOutput
             {
                 IsSuccessful = true,
-                Errors = new List<string>()
+                Errors = []
             });
 
         _fixture.Mock<IRequestFhirHeadersDecoder>()
@@ -474,7 +474,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
         var failureOutput = new ProfileValidationOutput
         {
             IsSuccessful = false,
-            Errors = new List<string> { "Profile validation failed" }
+            Errors = ["Profile validation failed"]
         };
 
         _fixture.Mock<IFhirBundleProfileValidator>()
@@ -603,7 +603,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
         var failureOutput = new ProfileValidationOutput
         {
             IsSuccessful = false,
-            Errors = new List<string> { "Profile validation failed" }
+            Errors = ["Profile validation failed"]
         };
 
         _fixture.Mock<IFhirBundleProfileValidator>()
