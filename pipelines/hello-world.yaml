@@ -91,7 +91,9 @@ steps:
       else
         echo "Repository does not exist → skipping delete"
       fi
-    
+      
+      az account set --subscription 7bda6ea8-f947-4efa-930c-c4c3f9c56d48
+      
       az acr list -o table
       
       echo "Importing image into ACR..."
