@@ -1,18 +1,7 @@
 trigger:
 - none
 
-#trigger:
-#  branches:
- #   include:
-#    - 5743
-
-#pr:
-#  branches:
-#    include:
-#    - branchA
-
 pool:
-  #name: NWRI-ADO-POOL
   name: UKS-DHCW-NWRI-DEV-ADOSelfHostPool
 
 steps:
@@ -52,8 +41,7 @@ steps:
 - script: nc -zv uksdhcwdevnwrisa.blob.core.windows.net 443
   displayName: 'Testing ADO connection to NWRI Storage Account'
    
-- script: |
-    terraform --version
+- script: terraform --version
   displayName: 'Check Terraform version'
    
 - task: AzureCLI@2
@@ -75,21 +63,33 @@ steps:
       IMAGE_NAME="containerapps-helloworld:latest"
       SOURCE_IMAGE="mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
 
-      echo "Checking if image exists in ACR..."
-      EXISTS=$(az acr repository show-tags \
+      echo "Checking if repository exists..."
+
+      REPO_EXISTS=$(az acr repository show \
         --name $ACR_NAME \
         --repository ${IMAGE_NAME%:*} \
-        --query "contains(@, '${IMAGE_NAME#*:}')" \
-        -o tsv)
+        --output none 2>/dev/null && echo "true" || echo "false")
 
-      if [ "$EXISTS" == "true" ]; then
-          echo "Image $IMAGE_NAME exists in ACR → deleting..."
+      if [ "$REPO_EXISTS" == "true" ]; then
+        echo "Repository exists, checking tags..."
+
+        EXISTS=$(az acr repository show-tags \
+          --name $ACR_NAME \
+          --repository ${IMAGE_NAME%:*} \
+          --query "contains(@, '${IMAGE_NAME#*:}')" \
+          -o tsv)
+
+        if [ "$EXISTS" == "true" ]; then
+          echo "Image $IMAGE_NAME exists → deleting..."
           az acr repository delete \
             --name $ACR_NAME \
             --repository ${IMAGE_NAME%:*} \
             --yes
+        else
+          echo "Tag does not exist → nothing to delete"
+        fi
       else
-          echo "Image $IMAGE_NAME does not exist in ACR."
+        echo "Repository does not exist → skipping delete"
       fi
 
       echo "Importing image into ACR..."
@@ -136,7 +136,6 @@ steps:
     scriptType: bash
     scriptLocation: inlineScript
     inlineScript: |
-      # Define variables again
       APP_NAME="nwri-hello-world-app"
       RG="UKSouth-DHCW-APP-DEV-NWRI-RG"
 
