@@ -8,6 +8,13 @@
         "jb"
       ],
       "rollForward": false
+    },
+    "dotnetsay": {
+      "version": "3.0.3",
+      "commands": [
+        "dotnetsay"
+      ],
+      "rollForward": false
     }
   }
 }
