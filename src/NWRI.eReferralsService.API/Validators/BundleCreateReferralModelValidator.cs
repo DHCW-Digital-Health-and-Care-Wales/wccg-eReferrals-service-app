@@ -1,6 +1,5 @@
 using FluentValidation;
 using Hl7.Fhir.Model;
-using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.Models;
 using static NWRI.eReferralsService.API.Constants.ValidationMessages;
 using static NWRI.eReferralsService.API.Constants.FhirConstants;
