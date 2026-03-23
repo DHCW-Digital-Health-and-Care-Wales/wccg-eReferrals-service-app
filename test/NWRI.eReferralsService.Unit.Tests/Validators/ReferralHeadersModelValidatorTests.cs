@@ -4,8 +4,11 @@ using AutoFixture;
 using FluentValidation;
 using FluentValidation.TestHelper;
 using Hl7.Fhir.Model;
+using Microsoft.Extensions.Logging;
+using Moq;
 using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.Extensions;
+using NWRI.eReferralsService.API.Helpers;
 using NWRI.eReferralsService.API.Models;
 using NWRI.eReferralsService.API.Validators;
 using NWRI.eReferralsService.Unit.Tests.Extensions;
@@ -21,9 +24,11 @@ public class ReferralHeadersModelValidatorTests
 
     public ReferralHeadersModelValidatorTests()
     {
-        var fhirHeaderValueValidator = new FhirHeaderValueValidator(_jsonSerializerOptions);
+        var logger = new Mock<ILogger<FhirBase64Decoder>>();
+        var fhirBase64Decoder = new FhirBase64Decoder(logger.Object, _jsonSerializerOptions);
 
-        _sut = new ReferralHeadersModelValidator(fhirHeaderValueValidator);
+        _sut = new ReferralHeadersModelValidator(fhirBase64Decoder);
+
         _sut.ClassLevelCascadeMode = CascadeMode.Continue;
         _sut.RuleLevelCascadeMode = CascadeMode.Stop;
 

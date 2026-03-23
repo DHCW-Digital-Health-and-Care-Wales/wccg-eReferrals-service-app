@@ -109,6 +109,44 @@ public class FhirBase64DecoderTests
         }
     }
 
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("  ")]
+    public void IsValidShouldReturnFalseWhenBase64ValueMissing(string? base64Value)
+    {
+        // Act
+        var result = _decoder.IsValid<Identifier>(base64Value);
+
+        // Assert
+        result.Should().BeFalse();
+    }
+
+    [Fact]
+    public void IsValidShouldReturnTrueWhenValidBase64FhirJson()
+    {
+        // Arrange
+        var identifier = new Identifier("https://www.nhs.wales", "ABC-123");
+        var base64 = ToBase64Json(identifier);
+
+        // Act
+        var result = _decoder.IsValid<Identifier>(base64);
+
+        // Assert
+        result.Should().BeTrue();
+    }
+
+    [Fact]
+    public void IsValidShouldReturnFalseWhenBase64Invalid()
+    {
+        // Act
+        var result = _decoder.IsValid<Identifier>("not-base64");
+
+        // Assert
+        result.Should().BeFalse();
+    }
+
+
     private string ToBase64Json<T>(T value)
         where T : Base
     {
