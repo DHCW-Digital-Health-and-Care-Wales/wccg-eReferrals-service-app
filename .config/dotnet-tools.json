@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "jetbrains.resharper.globaltools": {
+      "version": "2025.3.3",
+      "commands": [
+        "jb"
+      ],
+      "rollForward": false
+    },
+    "dotnetsay": {
+      "version": "3.0.3",
+      "commands": [
+        "dotnetsay"
+      ],
+      "rollForward": false
+    }
+  }
+}
