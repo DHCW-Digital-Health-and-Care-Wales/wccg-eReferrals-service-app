@@ -1,0 +1,8 @@
+trigger: none
+
+pool:
+  name: UKS-DHCW-NWRI-DEV-ADOSelfHostPool
+
+steps:
+  - script: echo "Hello, world!"
+    displayName: 'Print Hello World'
