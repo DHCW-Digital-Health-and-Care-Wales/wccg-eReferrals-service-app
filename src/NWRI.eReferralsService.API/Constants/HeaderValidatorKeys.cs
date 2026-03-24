@@ -2,6 +2,6 @@ namespace NWRI.eReferralsService.API.Constants;
 
 public static class HeaderValidatorKeys
 {
-    public const string Referral = "referral";
-    public const string Metadata = "metadata";
+    public const string ReferralHeaders = "referral-headers";
+    public const string MetadataHeaders = "metadata-headers";
 }

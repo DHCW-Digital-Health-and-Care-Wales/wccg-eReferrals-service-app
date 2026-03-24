@@ -14,7 +14,7 @@ public sealed class MetadataService : IMetadataService
     private readonly IEventLogger _eventLogger;
 
     public MetadataService(
-       [FromKeyedServices(HeaderValidatorKeys.Referral)] IValidator<HeadersModel> metadataHeadersValidator,
+        [FromKeyedServices(HeaderValidatorKeys.MetadataHeaders)] IValidator<HeadersModel> metadataHeadersValidator,
         ICapabilityStatementService capabilityStatementService,
         IEventLogger eventLogger)
     {
