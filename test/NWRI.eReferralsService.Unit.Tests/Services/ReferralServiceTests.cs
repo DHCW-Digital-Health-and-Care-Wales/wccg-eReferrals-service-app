@@ -269,6 +269,25 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
         var bundle = CreateMessageBundle(FhirConstants.BarsMessageReasonNew);
         var messageHeader = bundle.ResourceByType<MessageHeader>()!;
         messageHeader.Reason = null;
+
+        var bundleJson = JsonSerializer.Serialize(bundle, _jsonSerializerOptions);
+        var headers = _fixture.Create<IHeaderDictionary>();
+        var sut = CreateReferralService();
+
+        // Act
+        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
+
+        // Assert
+        (await action.Should().ThrowAsync<RequestParameterValidationException>())
+            .Which.Message.Should().Contain("MessageHeader.reason.coding.code is required");
+    }
+
+    [Fact]
+    public async Task ProcessMessageAsyncShouldThrowWhenMessageHeaderIsMissing()
+    {
+        // Arrange
+        var bundle = CreateMessageBundle(FhirConstants.BarsMessageReasonNew);
+        bundle.Entry.RemoveAll(e => e.Resource is MessageHeader);
         var bundleJson = JsonSerializer.Serialize(bundle, _jsonSerializerOptions);
         var headers = _fixture.Create<IHeaderDictionary>();
 
@@ -280,6 +299,47 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
         // Assert
         (await action.Should().ThrowAsync<RequestParameterValidationException>())
             .Which.Message.Should().Contain("MessageHeader.reason.coding.code is required");
+    }
+
+    [Fact]
+    public async Task ProcessMessageAsyncShouldThrowWhenReasonCodingSystemIsNotBars()
+    {
+        // Arrange
+        var bundle = CreateMessageBundle(FhirConstants.BarsMessageReasonNew);
+        var messageHeader = bundle.ResourceByType<MessageHeader>()!;
+        messageHeader.Reason = new CodeableConcept("https://example.org/not-bars", FhirConstants.BarsMessageReasonNew);
+        var bundleJson = JsonSerializer.Serialize(bundle, _jsonSerializerOptions);
+        var headers = _fixture.Create<IHeaderDictionary>();
+
+        var sut = CreateReferralService();
+
+        // Act
+        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
+
+        // Assert
+        (await action.Should().ThrowAsync<RequestParameterValidationException>())
+            .Which.Message.Should().Contain("MessageHeader.reason.coding.code is required");
+    }
+
+    [Fact]
+    public async Task ProcessMessageAsyncShouldThrowWhenServiceRequestIsMissing()
+    {
+        // Arrange
+        var bundle = CreateMessageBundle(FhirConstants.BarsMessageReasonNew);
+        bundle.Entry.RemoveAll(e => e.Resource is ServiceRequest);
+        var bundleJson = JsonSerializer.Serialize(bundle, _jsonSerializerOptions);
+        var headers = _fixture.Create<IHeaderDictionary>();
+
+        var sut = CreateReferralService();
+
+        // Act
+        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
+
+        // Assert
+        (await action.Should().ThrowAsync<RequestParameterValidationException>())
+            .Which.Message.Should().Contain("ServiceRequest is required");
+        _fixture.Mock<IWpasApiClient>().Verify(x => x.CreateReferralAsync(It.IsAny<WpasCreateReferralRequest>(), It.IsAny<CancellationToken>()), Times.Never);
+        _fixture.Mock<IWpasApiClient>().Verify(x => x.CancelReferralAsync(It.IsAny<WpasCancelReferralRequest>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -545,6 +605,29 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
 
         // Assert
         responseServiceRequest.Id.Should().Be(expectedResponse.ReferralId);
+    }
+
+    [Theory]
+    [InlineData(FhirConstants.BarsServiceRequestCancelReferral, RequestStatus.Active)]
+    [InlineData(FhirConstants.BarsServiceRequestCreateReferral, RequestStatus.Revoked)]
+    public async Task ProcessMessageAsyncShouldThrowWhenReasonIsUpdateAndServiceRequestIsInvalidForCancel(string serviceRequestProfile,
+        RequestStatus serviceRequestStatus)
+    {
+        // Arrange
+        var bundleJson = JsonSerializer.Serialize(
+            CreateMessageBundle(FhirConstants.BarsMessageReasonUpdate, serviceRequestProfile, serviceRequestStatus),
+            _jsonSerializerOptions);
+
+        var headers = _fixture.Create<IHeaderDictionary>();
+        var sut = CreateReferralService();
+
+        // Act
+        var action = async () => await sut.ProcessMessageAsync(headers, bundleJson, CancellationToken.None);
+
+        // Assert
+        (await action.Should().ThrowAsync<BundleValidationException>())
+            .Which.Message.Should().Contain("Invalid MessageHeader.reason and ServiceRequest profile/status combination.");
+        _fixture.Mock<IWpasApiClient>().Verify(x => x.CancelReferralAsync(It.IsAny<WpasCancelReferralRequest>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
