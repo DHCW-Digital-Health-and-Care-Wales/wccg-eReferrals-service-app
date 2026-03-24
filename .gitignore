@@ -5,6 +5,7 @@ riderModule.iml
 /_ReSharper.Caches/
 .claude/
 CLAUDE.md
+/tmp
 
 # Created by https://www.toptal.com/developers/gitignore/api/rider
 # Edit at https://www.toptal.com/developers/gitignore?templates=rider
