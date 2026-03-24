@@ -1,19 +1,20 @@
+using FluentValidation;
+using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.EventLogging;
 using NWRI.eReferralsService.API.EventLogging.Interfaces;
 using NWRI.eReferralsService.API.Exceptions;
 using NWRI.eReferralsService.API.Models;
-using NWRI.eReferralsService.API.Validators;
 
 namespace NWRI.eReferralsService.API.Services;
 
 public sealed class MetadataService : IMetadataService
 {
-    private readonly IMetadataHeadersValidator _metadataHeadersValidator;
+    private readonly IValidator<HeadersModel> _metadataHeadersValidator;
     private readonly ICapabilityStatementService _capabilityStatementService;
     private readonly IEventLogger _eventLogger;
 
     public MetadataService(
-        IMetadataHeadersValidator metadataHeadersValidator,
+       [FromKeyedServices(HeaderValidatorKeys.Referral)] IValidator<HeadersModel> metadataHeadersValidator,
         ICapabilityStatementService capabilityStatementService,
         IEventLogger eventLogger)
     {

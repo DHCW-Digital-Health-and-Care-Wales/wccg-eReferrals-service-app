@@ -1,5 +1,6 @@
 using AutoFixture;
 using FluentAssertions;
+using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
 using Moq;
@@ -25,7 +26,7 @@ public class MetadataServiceTests
         var expectedModel = HeadersModel.FromHeaderDictionary(headers);
 
         var modelArgs = new List<HeadersModel>();
-        _fixture.Mock<IMetadataHeadersValidator>()
+        _fixture.Mock<IValidator<HeadersModel>>()
             .Setup(x => x.ValidateAsync(Capture.In(modelArgs), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());
 
@@ -40,7 +41,7 @@ public class MetadataServiceTests
 
         // Assert
         modelArgs[0].Should().BeEquivalentTo(expectedModel);
-        _fixture.Mock<IMetadataHeadersValidator>()
+        _fixture.Mock<IValidator<HeadersModel>>()
             .Verify(x => x.ValidateAsync(It.IsAny<HeadersModel>(), It.IsAny<CancellationToken>()));
     }
 
@@ -55,7 +56,7 @@ public class MetadataServiceTests
             .With(x => x.Errors, validationFailures)
             .Create();
 
-        _fixture.Mock<IMetadataHeadersValidator>()
+        _fixture.Mock<IValidator<HeadersModel>>()
             .Setup(x => x.ValidateAsync(It.IsAny<HeadersModel>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(validationResult);
 
@@ -80,7 +81,7 @@ public class MetadataServiceTests
             .With(x => x.Errors, validationFailures)
             .Create();
 
-        _fixture.Mock<IMetadataHeadersValidator>()
+        _fixture.Mock<IValidator<HeadersModel>>()
             .Setup(x => x.ValidateAsync(It.IsAny<HeadersModel>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(validationResult);
 
@@ -103,7 +104,7 @@ public class MetadataServiceTests
         var headers = CreateHeaders();
         var outputJson = _fixture.Create<string>();
 
-        _fixture.Mock<IMetadataHeadersValidator>()
+        _fixture.Mock<IValidator<HeadersModel>>()
             .Setup(x => x.ValidateAsync(It.IsAny<HeadersModel>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());
 
@@ -126,7 +127,7 @@ public class MetadataServiceTests
         // Arrange
         var headers = CreateHeaders();
 
-        _fixture.Mock<IMetadataHeadersValidator>()
+        _fixture.Mock<IValidator<HeadersModel>>()
             .Setup(x => x.ValidateAsync(It.IsAny<HeadersModel>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());
 
@@ -147,7 +148,7 @@ public class MetadataServiceTests
     private MetadataService CreateMetadataService()
     {
         return new MetadataService(
-            _fixture.Mock<IMetadataHeadersValidator>().Object,
+            _fixture.Mock<IValidator<HeadersModel>>().Object,
             _fixture.Mock<ICapabilityStatementService>().Object,
              _fixture.Mock<IEventLogger>().Object);
     }

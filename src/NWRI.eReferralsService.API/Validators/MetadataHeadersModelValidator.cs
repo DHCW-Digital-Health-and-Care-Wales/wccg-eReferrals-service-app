@@ -6,7 +6,7 @@ using NWRI.eReferralsService.API.Models;
 
 namespace NWRI.eReferralsService.API.Validators;
 
-public sealed class MetadataHeadersModelValidator : AbstractValidator<HeadersModel>, IMetadataHeadersValidator
+public sealed class MetadataHeadersModelValidator : AbstractValidator<HeadersModel>
 {
     public MetadataHeadersModelValidator(FhirBase64Decoder fhirBase64Decoder)
     {

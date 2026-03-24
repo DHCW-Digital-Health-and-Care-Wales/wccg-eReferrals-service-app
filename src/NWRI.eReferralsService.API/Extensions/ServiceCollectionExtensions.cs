@@ -8,6 +8,7 @@ using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Options;
 using NWRI.eReferralsService.API.Configuration;
 using NWRI.eReferralsService.API.Configuration.Resilience;
+using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.EventLogging;
 using NWRI.eReferralsService.API.HealthChecks;
 using NWRI.eReferralsService.API.Mappers;
@@ -49,8 +50,8 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<IValidator<BundleCreateReferralModel>, BundleCreateReferralModelValidator>();
         services.AddScoped<IValidator<BundleCancelReferralModel>, BundleCancelReferralModelValidator>();
-        services.AddScoped<IReferralHeadersModelValidator, ReferralHeadersModelValidator>();
-        services.AddScoped<IMetadataHeadersValidator, MetadataHeadersModelValidator>();
+        services.AddKeyedScoped<IValidator<HeadersModel>, ReferralHeadersModelValidator>(HeaderValidatorKeys.Referral);
+        services.AddKeyedScoped<IValidator<HeadersModel>, MetadataHeadersModelValidator>(HeaderValidatorKeys.Metadata);
         services.AddSingleton<IFhirBundleProfileValidator, FhirBundleProfileValidator>();
         services.AddSingleton<WpasJsonSchemaValidator>();
     }

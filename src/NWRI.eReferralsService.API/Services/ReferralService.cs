@@ -10,7 +10,6 @@ using NWRI.eReferralsService.API.Exceptions;
 using NWRI.eReferralsService.API.Extensions;
 using NWRI.eReferralsService.API.Models;
 using NWRI.eReferralsService.API.Models.WPAS.Responses;
-using NWRI.eReferralsService.API.Validators;
 using Task = System.Threading.Tasks.Task;
 // ReSharper disable NullableWarningSuppressionIsUsed
 
@@ -24,13 +23,13 @@ public class ReferralService : IReferralService
         Cancel
     }
 
-    private readonly IReferralHeadersModelValidator _referralHeadersModelValidator;
+    private readonly IValidator<HeadersModel> _referralHeadersModelValidator;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
     private readonly IEventLogger _eventLogger;
     private readonly IRequestFhirHeadersDecoder _requestFhirHeadersDecoder;
     private readonly IReferralWorkflowProcessor _referralWorkflowProcessor;
 
-    public ReferralService(IReferralHeadersModelValidator referralHeadersModelValidator,
+    public ReferralService([FromKeyedServices(HeaderValidatorKeys.Referral)] IValidator<HeadersModel> referralHeadersModelValidator,
         JsonSerializerOptions jsonSerializerOptions,
         IEventLogger eventLogger,
         IRequestFhirHeadersDecoder requestFhirHeadersDecoder,
