@@ -5,6 +5,7 @@ using NWRI.eReferralsService.API.Models;
 using NWRI.eReferralsService.API.Validators;
 
 namespace NWRI.eReferralsService.API.Services;
+
 public sealed class MetadataService : IMetadataService
 {
     private readonly IMetadataHeadersValidator _metadataHeadersValidator;

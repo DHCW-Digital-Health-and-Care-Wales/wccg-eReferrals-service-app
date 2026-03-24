@@ -10,9 +10,6 @@ public sealed class CommonHeadersModelValidator : AbstractValidator<HeadersModel
 {
     public CommonHeadersModelValidator(FhirBase64Decoder fhirBase64Decoder)
     {
-        ClassLevelCascadeMode = CascadeMode.Continue;
-        RuleLevelCascadeMode = CascadeMode.Stop;
-
         RuleFor(x => x.EndUserOrganisation)
             .NotEmpty()
             .WithMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.EndUserOrganisation))

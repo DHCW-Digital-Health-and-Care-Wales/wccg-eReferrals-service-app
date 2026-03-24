@@ -146,7 +146,6 @@ public class FhirBase64DecoderTests
         result.Should().BeFalse();
     }
 
-
     private string ToBase64Json<T>(T value)
         where T : Base
     {

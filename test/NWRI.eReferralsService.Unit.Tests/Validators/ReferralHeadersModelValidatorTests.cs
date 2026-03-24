@@ -5,6 +5,7 @@ using FluentValidation;
 using FluentValidation.TestHelper;
 using Hl7.Fhir.Model;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.Extensions;
@@ -24,8 +25,7 @@ public class ReferralHeadersModelValidatorTests
 
     public ReferralHeadersModelValidatorTests()
     {
-        var logger = new Mock<ILogger<FhirBase64Decoder>>();
-        var fhirBase64Decoder = new FhirBase64Decoder(logger.Object, _jsonSerializerOptions);
+        var fhirBase64Decoder = new FhirBase64Decoder(NullLogger<FhirBase64Decoder>.Instance, _jsonSerializerOptions);
 
         _sut = new ReferralHeadersModelValidator(fhirBase64Decoder);
 
