@@ -51,7 +51,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
             .ReturnsAsync(new ProfileValidationOutput
             {
                 IsSuccessful = true,
-                Errors = new List<string>()
+                Errors = []
             });
 
         _fixture.Mock<IRequestFhirHeadersDecoder>()
@@ -474,7 +474,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
         var failureOutput = new ProfileValidationOutput
         {
             IsSuccessful = false,
-            Errors = new List<string> { "Profile validation failed" }
+            Errors = ["Profile validation failed"]
         };
 
         _fixture.Mock<IFhirBundleProfileValidator>()
@@ -603,7 +603,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
         var failureOutput = new ProfileValidationOutput
         {
             IsSuccessful = false,
-            Errors = new List<string> { "Profile validation failed" }
+            Errors = ["Profile validation failed"]
         };
 
         _fixture.Mock<IFhirBundleProfileValidator>()
@@ -722,7 +722,6 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
     {
         const string serviceRequestCategorySystem = "https://fhir.nhs.uk/CodeSystem/message-category-servicerequest";
         const string barsUseCaseCategorySystem = "https://fhir.nhs.uk/CodeSystem/usecases-categories-bars";
-        const string nhsNumberSystem = "https://fhir.nhs.uk/Id/nhs-number";
         const string nhsNumberVerificationStatusSystem =
             "https://fhir.hl7.org.uk/CodeSystem/UKCore-NHSNumberVerificationStatusEngland";
 
@@ -806,7 +805,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
             [
                 new Identifier
                 {
-                    System = nhsNumberSystem,
+                    System = FhirConstants.NhsNumberSystem,
                     Value = "3478526985",
                     Extension =
                     [

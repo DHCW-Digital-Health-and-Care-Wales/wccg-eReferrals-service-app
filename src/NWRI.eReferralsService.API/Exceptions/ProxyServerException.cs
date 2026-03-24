@@ -4,15 +4,13 @@ namespace NWRI.eReferralsService.API.Exceptions;
 
 public sealed class ProxyServerException : BaseFhirException
 {
-    private readonly string _message;
-
     public ProxyServerException(string message)
     {
-        _message = message;
+        Message = message;
         Errors = [new ProxyServerError(message)];
     }
 
     public override IEnumerable<BaseFhirHttpError> Errors { get; }
 
-    public override string Message => _message;
+    public override string Message { get; }
 }

@@ -2,6 +2,7 @@ using FluentValidation;
 using Hl7.Fhir.Model;
 using NWRI.eReferralsService.API.Models;
 using static NWRI.eReferralsService.API.Constants.ValidationMessages;
+using static NWRI.eReferralsService.API.Constants.FhirConstants;
 // ReSharper disable NullableWarningSuppressionIsUsed
 
 namespace NWRI.eReferralsService.API.Validators;
@@ -13,7 +14,6 @@ public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancel
     private const string SenderReference = "sender.reference";
     private const string MetaProfile = "meta.profile";
     private const string OccurrencePeriod = "occurrencePeriod";
-    private const string NhsNumberSystem = "https://fhir.nhs.uk/Id/nhs-number";
 
     public BundleCancelReferralModelValidator()
     {
@@ -119,10 +119,9 @@ public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancel
                     .WithMessage(MissingEntityField<Patient>(nameof(Patient.Identifier)))
                     .DependentRules(() =>
                     {
-                        patient.RuleFor(x => x.Identifier!)
-                            .Must(ids => ids.Any(i =>
-                                string.Equals(i.System, NhsNumberSystem, StringComparison.OrdinalIgnoreCase)))
-                            .WithMessage("Patient NHS number identifier is required");
+                        patient.RuleFor(x => x.Identifier)
+                            .Must(ids => ids.Any(i => string.Equals(i.System, NhsNumberSystem, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(i.Value)))
+                            .WithMessage(MissingPatientNhsNumber);
                     });
 
                 patient.RuleFor(x => x.Name)

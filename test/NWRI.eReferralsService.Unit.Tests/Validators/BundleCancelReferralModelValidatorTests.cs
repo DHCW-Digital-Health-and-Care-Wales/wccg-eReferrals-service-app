@@ -9,6 +9,7 @@ using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.Models;
 using NWRI.eReferralsService.API.Validators;
 using NWRI.eReferralsService.Unit.Tests.Extensions;
+using static NWRI.eReferralsService.API.Constants.FhirConstants;
 // ReSharper disable NullableWarningSuppressionIsUsed
 
 namespace NWRI.eReferralsService.Unit.Tests.Validators;
@@ -104,19 +105,30 @@ public class BundleCancelReferralModelValidatorTests
     }
 
     [Fact]
-    public void ShouldContainErrorWhenPatientNhsNumberMissing()
+    public void ShouldContainErrorWhenPatientIdentifierMissing()
+    {
+        var model = CreateValidModelFromExampleBundle(CancelBundleFile);
+        model.Patient!.Identifier = null;
+
+        var result = _sut.TestValidate(model);
+
+        result.Errors.Should().Contain(e => e.ErrorMessage == "Patient.Identifier is required");
+        result.Errors.Should().NotContain(e => e.ErrorMessage == "Patient NHS number identifier is required");
+    }
+
+    [Theory]
+    [InlineData(NhsNumberSystem, null)]
+    [InlineData("invalid-system", "SomeValue")]
+    public void ShouldContainErrorWhenPatientNhsNumberMissing(string identifierSystem, string? identifierValue)
     {
         var model = CreateValidModelFromExampleBundle(CancelBundleFile);
         model.Patient!.Identifier =
         [
-            new Identifier
-            {
-                System = "https://example.org/local-patient-id",
-                Value = "ABC123"
-            }
+            new Identifier(identifierSystem, identifierValue)
         ];
 
         var result = _sut.TestValidate(model);
+
         result.Errors.Should().Contain(e => e.ErrorMessage == "Patient NHS number identifier is required");
     }
 
@@ -173,16 +185,5 @@ public class BundleCancelReferralModelValidatorTests
         var result = _sut.TestValidate(model);
         result.Errors.Should().Contain(e =>
             e.ErrorMessage == ValidationMessages.MissingEntityField<ServiceRequest>(nameof(ServiceRequest.Meta)));
-    }
-
-    [Fact]
-    public void ShouldContainErrorWhenPatientIdentifierMissing()
-    {
-        var model = CreateValidModelFromExampleBundle(CancelBundleFile);
-        model.Patient!.Identifier = [];
-
-        var result = _sut.TestValidate(model);
-        result.Errors.Should().Contain(e =>
-            e.ErrorMessage == ValidationMessages.MissingEntityField<Patient>(nameof(Patient.Identifier)));
     }
 }

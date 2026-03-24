@@ -9,7 +9,6 @@ namespace NWRI.eReferralsService.API.Mappers;
 
 public sealed class WpasCreateReferralRequestMapper
 {
-    private const string NhsNumberSystem = "https://fhir.nhs.uk/Id/nhs-number";
     private const string NhsNumberVerificationStatusSystem =
         "https://fhir.hl7.org.uk/CodeSystem/UKCore-NHSNumberVerificationStatusEngland";
     private const string ServiceRequestCategorySystem = "https://fhir.nhs.uk/CodeSystem/message-category-servicerequest";
