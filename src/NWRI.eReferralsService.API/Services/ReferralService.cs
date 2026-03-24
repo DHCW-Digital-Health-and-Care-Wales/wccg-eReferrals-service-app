@@ -50,11 +50,9 @@ public class ReferralService : IReferralService
         await ValidateHeadersAsync(headersModel);
 
         _eventLogger.Audit(new EventCatalogue.PayloadValidationStarted());
-        var bundle = JsonSerializer.Deserialize<Bundle>(requestBody, _jsonSerializerOptions)!;
 
-        var messageReasonCode = GetMessageReasonCode(bundle);
-        var serviceRequest = GetReferralServiceRequest(bundle);
-        var workflowAction = DetermineReferralWorkflowAction(messageReasonCode, serviceRequest.Status);
+        var bundle = JsonSerializer.Deserialize<Bundle>(requestBody, _jsonSerializerOptions)!;
+        var (workflowAction, serviceRequest) = DetermineReferralWorkflowAction(bundle);
 
         WpasReferralResponse response = workflowAction switch
         {
@@ -75,25 +73,38 @@ public class ReferralService : IReferralService
         return JsonSerializer.Serialize(bundle, _jsonSerializerOptions);
     }
 
-    private static ReferralWorkflowAction DetermineReferralWorkflowAction(string messageReasonCode, RequestStatus? serviceRequestStatus)
+    private static (ReferralWorkflowAction, ServiceRequest) DetermineReferralWorkflowAction(Bundle bundle)
     {
-        if (serviceRequestStatus is null)
+        var messageReasonCode = GetMessageReasonCode(bundle);
+
+        var serviceRequests = bundle.ResourcesByType<ServiceRequest>().ToList();
+        if (serviceRequests.Count == 0)
         {
-            throw new RequestParameterValidationException("ServiceRequest.status", "ServiceRequest.status is required");
+            throw new RequestParameterValidationException("ServiceRequest", "ServiceRequest is required");
         }
 
-        if (messageReasonCode == FhirConstants.BarsMessageReasonNew && serviceRequestStatus == RequestStatus.Active)
+        var createReferralServiceRequest = serviceRequests
+            .FirstOrDefault(serviceRequest => serviceRequest.HasProfile(FhirConstants.BarsServiceRequestCreateReferral));
+        if (createReferralServiceRequest is not null)
         {
-            return ReferralWorkflowAction.Create;
+            if (messageReasonCode == FhirConstants.BarsMessageReasonNew && createReferralServiceRequest.Status == RequestStatus.Active)
+            {
+                return (ReferralWorkflowAction.Create, createReferralServiceRequest);
+            }
         }
 
-        if (messageReasonCode == FhirConstants.BarsMessageReasonUpdate &&
-            serviceRequestStatus is RequestStatus.Revoked or RequestStatus.EnteredInError)
+        var cancelReferralServiceRequest = serviceRequests
+            .FirstOrDefault(serviceRequest => serviceRequest.HasProfile(FhirConstants.BarsServiceRequestCancelReferral));
+        if (cancelReferralServiceRequest is not null)
         {
-            return ReferralWorkflowAction.Cancel;
+            if (messageReasonCode == FhirConstants.BarsMessageReasonUpdate &&
+                cancelReferralServiceRequest.Status is RequestStatus.Revoked or RequestStatus.EnteredInError)
+            {
+                return (ReferralWorkflowAction.Cancel, cancelReferralServiceRequest);
+            }
         }
 
-        throw new BundleValidationException([new ValidationFailure("", "Invalid MessageHeader.reason and ServiceRequest.status combination.")]);
+        throw new BundleValidationException([new ValidationFailure("", "Invalid MessageHeader.reason and ServiceRequest profile/status combination.")]);
     }
 
     private async Task ValidateHeadersAsync(HeadersModel headersModel)
@@ -113,19 +124,5 @@ public class ReferralService : IReferralService
             ?.Code;
 
         return messageReasonCode ?? throw new RequestParameterValidationException("MessageHeader.reason", "MessageHeader.reason.coding.code is required");
-    }
-
-    private static ServiceRequest GetReferralServiceRequest(Bundle bundle)
-    {
-        var matching = bundle.ResourcesByProfile<ServiceRequest>(FhirConstants.BarsServiceRequestReferral).ToList();
-        if (matching.Count == 0)
-        {
-            throw new RequestParameterValidationException("ServiceRequest", $"No ServiceRequest with profile '{FhirConstants.BarsServiceRequestReferral}' found in the request bundle.");
-        }
-        if (matching.Count > 1)
-        {
-            throw new RequestParameterValidationException("ServiceRequest", "ServiceRequest cannot be uniquely identified in the request bundle.");
-        }
-        return matching[0];
     }
 }

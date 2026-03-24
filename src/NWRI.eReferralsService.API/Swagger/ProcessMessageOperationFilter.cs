@@ -33,8 +33,21 @@ public sealed class ProcessMessageOperationFilter : IOperationFilter
             {
                 [FhirConstants.FhirMediaType] = new OpenApiMediaType
                 {
-                    Example = new OpenApiString(
-                        File.ReadAllText("Swagger/Examples/process-message-payload.json"))
+                    Examples = new Dictionary<string, OpenApiExample>
+                    {
+                        ["create"] = new()
+                        {
+                            Summary = "Create referral",
+                            Value = new OpenApiString(
+                                File.ReadAllText("Swagger/Examples/process-message-create-payload.json"))
+                        },
+                        ["cancel"] = new()
+                        {
+                            Summary = "Cancel referral",
+                            Value = new OpenApiString(
+                                File.ReadAllText("Swagger/Examples/process-message-cancel-payload.json"))
+                        }
+                    }
                 }
             }
         };

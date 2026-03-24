@@ -316,7 +316,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
 
         // Assert
         (await action.Should().ThrowAsync<RequestParameterValidationException>())
-            .Which.Message.Should().Contain($"No ServiceRequest with profile '{FhirConstants.BarsServiceRequestReferral}' found in the request bundle.");
+            .Which.Message.Should().Contain($"No ServiceRequest with profile '{FhirConstants.BarsServiceRequestCreateReferral}' found in the request bundle.");
         _fixture.Mock<IWpasApiClient>().Verify(x => x.CreateReferralAsync(It.IsAny<WpasCreateReferralRequest>(), It.IsAny<CancellationToken>()), Times.Never);
         _fixture.Mock<IWpasApiClient>().Verify(x => x.CancelReferralAsync(It.IsAny<WpasCancelReferralRequest>(), It.IsAny<CancellationToken>()), Times.Never);
     }
@@ -333,7 +333,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
                 Id = "sr-2",
                 Meta = new Meta
                 {
-                    Profile = [FhirConstants.BarsServiceRequestReferral]
+                    Profile = [FhirConstants.BarsServiceRequestCreateReferral]
                 },
                 IntentElement = new Code<RequestIntent>(RequestIntent.Order),
                 Subject = new ResourceReference("Patient/pat-1"),
@@ -742,7 +742,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
             Id = serviceRequestId,
             Meta = new Meta
             {
-                Profile = [FhirConstants.BarsServiceRequestReferral]
+                Profile = [FhirConstants.BarsServiceRequestCreateReferral]
             },
             IntentElement = new Code<RequestIntent>(RequestIntent.Order),
             Subject = new ResourceReference("Patient/pat-1"),
