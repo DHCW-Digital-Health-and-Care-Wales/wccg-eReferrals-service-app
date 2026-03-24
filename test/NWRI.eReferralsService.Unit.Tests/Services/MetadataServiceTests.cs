@@ -9,7 +9,6 @@ using NWRI.eReferralsService.API.EventLogging.Interfaces;
 using NWRI.eReferralsService.API.Exceptions;
 using NWRI.eReferralsService.API.Models;
 using NWRI.eReferralsService.API.Services;
-using NWRI.eReferralsService.API.Validators;
 using NWRI.eReferralsService.Unit.Tests.Extensions;
 
 namespace NWRI.eReferralsService.Unit.Tests.Services;
