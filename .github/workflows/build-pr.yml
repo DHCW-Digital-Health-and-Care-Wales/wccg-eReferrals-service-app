@@ -30,7 +30,7 @@ jobs:
         run: dotnet test --no-restore --no-build --configuration ${{ env.BUILD_CONFIGURATION }} --verbosity normal --logger trx --collect "XPlat Code Coverage" --settings coverlet.runsettings
 
       - name: "Coverage Report Generator"
-        uses: danielpalme/ReportGenerator-GitHub-Action@5.5.3
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.5.4
         with:
           reports: "**/*.cobertura.xml"
           targetdir: "${{ github.workspace }}"
@@ -61,7 +61,7 @@ jobs:
           thresholds: "60 80"
 
       - name: "Add Coverage PR Comment"
-        uses: marocchino/sticky-pull-request-comment@v2
+        uses: marocchino/sticky-pull-request-comment@v3
         if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'
         with:
           recreate: true

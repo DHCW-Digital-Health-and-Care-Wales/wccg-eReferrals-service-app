@@ -4,9 +4,11 @@ on:
   workflow_dispatch:
   push:
     branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
-  code-inspect:
+  code-inspect-jetbrains:
     runs-on: "ubuntu-latest"
 
     permissions:
