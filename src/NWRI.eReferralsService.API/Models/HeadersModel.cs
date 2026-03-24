@@ -31,7 +31,7 @@ public class HeadersModel
             Accept = headerDictionary.GetOrDefault(RequestHeaderKeys.Accept),
 
             //Optional
-            RequestingPractitioner = headerDictionary.GetOrDefault(RequestHeaderKeys.RequestingPractitioner),
+            RequestingPractitioner = headerDictionary.GetOrDefault(RequestHeaderKeys.RequestingPractitioner)
         };
     }
 }
