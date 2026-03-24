@@ -52,7 +52,7 @@ public class ReferralService : IReferralService
         _eventLogger.Audit(new EventCatalogue.PayloadValidationStarted());
 
         var bundle = JsonSerializer.Deserialize<Bundle>(requestBody, _jsonSerializerOptions)!;
-        var (workflowAction, serviceRequest) = DetermineReferralWorkflowAction(bundle);
+        var (workflowAction, serviceRequest) = ResolveWorkflowContext(bundle);
 
         WpasReferralResponse response = workflowAction switch
         {
@@ -73,34 +73,35 @@ public class ReferralService : IReferralService
         return JsonSerializer.Serialize(bundle, _jsonSerializerOptions);
     }
 
-    private static (ReferralWorkflowAction, ServiceRequest) DetermineReferralWorkflowAction(Bundle bundle)
+    private static (ReferralWorkflowAction, ServiceRequest) ResolveWorkflowContext(Bundle bundle)
     {
-        var messageReasonCode = GetMessageReasonCode(bundle);
-
         var serviceRequests = bundle.ResourcesByType<ServiceRequest>().ToList();
         if (serviceRequests.Count == 0)
         {
             throw new RequestParameterValidationException("ServiceRequest", "ServiceRequest is required");
         }
 
-        var createReferralServiceRequest = serviceRequests
-            .FirstOrDefault(serviceRequest => serviceRequest.HasProfile(FhirConstants.BarsServiceRequestCreateReferral));
-        if (createReferralServiceRequest is not null)
+        switch (GetMessageReasonCode(bundle))
         {
-            if (messageReasonCode == FhirConstants.BarsMessageReasonNew && createReferralServiceRequest.Status == RequestStatus.Active)
+            case FhirConstants.BarsMessageReasonNew:
             {
-                return (ReferralWorkflowAction.Create, createReferralServiceRequest);
-            }
-        }
+                var createRequest = serviceRequests.FirstOrDefault(sr => sr.HasProfile(FhirConstants.BarsServiceRequestCreateReferral));
+                if (createRequest?.Status == RequestStatus.Active)
+                {
+                    return (ReferralWorkflowAction.Create, createRequest);
+                }
 
-        var cancelReferralServiceRequest = serviceRequests
-            .FirstOrDefault(serviceRequest => serviceRequest.HasProfile(FhirConstants.BarsServiceRequestCancelReferral));
-        if (cancelReferralServiceRequest is not null)
-        {
-            if (messageReasonCode == FhirConstants.BarsMessageReasonUpdate &&
-                cancelReferralServiceRequest.Status is RequestStatus.Revoked or RequestStatus.EnteredInError)
+                break;
+            }
+            case FhirConstants.BarsMessageReasonUpdate:
             {
-                return (ReferralWorkflowAction.Cancel, cancelReferralServiceRequest);
+                var cancelRequest = serviceRequests.FirstOrDefault(sr => sr.HasProfile(FhirConstants.BarsServiceRequestCancelReferral));
+                if (cancelRequest?.Status is RequestStatus.Revoked or RequestStatus.EnteredInError)
+                {
+                    return (ReferralWorkflowAction.Cancel, cancelRequest);
+                }
+
+                break;
             }
         }
 
