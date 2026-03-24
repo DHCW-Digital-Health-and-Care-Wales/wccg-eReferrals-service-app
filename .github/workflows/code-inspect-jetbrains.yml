@@ -1,0 +1,46 @@
+name: code-inspect-jetbrains.yml
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  code-inspect:
+    runs-on: "ubuntu-latest"
+
+    permissions:
+      security-events: write
+      contents: read
+      actions: read
+
+    steps:
+      - name: "Checkout branch"
+        uses: actions/checkout@v6
+
+      - name: "Setup .NET Core v8 SDK"
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 8.0.x
+
+      - name: "DotNet Restore"
+        run: dotnet restore
+
+      - name: "Restore DotNet Tools"
+        run: dotnet tool restore
+
+      - name: "Run JetBrains Code Inspection"
+        run: dotnet jb inspectcode NWRI.eReferralsService.sln -o="CodeInspectionReport.sarif.json"
+
+      - name: "Upload Code Inspection Report"
+        uses: actions/upload-artifact@v7
+        with:
+          name: code-inspection-report
+          path: "${{ github.workspace }}/CodeInspectionReport.sarif.json"
+          retention-days: 5
+
+      - name: "Publish Code Inspection Report"
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: "${{ github.workspace }}/CodeInspectionReport.sarif.json"
+          category: "JetBrains-CodeInspection"
