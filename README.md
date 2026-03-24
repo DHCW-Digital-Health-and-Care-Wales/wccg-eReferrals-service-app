@@ -169,7 +169,7 @@ Depending on the message content, the API will either:
 
 #### Request details
 Request body must be a valid FHIR `Bundle` JSON object.
-See [Example Payload](./src/NWRI.eReferralsService.API/Swagger/Examples/process-message-payload-response.json).
+See [Example Payload](./src/NWRI.eReferralsService.API/Swagger/Examples/process-message-create-payload.json).
 
 #### Workflow determination
 The API determines the workflow action by inspecting:
@@ -185,7 +185,7 @@ Supported combinations:
 If either field is missing, or the combination does not match the supported set, the endpoint returns `400`.
 
 #### Responses
-  - 200 - Referral processed successfully (Create). Returns an enriched FHIR `Bundle`. [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/process-message-payload&response.json)
+  - 200 - Referral processed successfully (Create). Returns an enriched FHIR `Bundle`. [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/process-message-ok-response.json)
   - 400 - Request validation failed (e.g. invalid/missing headers, invalid JSON/bundle, FHIR profile/mandatory data validation, or unsupported reason/status combination). [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/process-message-bad-request.json)
   - 429 - Too many requests. [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/common-too-many-requests.json)
   - 500 - Internal error. [Example](./src/NWRI.eReferralsService.API/Swagger/Examples/common-proxy-server-error.json)
