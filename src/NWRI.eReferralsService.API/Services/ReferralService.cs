@@ -85,22 +85,20 @@ public class ReferralService : IReferralService
         {
             case FhirConstants.BarsMessageReasonNew:
             {
-                var createRequest = serviceRequests.FirstOrDefault(sr => sr.HasProfile(FhirConstants.BarsServiceRequestCreateReferralProfile));
-                if (createRequest?.Status == RequestStatus.Active)
+                var createRequest = GetServiceRequestByProfile(serviceRequests, FhirConstants.BarsServiceRequestCreateReferral);
+                if (createRequest.Status == RequestStatus.Active)
                 {
                     return (ReferralWorkflowAction.Create, createRequest);
                 }
-
                 break;
             }
             case FhirConstants.BarsMessageReasonUpdate:
             {
-                var cancelRequest = serviceRequests.FirstOrDefault(sr => sr.HasProfile(FhirConstants.BarsServiceRequestCancelReferralProfile));
-                if (cancelRequest?.Status is RequestStatus.Revoked or RequestStatus.EnteredInError)
+                var cancelRequest = GetServiceRequestByProfile(serviceRequests, FhirConstants.BarsServiceRequestCancelReferral);
+                if (cancelRequest.Status is RequestStatus.Revoked or RequestStatus.EnteredInError)
                 {
                     return (ReferralWorkflowAction.Cancel, cancelRequest);
                 }
-
                 break;
             }
         }
@@ -125,5 +123,11 @@ public class ReferralService : IReferralService
             ?.Code;
 
         return messageReasonCode ?? throw new RequestParameterValidationException("MessageHeader.reason", "MessageHeader.reason.coding.code is required");
+    }
+
+    private static ServiceRequest GetServiceRequestByProfile(IList<ServiceRequest> serviceRequests, string profile)
+    {
+        var serviceRequest = serviceRequests.FirstOrDefault(sr => sr.HasProfile(profile));
+        return serviceRequest ?? throw new RequestParameterValidationException("ServiceRequest", $"No ServiceRequest with profile '{profile}' found.");
     }
 }

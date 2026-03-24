@@ -33,7 +33,7 @@ public static class FhirSearchExtensions
             .Where(r => !r.HasProfile(profile));
     }
 
-    public static bool HasProfile(this Resource r, string profile)
+    internal static bool HasProfile(this Resource r, string profile)
     {
         var profiles = r.Meta?.Profile;
         return profiles != null && profiles.Any(p => p != null && p.Contains(profile, StringComparison.OrdinalIgnoreCase));
