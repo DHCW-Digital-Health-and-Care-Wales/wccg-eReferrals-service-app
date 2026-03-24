@@ -1,14 +1,18 @@
-﻿name: code-inspect.yml
+name: code-inspect-jetbrains.yml
 
 on:
   workflow_dispatch:
+  push:
+    branches: [ "main" ]
 
 jobs:
   code-inspect:
     runs-on: "ubuntu-latest"
 
-    env:
-      BUILD_CONFIGURATION: "Release"
+    permissions:
+      security-events: write
+      contents: read
+      actions: read
 
     steps:
       - name: "Checkout branch"
@@ -22,13 +26,10 @@ jobs:
       - name: "DotNet Restore"
         run: dotnet restore
 
-      - name: "DotNet Build"
-        run: dotnet build --no-restore --configuration ${{ env.BUILD_CONFIGURATION }}
-
       - name: "Restore DotNet Tools"
         run: dotnet tool restore
 
-      - name: "Run Code Inspection"
+      - name: "Run JetBrains Code Inspection"
         run: dotnet jb inspectcode NWRI.eReferralsService.sln -o="CodeInspectionReport.sarif.json"
 
       - name: "Upload Code Inspection Report"
@@ -37,3 +38,9 @@ jobs:
           name: code-inspection-report
           path: "${{ github.workspace }}/CodeInspectionReport.sarif.json"
           retention-days: 5
+
+      - name: "Publish Code Inspection Report"
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: "${{ github.workspace }}/CodeInspectionReport.sarif.json"
+          category: "JetBrains-CodeInspection"
