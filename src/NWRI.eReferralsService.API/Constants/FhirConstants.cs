@@ -9,8 +9,8 @@ public static class FhirConstants
     public const string NhsNumberSystem = "https://fhir.nhs.uk/Id/nhs-number";
     public const string BarsMessageReasonNew = "new";
     public const string BarsMessageReasonUpdate = "update";
-    public const string BarsServiceRequestCreateReferral = "https://fhir.nhs.uk/StructureDefinition/BARSServiceRequest-request-referral";
-    public const string BarsServiceRequestCancelReferral = "https://fhir.nhs.uk/StructureDefinition/BARSServiceRequest-request-validation";
+    public const string BarsServiceRequestCreateReferralProfile = "BARSServiceRequest-request-referral";
+    public const string BarsServiceRequestCancelReferralProfile = "BARSServiceRequest-request-validation";
     public const string BarsLocationIncidentLocation = "BARSLocationIncidentLocation";
     public const string BarsFlagSceneSafety = "BARSFlagSceneSafety";
     public const string ReceivingPerformingOrganisationName = "Receiving/performing Organization";

@@ -85,7 +85,7 @@ public class ReferralService : IReferralService
         {
             case FhirConstants.BarsMessageReasonNew:
             {
-                var createRequest = serviceRequests.FirstOrDefault(sr => sr.HasProfile(FhirConstants.BarsServiceRequestCreateReferral));
+                var createRequest = serviceRequests.FirstOrDefault(sr => sr.HasProfile(FhirConstants.BarsServiceRequestCreateReferralProfile));
                 if (createRequest?.Status == RequestStatus.Active)
                 {
                     return (ReferralWorkflowAction.Create, createRequest);
@@ -95,7 +95,7 @@ public class ReferralService : IReferralService
             }
             case FhirConstants.BarsMessageReasonUpdate:
             {
-                var cancelRequest = serviceRequests.FirstOrDefault(sr => sr.HasProfile(FhirConstants.BarsServiceRequestCancelReferral));
+                var cancelRequest = serviceRequests.FirstOrDefault(sr => sr.HasProfile(FhirConstants.BarsServiceRequestCancelReferralProfile));
                 if (cancelRequest?.Status is RequestStatus.Revoked or RequestStatus.EnteredInError)
                 {
                     return (ReferralWorkflowAction.Cancel, cancelRequest);

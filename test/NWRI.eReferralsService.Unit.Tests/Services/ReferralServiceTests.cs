@@ -250,7 +250,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
     public async Task ProcessMessageAsyncShouldThrowWhenReasonIsNewAndStatusIsNotActive()
     {
         //Arrange
-        var bundleJson = JsonSerializer.Serialize(CreateMessageBundle(FhirConstants.BarsMessageReasonNew, FhirConstants.BarsServiceRequestCreateReferral, RequestStatus.Revoked), _jsonSerializerOptions);
+        var bundleJson = JsonSerializer.Serialize(CreateMessageBundle(FhirConstants.BarsMessageReasonNew, FhirConstants.BarsServiceRequestCreateReferralProfile, RequestStatus.Revoked), _jsonSerializerOptions);
         var headers = _fixture.Create<IHeaderDictionary>();
 
         var sut = CreateReferralService();
@@ -346,7 +346,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
     public async Task ProcessMessageAsyncShouldThrowWhenServiceRequestStatusIsMissing()
     {
         // Arrange
-        var bundle = CreateMessageBundle(FhirConstants.BarsMessageReasonNew, FhirConstants.BarsServiceRequestCreateReferral,null);
+        var bundle = CreateMessageBundle(FhirConstants.BarsMessageReasonNew, FhirConstants.BarsServiceRequestCreateReferralProfile,null);
         var bundleJson = JsonSerializer.Serialize(bundle, _jsonSerializerOptions);
         var headers = _fixture.Create<IHeaderDictionary>();
 
@@ -543,7 +543,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
     {
         // Arrange
         var bundleJson = JsonSerializer.Serialize(
-            CreateMessageBundle(FhirConstants.BarsMessageReasonUpdate, FhirConstants.BarsServiceRequestCancelReferral, RequestStatus.Revoked),
+            CreateMessageBundle(FhirConstants.BarsMessageReasonUpdate, FhirConstants.BarsServiceRequestCancelReferralProfile, RequestStatus.Revoked),
             _jsonSerializerOptions);
 
         var expectedResponse = _fixture.Create<WpasCancelReferralResponse>();
@@ -578,7 +578,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
     {
         // Arrange
         var bundleJson = JsonSerializer.Serialize(
-            CreateMessageBundle(FhirConstants.BarsMessageReasonUpdate, FhirConstants.BarsServiceRequestCancelReferral, RequestStatus.EnteredInError),
+            CreateMessageBundle(FhirConstants.BarsMessageReasonUpdate, FhirConstants.BarsServiceRequestCancelReferralProfile, RequestStatus.EnteredInError),
             _jsonSerializerOptions);
 
         var expectedResponse = _fixture.Create<WpasCancelReferralResponse>();
@@ -608,8 +608,8 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
     }
 
     [Theory]
-    [InlineData(FhirConstants.BarsServiceRequestCancelReferral, RequestStatus.Active)]
-    [InlineData(FhirConstants.BarsServiceRequestCreateReferral, RequestStatus.Revoked)]
+    [InlineData(FhirConstants.BarsServiceRequestCancelReferralProfile, RequestStatus.Active)]
+    [InlineData(FhirConstants.BarsServiceRequestCreateReferralProfile, RequestStatus.Revoked)]
     public async Task ProcessMessageAsyncShouldThrowWhenReasonIsUpdateAndServiceRequestIsInvalidForCancel(string serviceRequestProfile,
         RequestStatus serviceRequestStatus)
     {
@@ -635,7 +635,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
     {
         // Arrange
         var bundleJson = JsonSerializer.Serialize(
-            CreateMessageBundle(FhirConstants.BarsMessageReasonUpdate, FhirConstants.BarsServiceRequestCancelReferral, RequestStatus.Revoked),
+            CreateMessageBundle(FhirConstants.BarsMessageReasonUpdate, FhirConstants.BarsServiceRequestCancelReferralProfile, RequestStatus.Revoked),
             _jsonSerializerOptions);
 
         var headers = _fixture.Create<IHeaderDictionary>();
@@ -676,7 +676,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
     {
         // Arrange
         var bundleJson = JsonSerializer.Serialize(
-            CreateMessageBundle(FhirConstants.BarsMessageReasonUpdate, FhirConstants.BarsServiceRequestCancelReferral, RequestStatus.Revoked),
+            CreateMessageBundle(FhirConstants.BarsMessageReasonUpdate, FhirConstants.BarsServiceRequestCancelReferralProfile, RequestStatus.Revoked),
             _jsonSerializerOptions);
 
         var headers = _fixture.Create<IHeaderDictionary>();
@@ -766,7 +766,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
         }
     }
 
-    private static Bundle CreateMessageBundle(string reasonCode, string serviceRequestProfile = FhirConstants.BarsServiceRequestCreateReferral, RequestStatus? serviceRequestStatus = RequestStatus.Active)
+    private static Bundle CreateMessageBundle(string reasonCode, string serviceRequestProfile = FhirConstants.BarsServiceRequestCreateReferralProfile, RequestStatus? serviceRequestStatus = RequestStatus.Active)
     {
         const string serviceRequestCategorySystem = "https://fhir.nhs.uk/CodeSystem/message-category-servicerequest";
         const string barsUseCaseCategorySystem = "https://fhir.nhs.uk/CodeSystem/usecases-categories-bars";
