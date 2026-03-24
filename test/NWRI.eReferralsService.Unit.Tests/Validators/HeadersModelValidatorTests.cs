@@ -48,7 +48,7 @@ public class HeadersModelValidatorTests
         //Assert
         validationResult.ShouldHaveValidationErrorFor(x => x.TargetIdentifier)
             .WithErrorMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.TargetIdentifier))
-            .WithErrorCode(ValidationErrorCode.MissingRequiredHeaderCode.ToString());
+            .WithErrorCode(nameof(ValidationErrorCode.MissingRequiredHeaderCode));
     }
 
     [Fact]
@@ -63,7 +63,7 @@ public class HeadersModelValidatorTests
         //Assert
         validationResult.ShouldHaveValidationErrorFor(x => x.TargetIdentifier)
             .WithErrorMessage(ValidationMessages.InvalidFhirObject(RequestHeaderKeys.TargetIdentifier, nameof(Identifier)))
-            .WithErrorCode(ValidationErrorCode.InvalidHeaderCode.ToString());
+            .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
     }
 
     [Fact]
@@ -98,7 +98,7 @@ public class HeadersModelValidatorTests
         //Assert
         validationResult.ShouldHaveValidationErrorFor(x => x.EndUserOrganisation)
             .WithErrorMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.EndUserOrganisation))
-            .WithErrorCode(ValidationErrorCode.MissingRequiredHeaderCode.ToString());
+            .WithErrorCode(nameof(ValidationErrorCode.MissingRequiredHeaderCode));
     }
 
     [Fact]
@@ -113,7 +113,7 @@ public class HeadersModelValidatorTests
         //Assert
         validationResult.ShouldHaveValidationErrorFor(x => x.EndUserOrganisation)
             .WithErrorMessage(ValidationMessages.InvalidFhirObject(RequestHeaderKeys.EndUserOrganisation, nameof(Organization)))
-            .WithErrorCode(ValidationErrorCode.InvalidHeaderCode.ToString());
+            .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
     }
 
     [Fact]
@@ -148,7 +148,7 @@ public class HeadersModelValidatorTests
         //Assert
         validationResult.ShouldHaveValidationErrorFor(x => x.RequestingSoftware)
             .WithErrorMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.RequestingSoftware))
-            .WithErrorCode(ValidationErrorCode.MissingRequiredHeaderCode.ToString());
+            .WithErrorCode(nameof(ValidationErrorCode.MissingRequiredHeaderCode));
     }
 
     [Fact]
@@ -163,7 +163,7 @@ public class HeadersModelValidatorTests
         //Assert
         validationResult.ShouldHaveValidationErrorFor(x => x.RequestingSoftware)
             .WithErrorMessage(ValidationMessages.InvalidFhirObject(RequestHeaderKeys.RequestingSoftware, nameof(Device)))
-            .WithErrorCode(ValidationErrorCode.InvalidHeaderCode.ToString());
+            .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
     }
 
     [Fact]
@@ -193,7 +193,7 @@ public class HeadersModelValidatorTests
         //Assert
         validationResult.ShouldHaveValidationErrorFor(x => x.RequestingPractitioner)
             .WithErrorMessage(ValidationMessages.InvalidFhirObject(RequestHeaderKeys.RequestingPractitioner, nameof(PractitionerRole)))
-            .WithErrorCode(ValidationErrorCode.InvalidHeaderCode.ToString());
+            .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
     }
 
     [Fact]
@@ -243,7 +243,7 @@ public class HeadersModelValidatorTests
         //Assert
         validationResult.ShouldHaveValidationErrorFor(x => x.RequestId)
             .WithErrorMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.RequestId))
-            .WithErrorCode(ValidationErrorCode.MissingRequiredHeaderCode.ToString());
+            .WithErrorCode(nameof(ValidationErrorCode.MissingRequiredHeaderCode));
     }
 
     [Fact]
@@ -258,7 +258,7 @@ public class HeadersModelValidatorTests
         //Assert
         validationResult.ShouldHaveValidationErrorFor(x => x.RequestId)
             .WithErrorMessage(ValidationMessages.NotGuidFormat(RequestHeaderKeys.RequestId))
-            .WithErrorCode(ValidationErrorCode.InvalidHeaderCode.ToString());
+            .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
     }
 
     [Fact]
@@ -293,7 +293,7 @@ public class HeadersModelValidatorTests
         //Assert
         validationResult.ShouldHaveValidationErrorFor(x => x.CorrelationId)
             .WithErrorMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.CorrelationId))
-            .WithErrorCode(ValidationErrorCode.MissingRequiredHeaderCode.ToString());
+            .WithErrorCode(nameof(ValidationErrorCode.MissingRequiredHeaderCode));
     }
 
     [Fact]
@@ -308,7 +308,7 @@ public class HeadersModelValidatorTests
         //Assert
         validationResult.ShouldHaveValidationErrorFor(x => x.CorrelationId)
             .WithErrorMessage(ValidationMessages.NotGuidFormat(RequestHeaderKeys.CorrelationId))
-            .WithErrorCode(ValidationErrorCode.InvalidHeaderCode.ToString());
+            .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
     }
 
     [Fact]
@@ -343,7 +343,7 @@ public class HeadersModelValidatorTests
         //Assert
         validationResult.ShouldHaveValidationErrorFor(x => x.UseContext)
             .WithErrorMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.UseContext))
-            .WithErrorCode(ValidationErrorCode.MissingRequiredHeaderCode.ToString());
+            .WithErrorCode(nameof(ValidationErrorCode.MissingRequiredHeaderCode));
     }
 
     [Fact]
@@ -361,7 +361,7 @@ public class HeadersModelValidatorTests
         validationResult.ShouldHaveValidationErrorFor(x => x.UseContext)
             .WithErrorMessage(ValidationMessages.NotExpectedFormat(RequestHeaderKeys.UseContext,
                 RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.UseContext)))
-            .WithErrorCode(ValidationErrorCode.InvalidHeaderCode.ToString());
+            .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
     }
 
     [Theory]
@@ -400,7 +400,7 @@ public class HeadersModelValidatorTests
         //Assert
         validationResult.ShouldHaveValidationErrorFor(x => x.Accept)
             .WithErrorMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.Accept))
-            .WithErrorCode(ValidationErrorCode.MissingRequiredHeaderCode.ToString());
+            .WithErrorCode(nameof(ValidationErrorCode.MissingRequiredHeaderCode));
     }
 
     [Theory]
@@ -422,7 +422,7 @@ public class HeadersModelValidatorTests
         validationResult.ShouldHaveValidationErrorFor(x => x.Accept)
             .WithErrorMessage(ValidationMessages.NotExpectedFormat(RequestHeaderKeys.Accept,
                 RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept)))
-            .WithErrorCode(ValidationErrorCode.InvalidHeaderCode.ToString());
+            .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
     }
 
     [Theory]

@@ -123,24 +123,23 @@ public class BundleCreateReferralModelValidatorTests
     public void ShouldContainErrorWhenPatientIdentifierMissing()
     {
         var model = CreateValidModelFromExampleBundle();
-        model.Patient!.Identifier = [];
+        model.Patient!.Identifier = null;
 
         var result = _sut.TestValidate(model);
-        result.Errors.Should().Contain(e =>
-            e.ErrorMessage == ValidationMessages.MissingEntityField<Patient>(nameof(Patient.Identifier)));
+
+        result.Errors.Should().Contain(e => e.ErrorMessage == "Patient.Identifier is required");
+        result.Errors.Should().NotContain(e => e.ErrorMessage == "Patient NHS number identifier is required");
     }
 
-    [Fact]
-    public void ShouldContainErrorWhenPatientNhsNumberMissing()
+    [Theory]
+    [InlineData(NhsNumberSystem, null)]
+    [InlineData("invalid-system", "SomeValue")]
+    public void ShouldContainErrorWhenPatientNhsNumberMissing(string identifierSystem, string? identifierValue)
     {
         var model = CreateValidModelFromExampleBundle();
         model.Patient!.Identifier =
         [
-            new Identifier
-            {
-                System = "https://example.org/local-patient-id",
-                Value = "ABC123"
-            }
+            new Identifier(identifierSystem, identifierValue)
         ];
 
         var result = _sut.TestValidate(model);

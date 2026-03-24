@@ -15,7 +15,7 @@ public static class OperationOutcomeCreator
             {
                 Severity = OperationOutcome.IssueSeverity.Error,
                 Code = error.IssueType,
-                Details = new CodeableConcept(BaseFhirHttpError.System, error.Code, error.Display),
+                Details = new CodeableConcept(BaseFhirHttpError.System, error.Code, error.Display)
             };
 
             if (!string.IsNullOrWhiteSpace(error.DiagnosticsMessage))

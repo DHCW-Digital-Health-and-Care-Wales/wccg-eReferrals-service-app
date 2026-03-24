@@ -147,7 +147,7 @@ public class WpasCreateReferralRequestMapperTests
         var model = CreateValidModelFromExampleBundle();
 
         model.Patient!.Identifier = model.Patient.Identifier
-            .Where(i => !string.Equals(i.System, "https://fhir.nhs.uk/Id/nhs-number", StringComparison.OrdinalIgnoreCase))
+            .Where(i => !string.Equals(i.System, NhsNumberSystem, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
         var mapper = new WpasCreateReferralRequestMapper();
