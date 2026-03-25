@@ -18,7 +18,7 @@ internal static class SwaggerHelpers
                 Name = header,
                 Required = isRequired,
                 Example = new OpenApiString(RequestHeaderKeys.GetExampleValue(header)),
-                Schema = new OpenApiSchema { Type = "string" }
+                Schema = new OpenApiSchema {Type = "string"}
             });
         }
     }
@@ -37,11 +37,11 @@ internal static class SwaggerHelpers
             Name = name,
             Required = required,
             Example = example,
-            Schema = new OpenApiSchema { Type = "string" }
+            Schema = new OpenApiSchema {Type = "string"}
         });
     }
 
-    public static void AddIfMissing(OpenApiOperation operation, OpenApiParameter parameter)
+    private static void AddIfMissing(OpenApiOperation operation, OpenApiParameter parameter)
     {
         operation.Parameters ??= new List<OpenApiParameter>();
 
@@ -80,10 +80,7 @@ internal static class SwaggerHelpers
             {
                 {
                     RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept),
-                    new OpenApiMediaType
-                    {
-                        Example = new OpenApiString(File.ReadAllText(examplePath))
-                    }
+                    new OpenApiMediaType {Example = new OpenApiString(File.ReadAllText(examplePath))}
                 }
             }
         };

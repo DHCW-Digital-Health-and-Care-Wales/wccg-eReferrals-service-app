@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using JetBrains.Annotations;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using NWRI.eReferralsService.API.Constants;
@@ -9,6 +10,7 @@ using NWRI.eReferralsService.API.Swagger.Attributes;
 namespace NWRI.eReferralsService.API.Swagger;
 
 [ExcludeFromCodeCoverage]
+[UsedImplicitly(Reason = "Registered in DI")]
 public sealed class ProcessMessageOperationFilter : IOperationFilter
 {
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
@@ -67,28 +69,28 @@ public sealed class ProcessMessageOperationFilter : IOperationFilter
                 "Too many requests",
                 "Swagger/Examples/common-too-many-requests.json"),
             ["500"] = new OpenApiResponse
+            {
+                Description = "Internal Server Error",
+                Content = new Dictionary<string, OpenApiMediaType>
                 {
-                    Description = "Internal Server Error",
-                    Content = new Dictionary<string, OpenApiMediaType>
+                    [FhirConstants.FhirMediaType] = new()
                     {
-                        [FhirConstants.FhirMediaType] = new()
+                        Examples = new Dictionary<string, OpenApiExample>
                         {
-                            Examples = new Dictionary<string, OpenApiExample>
+                            ["proxy-server-error"] = new()
                             {
-                                ["proxy-server-error"] = new()
-                                {
-                                    Summary = "Proxy error",
-                                    Value = new OpenApiString(File.ReadAllText("Swagger/Examples/common-proxy-server-error.json"))
-                                },
-                                ["receiver-server-error"] = new()
-                                {
-                                    Summary = "WPAS API error",
-                                    Value = new OpenApiString(File.ReadAllText("Swagger/Examples/common-external-server-error.json"))
-                                }
+                                Summary = "Proxy error",
+                                Value = new OpenApiString(File.ReadAllText("Swagger/Examples/common-proxy-server-error.json"))
+                            },
+                            ["receiver-server-error"] = new()
+                            {
+                                Summary = "WPAS API error",
+                                Value = new OpenApiString(File.ReadAllText("Swagger/Examples/common-external-server-error.json"))
                             }
                         }
                     }
-                },
+                }
+            },
             ["503"] = SwaggerHelpers.CreateFhirResponseWithExample(
                 "Service Unavailable",
                 "Swagger/Examples/common-service-unavailable.json")

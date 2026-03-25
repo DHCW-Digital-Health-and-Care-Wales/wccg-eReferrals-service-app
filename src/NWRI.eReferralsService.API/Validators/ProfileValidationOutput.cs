@@ -2,6 +2,6 @@ namespace NWRI.eReferralsService.API.Validators;
 
 public class ProfileValidationOutput
 {
-    public bool IsSuccessful { get; set; }
-    public List<string>? Errors { get; set; }
+    public bool IsSuccessful { get; init; }
+    public List<string>? Errors { get; init; }
 }

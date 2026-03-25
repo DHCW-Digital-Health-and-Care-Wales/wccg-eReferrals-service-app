@@ -21,14 +21,16 @@ public class HeadersModelValidatorTests
 
     public HeadersModelValidatorTests()
     {
-        _sut = new HeadersModelValidator(new JsonSerializerOptions().ForFhirExtended());
-        _sut.ClassLevelCascadeMode = CascadeMode.Continue;
-        _sut.RuleLevelCascadeMode = CascadeMode.Stop;
+        _sut = new HeadersModelValidator(new JsonSerializerOptions().ForFhirExtended())
+        {
+            ClassLevelCascadeMode = CascadeMode.Continue,
+            RuleLevelCascadeMode = CascadeMode.Stop
+        };
 
         _fixture.Register(() => new Identifier(_fixture.Create<string>(), _fixture.Create<string>()));
-        _fixture.Register(() => new Organization { Id = _fixture.Create<string>() });
-        _fixture.Register(() => new Device { Id = _fixture.Create<string>() });
-        _fixture.Register(() => new PractitionerRole { Id = _fixture.Create<string>() });
+        _fixture.Register(() => new Organization {Id = _fixture.Create<string>()});
+        _fixture.Register(() => new Device {Id = _fixture.Create<string>()});
+        _fixture.Register(() => new PractitionerRole {Id = _fixture.Create<string>()});
     }
 
     [Theory]

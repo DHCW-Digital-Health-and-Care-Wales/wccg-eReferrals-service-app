@@ -9,5 +9,5 @@ public class ManagedIdentityConfig
 {
     public static string SectionName => "ManagedIdentity";
 
-    public required string ClientId { get; set; }
+    public required string ClientId { get; init; }
 }
