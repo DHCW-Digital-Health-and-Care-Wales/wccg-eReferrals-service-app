@@ -744,8 +744,6 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
         var cancelBundleValidator = _fixture.Mock<IValidator<BundleCancelReferralModel>>().Object;
         var jsonSerializerOptions = new JsonSerializerOptions().ForFhirExtended();
 
-        _fixture.Create<WpasCreateReferralRequestMapper>();
-
         var referralValidationService = new ReferralBundleValidationService(
             createBundleValidator,
             cancelBundleValidator,
