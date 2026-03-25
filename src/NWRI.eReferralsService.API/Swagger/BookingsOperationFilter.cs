@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using JetBrains.Annotations;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using NWRI.eReferralsService.API.Swagger.Attributes;
@@ -8,6 +9,7 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 namespace NWRI.eReferralsService.API.Swagger;
 
 [ExcludeFromCodeCoverage]
+[UsedImplicitly(Reason = "Registered in DI")]
 public sealed class BookingsOperationFilter : IOperationFilter
 {
     public void Apply(OpenApiOperation operation, OperationFilterContext context)

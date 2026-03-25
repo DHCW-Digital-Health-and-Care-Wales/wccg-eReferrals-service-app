@@ -17,7 +17,7 @@ public sealed class WpasCreateReferralRequestMapper
     private const string UrgentReferrerPriorityType = "2";
     private const string OphthalmologyMainSpecialtyCode = "130";
 
-    public WpasCreateReferralRequest Map(BundleCreateReferralModel createReferralModel)
+    public static WpasCreateReferralRequest Map(BundleCreateReferralModel createReferralModel)
     {
         var encounterId = FormatFixedWidthLeftJustified(createReferralModel.Encounter?.Identifier.First().Value!, 12);
         var receiverOrganisationId = createReferralModel.Organizations?

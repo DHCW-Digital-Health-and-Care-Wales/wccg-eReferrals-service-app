@@ -25,11 +25,11 @@ public class WpasCreateReferralRequestMapperTests
     {
         var model = CreateValidModelFromExampleBundle();
 
-        var mapper = new WpasCreateReferralRequestMapper();
-        var payload = mapper.Map(model);
+        var payload = WpasCreateReferralRequestMapper.Map(model);
 
         using (new AssertionScope())
         {
+            payload.RecordId.Should().Be("140:12345678");
             payload.ContractDetails.ProviderOrganisationCode.Should().Be("7A4BV");
             payload.ReferralDetails.ReferringOrganisationCode.Should().Be("7A4BV");
             payload.ReferralDetails.OutpatientReferralSource.Should().Be("TP");
@@ -47,6 +47,10 @@ public class WpasCreateReferralRequestMapperTests
             payload.ReferralDetails.ReferrerPriorityType.Should().Be("2");
             payload.ReferralDetails.ReasonForReferral.Should().Be("Glaucoma");
             payload.ReferralDetails.ReferralIdentifier.Length.Should().BeLessOrEqualTo(12);
+            payload.PatientDetails.UsualAddress.NoAndStreet.Should().Be("22 Brightside Crescent");
+            payload.PatientDetails.UsualAddress.Town.Should().Be("Overtown");
+            payload.PatientDetails.UsualAddress.Postcode.Should().Be("LS10 4YU");
+            payload.PatientDetails.UsualAddress.Locality.Should().BeEmpty();
         }
     }
 
@@ -70,8 +74,7 @@ public class WpasCreateReferralRequestMapperTests
 
         var model = BundleCreateReferralModel.FromBundle(bundle);
 
-        var mapper = new WpasCreateReferralRequestMapper();
-        var payload = mapper.Map(model);
+        var payload = WpasCreateReferralRequestMapper.Map(model);
 
         payload.ReferralDetails.ReasonForReferral.Should().Be(expected);
         payload.ReferralDetails.ReasonForReferral.Length.Should().Be(8);
@@ -83,8 +86,7 @@ public class WpasCreateReferralRequestMapperTests
         var model = CreateValidModelFromExampleBundle();
         model.Conditions = [];
 
-        var mapper = new WpasCreateReferralRequestMapper();
-        var act = () => mapper.Map(model);
+        var act = () => WpasCreateReferralRequestMapper.Map(model);
 
         act.Should().Throw<InvalidOperationException>();
     }
@@ -97,8 +99,7 @@ public class WpasCreateReferralRequestMapperTests
             .Where(o => !StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, ReceivingPerformingOrganisationName))
             .ToList();
 
-        var mapper = new WpasCreateReferralRequestMapper();
-        var act = () => mapper.Map(model);
+        var act = () => WpasCreateReferralRequestMapper.Map(model);
 
         act.Should().Throw<InvalidOperationException>();
     }
@@ -111,8 +112,7 @@ public class WpasCreateReferralRequestMapperTests
             .Where(o => !StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, SenderOrganisationName))
             .ToList();
 
-        var mapper = new WpasCreateReferralRequestMapper();
-        var act = () => mapper.Map(model);
+        var act = () => WpasCreateReferralRequestMapper.Map(model);
 
         act.Should().Throw<InvalidOperationException>();
     }
@@ -123,8 +123,7 @@ public class WpasCreateReferralRequestMapperTests
         var model = CreateValidModelFromExampleBundle();
         model.Patient!.Address = [];
 
-        var mapper = new WpasCreateReferralRequestMapper();
-        var act = () => mapper.Map(model);
+        var act = () => WpasCreateReferralRequestMapper.Map(model);
 
         act.Should().Throw<InvalidOperationException>();
     }
@@ -135,8 +134,7 @@ public class WpasCreateReferralRequestMapperTests
         var model = CreateValidModelFromExampleBundle();
         model.Patient!.BirthDate = null;
 
-        var mapper = new WpasCreateReferralRequestMapper();
-        var payload = mapper.Map(model);
+        var payload = WpasCreateReferralRequestMapper.Map(model);
 
         payload.PatientDetails.BirthDate.Should().BeEmpty();
     }
@@ -150,8 +148,7 @@ public class WpasCreateReferralRequestMapperTests
             .Where(i => !string.Equals(i.System, NhsNumberSystem, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
-        var mapper = new WpasCreateReferralRequestMapper();
-        var act = () => mapper.Map(model);
+        var act = () => WpasCreateReferralRequestMapper.Map(model);
 
         act.Should().Throw<InvalidOperationException>();
     }

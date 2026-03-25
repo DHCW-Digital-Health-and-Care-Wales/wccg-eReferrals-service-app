@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using JetBrains.Annotations;
 using Microsoft.OpenApi.Models;
 using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.Swagger.Attributes;
@@ -8,6 +9,7 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 namespace NWRI.eReferralsService.API.Swagger;
 
 [ExcludeFromCodeCoverage]
+[UsedImplicitly(Reason = "Registered in DI")]
 public sealed class MetadataOperationFilter : IOperationFilter
 {
     private static readonly string[] OptionalHeaders =
@@ -18,8 +20,8 @@ public sealed class MetadataOperationFilter : IOperationFilter
 
     private static readonly string[] RequiredHeaders =
         RequestHeaderKeys.GetAll()
-        .Except([.. OptionalHeaders, RequestHeaderKeys.UseContext])
-        .ToArray();
+            .Except([.. OptionalHeaders, RequestHeaderKeys.UseContext])
+            .ToArray();
 
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {

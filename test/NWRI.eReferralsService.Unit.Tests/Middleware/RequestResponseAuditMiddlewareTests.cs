@@ -16,25 +16,27 @@ public class RequestResponseAuditMiddlewareTests
         // Arrange
         var spyLogger = new SpyEventLogger();
 
-        var context = new DefaultHttpContext();
-        context.Request.Method = HttpMethods.Post;
-        context.Request.Path = "/$process-message";
-        context.Request.ContentLength = 123;
-        context.Request.Headers[RequestHeaderKeys.CorrelationId] = "corr-1";
-        context.Request.Headers[RequestHeaderKeys.RequestId] = "req-1";
+        var context = new DefaultHttpContext
+        {
+            Request =
+            {
+                Method = HttpMethods.Post,
+                Path = "/$process-message",
+                ContentLength = 123,
+                Headers =
+                {
+                    [RequestHeaderKeys.CorrelationId] = "corr-1",
+                    [RequestHeaderKeys.RequestId] = "req-1"
+                }
+            }
+        };
 
         context.SetEndpoint(new Endpoint(
             _ => Task.CompletedTask,
             new EndpointMetadataCollection(new ControllerActionDescriptor(), new AuditLogRequestAttribute()),
             "Test controller endpoint"));
 
-        RequestDelegate next = ctx =>
-        {
-            ctx.Response.StatusCode = StatusCodes.Status200OK;
-            return Task.CompletedTask;
-        };
-
-        var middleware = new RequestResponseAuditMiddleware(next, spyLogger);
+        var middleware = new RequestResponseAuditMiddleware(Next, spyLogger);
 
         // Act
         await middleware.InvokeAsync(context);
@@ -52,6 +54,13 @@ public class RequestResponseAuditMiddlewareTests
         var resp = (EventCatalogue.ResponseSent)spyLogger.AuditEvents[1];
         resp.StatusCode.Should().Be(StatusCodes.Status200OK);
         resp.LatencyMs.Should().BeGreaterOrEqualTo(0);
+        return;
+
+        Task Next(HttpContext ctx)
+        {
+            ctx.Response.StatusCode = StatusCodes.Status200OK;
+            return Task.CompletedTask;
+        }
     }
 
     [Fact]
@@ -60,17 +69,16 @@ public class RequestResponseAuditMiddlewareTests
         // Arrange
         var spyLogger = new SpyEventLogger();
 
-        var context = new DefaultHttpContext();
-        context.Request.Method = HttpMethods.Get;
-        context.Request.Path = "/swagger/index.html";
-
-        RequestDelegate next = ctx =>
+        var context = new DefaultHttpContext
         {
-            ctx.Response.StatusCode = StatusCodes.Status200OK;
-            return Task.CompletedTask;
+            Request =
+            {
+                Method = HttpMethods.Get,
+                Path = "/swagger/index.html"
+            }
         };
 
-        var middleware = new RequestResponseAuditMiddleware(next, spyLogger);
+        var middleware = new RequestResponseAuditMiddleware(Next, spyLogger);
 
         // Act
         await middleware.InvokeAsync(context);
@@ -78,6 +86,13 @@ public class RequestResponseAuditMiddlewareTests
         // Assert
         spyLogger.AuditEvents.Should().BeEmpty();
         spyLogger.LogErrorEvents.Should().BeEmpty();
+        return;
+
+        Task Next(HttpContext ctx)
+        {
+            ctx.Response.StatusCode = StatusCodes.Status200OK;
+            return Task.CompletedTask;
+        }
     }
 
     [Fact]
@@ -86,24 +101,26 @@ public class RequestResponseAuditMiddlewareTests
         // Arrange
         var spyLogger = new SpyEventLogger();
 
-        var context = new DefaultHttpContext();
-        context.Request.Method = HttpMethods.Get;
-        context.Request.Path = "/ServiceRequest/123";
-        context.Request.Headers[RequestHeaderKeys.CorrelationId] = "corr-1";
-        context.Request.Headers[RequestHeaderKeys.RequestId] = "req-1";
+        var context = new DefaultHttpContext
+        {
+            Request =
+            {
+                Method = HttpMethods.Get,
+                Path = "/ServiceRequest/123",
+                Headers =
+                {
+                    [RequestHeaderKeys.CorrelationId] = "corr-1",
+                    [RequestHeaderKeys.RequestId] = "req-1"
+                }
+            }
+        };
 
         context.SetEndpoint(new Endpoint(
             _ => Task.CompletedTask,
             new EndpointMetadataCollection(new ControllerActionDescriptor(), new AuditLogRequestAttribute()),
             "Test controller endpoint"));
 
-        RequestDelegate next = ctx =>
-        {
-            ctx.Response.StatusCode = StatusCodes.Status200OK;
-            return Task.CompletedTask;
-        };
-
-        var middleware = new RequestResponseAuditMiddleware(next, spyLogger);
+        var middleware = new RequestResponseAuditMiddleware(Next, spyLogger);
 
         // Act
         await middleware.InvokeAsync(context);
@@ -112,5 +129,12 @@ public class RequestResponseAuditMiddlewareTests
         spyLogger.AuditEvents.Should().HaveCount(2);
         spyLogger.AuditEvents[0].Should().BeOfType<EventCatalogue.RequestReceived>();
         spyLogger.AuditEvents[1].Should().BeOfType<EventCatalogue.ResponseSent>();
+        return;
+
+        Task Next(HttpContext ctx)
+        {
+            ctx.Response.StatusCode = StatusCodes.Status200OK;
+            return Task.CompletedTask;
+        }
     }
 }

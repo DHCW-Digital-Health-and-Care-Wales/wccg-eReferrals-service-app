@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using NWRI.eReferralsService.API.Exceptions;
 using NWRI.eReferralsService.API.Extensions.Logger;
 using NWRI.eReferralsService.API.Middleware;
-using NWRI.eReferralsService.API.Queries;
+using NWRI.eReferralsService.API.Models.Queries;
 using NWRI.eReferralsService.API.Swagger.Attributes;
 
 namespace NWRI.eReferralsService.API.Controllers;

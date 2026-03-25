@@ -35,7 +35,7 @@ public class NotSuccessfulWpasApiCallExceptionTests
     [InlineData(HttpStatusCode.BadRequest)]
     [InlineData(HttpStatusCode.TooManyRequests)]
     [InlineData(HttpStatusCode.NotFound)]
-    public void ShouldMapNon5xxStatusCodesToReceiverServerError(HttpStatusCode statusCode)
+    public void ShouldMapNon5XxStatusCodesToReceiverServerError(HttpStatusCode statusCode)
     {
         // Arrange
         var errorMessage = _fixture.Create<string>();
@@ -56,7 +56,7 @@ public class NotSuccessfulWpasApiCallExceptionTests
     [InlineData(HttpStatusCode.NotImplemented)]
     [InlineData(HttpStatusCode.GatewayTimeout)]
     [InlineData(HttpStatusCode.ServiceUnavailable)]
-    public void ShouldMap5xxStatusCodesAbove500ToServiceUnavailableAndReceiverUnavailableError(HttpStatusCode statusCode)
+    public void ShouldMap5XxStatusCodesAbove500ToServiceUnavailableAndReceiverUnavailableError(HttpStatusCode statusCode)
     {
         // Arrange
         var errorMessage = _fixture.Create<string>();

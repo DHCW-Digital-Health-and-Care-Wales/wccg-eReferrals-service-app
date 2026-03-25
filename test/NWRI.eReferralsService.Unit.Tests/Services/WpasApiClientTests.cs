@@ -40,7 +40,7 @@ public class WpasApiClientTests
         // Arrange
         var request = WpasCreateReferralRequestBuilder.CreateValid();
         var expectedRequestJson = JsonSerializer.Serialize(request);
-        var expectedReferralId = WpasCreateReferralRequestBuilder.ValidReferralId;
+        const string expectedReferralId = WpasCreateReferralRequestBuilder.ValidReferralId;
         var expectedResponse = new WpasCreateReferralResponse
         {
             System = "Welsh PAS",
@@ -79,8 +79,8 @@ public class WpasApiClientTests
         // Arrange
         var requestBody = new WpasCancelReferralRequest();
         var expectedRequestJson = JsonSerializer.Serialize(requestBody);
-        var expectedReferralId = "140:12345678";
-        var expectedResponseJson = $@"{{""ReferralId"":""{expectedReferralId}""}}";
+        const string expectedReferralId = "140:12345678";
+        const string expectedResponseJson = $$"""{"ReferralId":"{{expectedReferralId}}"}""";
 
         using var mockHttp = new MockHttpMessageHandler();
         mockHttp.Expect(HttpMethod.Post, $"/{_wpasApiConfig.CancelReferralEndpoint}")
@@ -139,7 +139,7 @@ public class WpasApiClientTests
     {
         // Arrange
         var requestBody = WpasCreateReferralRequestBuilder.CreateValid();
-        var invalidJson = "{ this is not valid json";
+        const string invalidJson = "{ this is not valid json";
 
         using var mockHttp = new MockHttpMessageHandler();
         mockHttp.Expect(HttpMethod.Post, $"/{_wpasApiConfig.CreateReferralEndpoint}")

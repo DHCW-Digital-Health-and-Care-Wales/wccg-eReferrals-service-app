@@ -206,7 +206,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
             .Setup(x => x.ValidateAsync(It.IsAny<BundleCreateReferralModel>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ValidationResult());
 
-        var expectedReferralId = WpasCreateReferralRequestBuilder.ValidReferralId;
+        const string expectedReferralId = WpasCreateReferralRequestBuilder.ValidReferralId;
         _fixture.Mock<IWpasApiClient>()
             .Setup(x => x.CreateReferralAsync(It.IsAny<WpasCreateReferralRequest>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new WpasCreateReferralResponse
@@ -744,9 +744,6 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
         var cancelBundleValidator = _fixture.Mock<IValidator<BundleCancelReferralModel>>().Object;
         var jsonSerializerOptions = new JsonSerializerOptions().ForFhirExtended();
 
-        var wpasCreateReferralRequestMapper = _fixture.Create<WpasCreateReferralRequestMapper>();
-        var wpasJsonSchemaValidator = _schemaValidator;
-
         var referralValidationService = new ReferralBundleValidationService(
             createBundleValidator,
             cancelBundleValidator,
@@ -756,8 +753,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
 
         var referralWorkflowProcessor = new ReferralWorkflowProcessor(
             referralValidationService,
-            wpasCreateReferralRequestMapper,
-            wpasJsonSchemaValidator,
+            _schemaValidator,
             wpasApiClient,
             eventLogger
         );

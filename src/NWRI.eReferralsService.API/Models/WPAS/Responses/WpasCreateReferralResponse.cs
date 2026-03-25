@@ -1,5 +1,8 @@
+using JetBrains.Annotations;
+
 namespace NWRI.eReferralsService.API.Models.WPAS.Responses;
 
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers, Reason = "Part of API contract")]
 public record WpasCreateReferralResponse : WpasReferralResponse
 {
     public required string System { get; init; }

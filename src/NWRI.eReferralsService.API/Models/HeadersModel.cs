@@ -6,16 +6,16 @@ namespace NWRI.eReferralsService.API.Models;
 public class HeadersModel
 {
     //Required
-    public required string? TargetIdentifier { get; set; }
-    public required string? EndUserOrganisation { get; set; }
-    public required string? RequestingSoftware { get; set; }
-    public required string? RequestId { get; set; }
-    public required string? CorrelationId { get; set; }
-    public required string? UseContext { get; set; }
-    public required string? Accept { get; set; }
+    public required string? TargetIdentifier { get; init; }
+    public required string? EndUserOrganisation { get; init; }
+    public required string? RequestingSoftware { get; init; }
+    public required string? RequestId { get; init; }
+    public required string? CorrelationId { get; init; }
+    public required string? UseContext { get; init; }
+    public required string? Accept { get; init; }
 
     //Optional
-    public required string? RequestingPractitioner { get; set; }
+    public required string? RequestingPractitioner { get; init; }
 
     public static HeadersModel FromHeaderDictionary(IHeaderDictionary headerDictionary)
     {

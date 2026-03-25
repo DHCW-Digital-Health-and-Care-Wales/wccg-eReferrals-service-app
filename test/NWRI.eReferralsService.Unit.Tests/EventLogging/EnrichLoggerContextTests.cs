@@ -27,7 +27,7 @@ public class EnrichLoggerContextTests
     public void InitializeShouldSetCorrelationIdGlobalPropertyWhenHeaderIsPresent()
     {
         var context = new DefaultHttpContext();
-        var expectedCorrelationId = "corr-123";
+        const string expectedCorrelationId = "corr-123";
         context.Request.Headers[RequestHeaderKeys.CorrelationId] = expectedCorrelationId;
 
         var httpContextAccessor = new HttpContextAccessor { HttpContext = context };
