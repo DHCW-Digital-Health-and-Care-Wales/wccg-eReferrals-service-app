@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using JetBrains.Annotations;
+using Microsoft.AspNetCore.Mvc;
 
-namespace NWRI.eReferralsService.API.Queries;
+namespace NWRI.eReferralsService.API.Models.Queries;
 
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers, Reason = "Used by framework itself")]
 public class GetBookingSlotQuery
 {
     [FromQuery(Name = "status")]

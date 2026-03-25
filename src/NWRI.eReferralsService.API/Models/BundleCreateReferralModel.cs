@@ -1,10 +1,12 @@
 using Hl7.Fhir.Model;
+using JetBrains.Annotations;
 using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.Extensions;
 using Task = Hl7.Fhir.Model.Task;
 
 namespace NWRI.eReferralsService.API.Models;
 
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers, Reason = "Part of FHIR model")]
 public class BundleCreateReferralModel : IBundleModel<BundleCreateReferralModel>
 {
     public required MessageHeader? MessageHeader { get; set; }

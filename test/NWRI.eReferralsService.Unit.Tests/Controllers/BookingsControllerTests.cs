@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.Controllers;
 using NWRI.eReferralsService.API.Exceptions;
-using NWRI.eReferralsService.API.Queries;
+using NWRI.eReferralsService.API.Models.Queries;
 using NWRI.eReferralsService.Unit.Tests.Extensions;
 
 namespace NWRI.eReferralsService.Unit.Tests.Controllers;

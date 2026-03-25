@@ -1,20 +1,17 @@
 using System.ComponentModel;
+using JetBrains.Annotations;
 using NWRI.eReferralsService.API.EventLogging.Interfaces;
 
 namespace NWRI.eReferralsService.API.EventLogging;
 
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers, Reason = "Used by structured logging")]
 public static class EventCatalogue
 {
     [Description("REQ_RECEIVED")]
-    public record RequestReceived(
-        string Method,
-        string Path,
-        long? RequestSize) : IAuditEvent;
+    public record RequestReceived(string Method, string Path, long? RequestSize) : IAuditEvent;
 
     [Description("RESP_SENT")]
-    public record ResponseSent(
-        int StatusCode,
-        long LatencyMs) : IAuditEvent;
+    public record ResponseSent(int StatusCode, long LatencyMs) : IAuditEvent;
 
     [Description("VAL_PAYLOAD_STARTED")]
     public record PayloadValidationStarted : IAuditEvent;
@@ -32,16 +29,16 @@ public static class EventCatalogue
     public record MapFhirToWpas : IAuditEvent;
 
     [Description("INT_WPAS_SUCCESS")]
-    public record DataSuccessfullyCommittedToWpas(
-        long ExecutionTimeMs,
-        string? WpasReferralId) : IAuditEvent;
+    public record DataSuccessfullyCommittedToWpas(long ExecutionTimeMs, string? WpasReferralId) : IAuditEvent;
 
     [Description("AUDIT_REFERRAL_ACCEPTED")]
-    public record AuditReferralAccepted(
+    public record AuditReferralAccepted
+    (
         string? SourceSystem,
         string? UserRole,
         string? WpasReferralId,
-        long ProcessingTimeTotalMs) : IAuditEvent;
+        long ProcessingTimeTotalMs
+    ) : IAuditEvent;
 
     [Description("ERR_AUTH_FAILED")]
     public record AuthFailedError : IErrorEvent;
