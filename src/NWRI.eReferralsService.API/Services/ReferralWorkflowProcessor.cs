@@ -16,20 +16,17 @@ namespace NWRI.eReferralsService.API.Services;
 public class ReferralWorkflowProcessor : IReferralWorkflowProcessor
 {
     private readonly ReferralBundleValidationService _referralBundleValidationService;
-    private readonly WpasCreateReferralRequestMapper _wpasCreateReferralRequestMapper;
     private readonly WpasJsonSchemaValidator _wpasJsonSchemaValidator;
     private readonly IWpasApiClient _wpasApiClient;
     private readonly IEventLogger _eventLogger;
 
     public ReferralWorkflowProcessor(
         ReferralBundleValidationService referralBundleValidationService,
-        WpasCreateReferralRequestMapper wpasCreateReferralRequestMapper,
         WpasJsonSchemaValidator wpasJsonSchemaValidator,
         IWpasApiClient wpasApiClient,
         IEventLogger eventLogger)
     {
         _referralBundleValidationService = referralBundleValidationService;
-        _wpasCreateReferralRequestMapper = wpasCreateReferralRequestMapper;
         _wpasJsonSchemaValidator = wpasJsonSchemaValidator;
         _wpasApiClient = wpasApiClient;
         _eventLogger = eventLogger;
@@ -79,7 +76,7 @@ public class ReferralWorkflowProcessor : IReferralWorkflowProcessor
     {
         try
         {
-            return _wpasCreateReferralRequestMapper.Map(model);
+            return WpasCreateReferralRequestMapper.Map(model);
         }
         catch (Exception ex)
         {

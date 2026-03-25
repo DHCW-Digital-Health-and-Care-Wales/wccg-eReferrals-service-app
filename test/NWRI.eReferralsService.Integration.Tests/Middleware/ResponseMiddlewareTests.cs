@@ -421,7 +421,7 @@ public class ResponseMiddlewareTests
     {
         // Arrange
         const string resourcePath = "Resources/Fhir/metadata-capability-statement-response.json";
-        var cause = "File does not exist.";
+        const string cause = "File does not exist.";
         var exception = new CapabilityStatementUnavailableException(resourcePath, cause);
 
         var requestId = _fixture.Create<string>();

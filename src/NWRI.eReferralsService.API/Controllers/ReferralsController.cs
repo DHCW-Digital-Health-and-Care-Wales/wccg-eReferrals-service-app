@@ -6,6 +6,8 @@ using NWRI.eReferralsService.API.Middleware;
 using NWRI.eReferralsService.API.Services;
 using NWRI.eReferralsService.API.Swagger.Attributes;
 
+// ReSharper disable RouteTemplates.ActionRoutePrefixCanBeExtractedToControllerRoute
+
 namespace NWRI.eReferralsService.API.Controllers;
 
 [ApiController]
