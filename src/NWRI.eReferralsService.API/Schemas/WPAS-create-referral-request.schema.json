@@ -174,7 +174,7 @@
         "ReferralIdentifier": {
           "description": "The unique identifier for this referral as recorded within the source/sender system.  https://www.datadictionary.wales.nhs.uk/index.html#!WordDocuments/referralidentifier.htm",
           "type": "string",
-          "maxLength": 12
+          "maxLength": 36
         }
       },
       "required": [

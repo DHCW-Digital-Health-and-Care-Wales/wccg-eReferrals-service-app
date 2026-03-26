@@ -19,7 +19,7 @@ public sealed class WpasCreateReferralRequestMapper
 
     public static WpasCreateReferralRequest Map(BundleCreateReferralModel createReferralModel)
     {
-        var encounterId = FormatFixedWidthLeftJustified(createReferralModel.Encounter?.Identifier.First().Value!, 12);
+        var encounterId = createReferralModel.Encounter?.Identifier.First().Value!;
         var receiverOrganisationId = createReferralModel.Organizations?
             .First(x => StringComparer.InvariantCultureIgnoreCase.Equals(x.Name, ReceivingPerformingOrganisationName))
             .Identifier.First().Value!;
