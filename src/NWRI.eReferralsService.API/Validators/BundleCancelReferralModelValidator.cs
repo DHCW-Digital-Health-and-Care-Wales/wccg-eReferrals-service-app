@@ -13,7 +13,10 @@ public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancel
     private const string FocusReference = "focus.reference";
     private const string SenderReference = "sender.reference";
     private const string MetaProfile = "meta.profile";
+    private const string MetaLastUpdated = "meta.lastUpdated";
     private const string OccurrencePeriod = "occurrencePeriod";
+    private const string IdentifierSystem = "identifier.system";
+    private const string IdentifierValue = "identifier.value";
 
     public BundleCancelReferralModelValidator()
     {
@@ -120,7 +123,9 @@ public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancel
                     .DependentRules(() =>
                     {
                         patient.RuleFor(x => x.Identifier)
-                            .Must(ids => ids.Any(i => string.Equals(i.System, NhsNumberSystem, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(i.Value)))
+                            .Must(ids => ids.Any(i =>
+                                string.Equals(i.System, NhsNumberSystem, StringComparison.OrdinalIgnoreCase) &&
+                                !string.IsNullOrEmpty(i.Value)))
                             .WithMessage(MissingPatientNhsNumber);
                     });
 
@@ -142,17 +147,57 @@ public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancel
             });
 
         RuleFor(x => x.Organizations!)
-            .NotEmpty()
-            .WithMessage(MissingBundleEntity(nameof(Organization)))
-            .DependentRules(() =>
-            {
-                RuleForEach(x => x.Organizations!)
-                    .ChildRules(organization =>
-                    {
-                        organization.RuleFor(x => x.Identifier)
-                            .NotEmpty()
-                            .WithMessage(MissingEntityField<Organization>(nameof(Organization.Identifier)));
-                    });
-            });
+          .NotEmpty()
+          .WithMessage(MissingBundleEntity(nameof(Organization)))
+          .DependentRules(() =>
+          {
+              RuleForEach(x => x.Organizations!)
+                  .ChildRules(organization =>
+                  {
+                      organization.RuleFor(x => x.Meta)
+                          .NotNull()
+                          .WithMessage(MissingEntityField<Organization>(nameof(Organization.Meta)))
+                          .DependentRules(() =>
+                          {
+                              organization.RuleFor(x => x.Meta!.Profile)
+                                  .NotEmpty()
+                                  .WithMessage(MissingEntityField<Organization>(MetaProfile));
+
+                              organization.RuleFor(x => x.Meta!.LastUpdatedElement)
+                                  .NotNull()
+                                  .WithMessage(MissingEntityField<Organization>(MetaLastUpdated));
+                          });
+
+                      organization.RuleFor(x => x.Identifier)
+                          .NotEmpty()
+                          .WithMessage(MissingEntityField<Organization>(nameof(Organization.Identifier)));
+
+                      organization.RuleForEach(x => x.Identifier)
+                          .ChildRules(identifier =>
+                          {
+                              identifier.RuleFor(x => x.System)
+                                  .NotEmpty()
+                                  .WithMessage(MissingEntityField<Organization>(IdentifierSystem));
+
+                              identifier.RuleFor(x => x.Value)
+                                  .NotEmpty()
+                                  .WithMessage(MissingEntityField<Organization>(IdentifierValue));
+                          });
+
+                      organization.RuleFor(x => x.Name)
+                          .NotEmpty()
+                          .WithMessage(MissingEntityField<Organization>(nameof(Organization.Name)));
+                  });
+
+              RuleFor(x => x.Organizations!)
+                  .Must(orgs => orgs.Any(o =>
+                      StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, CancelReferralReceiverOrganisationName)))
+                  .WithMessage($"Organization with name '{CancelReferralReceiverOrganisationName}' is required");
+
+              RuleFor(x => x.Organizations!)
+                  .Must(orgs => orgs.Any(o =>
+                      StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, CancelReferralSenderOrganisationName)))
+                  .WithMessage($"Organization with name '{CancelReferralSenderOrganisationName}' is required");
+          });
     }
 }

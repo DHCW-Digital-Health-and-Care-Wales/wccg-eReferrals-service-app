@@ -186,4 +186,34 @@ public class BundleCancelReferralModelValidatorTests
         result.Errors.Should().Contain(e =>
             e.ErrorMessage == ValidationMessages.MissingEntityField<ServiceRequest>(nameof(ServiceRequest.Meta)));
     }
+
+    [Fact]
+    public void ShouldContainErrorWhenReceivingPerformingOrganizationMissing()
+    {
+        var model = CreateValidModelFromExampleBundle(CancelBundleFile);
+
+        model.Organizations = model.Organizations!
+            .Where(o => !StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, CancelReferralReceiverOrganisationName))
+            .ToList();
+
+        var result = _sut.TestValidate(model);
+
+        result.Errors.Should().Contain(e =>
+            e.ErrorMessage == $"Organization with name '{CancelReferralReceiverOrganisationName}' is required");
+    }
+
+    [Fact]
+    public void ShouldContainErrorWhenSenderOrganizationMissing()
+    {
+        var model = CreateValidModelFromExampleBundle(CancelBundleFile);
+
+        model.Organizations = model.Organizations!
+            .Where(o => !StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, CancelReferralSenderOrganisationName))
+            .ToList();
+
+        var result = _sut.TestValidate(model);
+
+        result.Errors.Should().Contain(e =>
+            e.ErrorMessage == $"Organization with name '{CancelReferralSenderOrganisationName}' is required");
+    }
 }

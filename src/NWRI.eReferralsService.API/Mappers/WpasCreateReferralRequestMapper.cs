@@ -21,10 +21,10 @@ public sealed class WpasCreateReferralRequestMapper
     {
         var encounterId = createReferralModel.Encounter?.Identifier.First().Value!;
         var receiverOrganisationId = createReferralModel.Organizations?
-            .First(x => StringComparer.InvariantCultureIgnoreCase.Equals(x.Name, ReceivingPerformingOrganisationName))
+            .First(x => StringComparer.InvariantCultureIgnoreCase.Equals(x.Name, CreateReferralReceiverOrganisationName))
             .Identifier.First().Value!;
         var senderOrganisationId = createReferralModel.Organizations?
-            .First(x => StringComparer.InvariantCultureIgnoreCase.Equals(x.Name, SenderOrganisationName))
+            .First(x => StringComparer.InvariantCultureIgnoreCase.Equals(x.Name, CreateReferralSenderOrganisationName))
             .Identifier.First().Value!;
 
         var patientName = createReferralModel.Patient!.Name.First();
