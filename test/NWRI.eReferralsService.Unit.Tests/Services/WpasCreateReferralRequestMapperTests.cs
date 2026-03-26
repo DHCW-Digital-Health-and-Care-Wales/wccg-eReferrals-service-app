@@ -30,6 +30,7 @@ public class WpasCreateReferralRequestMapperTests
         using (new AssertionScope())
         {
             payload.RecordId.Should().Be("2.16.840.1.113883.2.1.8.1.3.987");
+            payload.RecordId.Length.Should().BeLessOrEqualTo(36);
             payload.ContractDetails.ProviderOrganisationCode.Should().Be("7A4BV");
             payload.ReferralDetails.ReferringOrganisationCode.Should().Be("7A4BV");
             payload.ReferralDetails.OutpatientReferralSource.Should().Be("TP");
@@ -47,6 +48,7 @@ public class WpasCreateReferralRequestMapperTests
             payload.ReferralDetails.ReferrerPriorityType.Should().Be("2");
             payload.ReferralDetails.ReasonForReferral.Should().Be("Glaucoma");
             payload.ReferralDetails.ReferralIdentifier.Should().Be("2.16.840.1.113883.2.1.8.1.3.987");
+            payload.ReferralDetails.ReferralIdentifier.Length.Should().BeLessOrEqualTo(36);
             payload.PatientDetails.UsualAddress.NoAndStreet.Should().Be("22 Brightside Crescent");
             payload.PatientDetails.UsualAddress.Town.Should().Be("Overtown");
             payload.PatientDetails.UsualAddress.Postcode.Should().Be("LS10 4YU");
