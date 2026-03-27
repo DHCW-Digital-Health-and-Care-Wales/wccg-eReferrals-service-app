@@ -1,31 +1,47 @@
-trigger:
-  none
+trigger: none
 
 pool:
   name: UKS-DHCW-NWRI-DEV-ADOSelfHostPool
 
-variables:
-  containerAppName: nwri-test-app001
-  resourceGroup: UKSouth-DHCW-APP-DEV-NWRI-RG
-  acrName: uksdhcwdevnwriacr
-  acrLoginServer: uksdhcwdevnwriacr.azurecr.io
-  uamiResourceId: /subscriptions/7bda6ea8-f947-4efa-930c-c4c3f9c56d48/resourceGroups/UKSouth-DHCW-APP-DEV-NWRI-RG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/uks-dhcw-dev-nwri-umi
-
 steps:
 
-# Deploy container app
-- task: AzureContainerApps@1
+- script: echo "Starting Hello World integration tests"
+  displayName: "Start tests"
+
+# Optional: keep your connectivity checks for consistency
+- script: nc -zv uksdhcwdevnwriacr.azurecr.io 443
+  displayName: 'Check connectivity to ACR'
+
+# Get Container App URL
+- task: AzureCLI@2
+  displayName: "Fetch Container App URL"
   inputs:
     azureSubscription: 'Azure - NHSWales-DHCW-NWRI-Subscription'
-    acrName: '$(acrName)'
-    imageToDeploy: '$(acrLoginServer)/containerapps-helloworld:latest'
-    containerAppName: '$(containerAppName)'
-    resourceGroup: '$(resourceGroup)'
-    containerAppEnvironment: 'uks-dhcw-dev-nwri-cae'
-    targetPort: '80'
-    ingress: 'internal'
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
 
-# Wait for Container App readiness
+      RG="UKSouth-DHCW-APP-DEV-NWRI-RG"
+      APP_NAME="nwri-hello-world-app"
+
+      echo "Fetching Container App FQDN..."
+
+      FQDN=$(az containerapp show \
+        --name $APP_NAME \
+        --resource-group $RG \
+        --query properties.configuration.ingress.fqdn \
+        -o tsv)
+
+      if [ -z "$FQDN" ]; then
+        echo "Failed to retrieve FQDN"
+        exit 1
+      fi
+
+      echo "FQDN: $FQDN"
+
+      echo "##vso[task.setvariable variable=APP_URL]https://$FQDN"
+
+# Wait for readiness (same logic as your deploy pipeline)
 - task: AzureCLI@2
   displayName: "Wait for Container App readiness"
   inputs:
@@ -33,22 +49,60 @@ steps:
     scriptType: bash
     scriptLocation: inlineScript
     inlineScript: |
+
+      RG="UKSouth-DHCW-APP-DEV-NWRI-RG"
+      APP_NAME="nwri-hello-world-app"
+
       echo "Waiting for container app to become ready..."
-      for i in {1..30}; do
+
+      for i in {1..10}; do
         STATUS=$(az containerapp show \
-          -n $(containerAppName) \
-          -g $(resourceGroup) \
-          --query "properties.latestRevisionHealthState" -o tsv)
+          --name $APP_NAME \
+          --resource-group $RG \
+          --query "properties.latestRevisionHealthState" \
+          -o tsv)
+
         echo "Current status: $STATUS"
+
         if [ "$STATUS" = "Healthy" ]; then
           echo "App is ready"
           break
         fi
+
         sleep 10
       done
 
-# Test internal endpoint
+# Test endpoint from agent
 - script: |
-    echo "Calling internal endpoint..."
-    curl -v http://$(containerAppName).internal.yellowtree-fadb23ed.uksouth.azurecontainerapps.io/
-  displayName: "Curl internal Container App endpoint"
+    echo "======================================"
+    echo "Calling Hello World endpoint"
+    echo "URL: $(APP_URL)"
+    echo "======================================"
+
+    for i in {1..5}; do
+      RESPONSE=$(curl -s $(APP_URL))
+
+      echo "Attempt $i response:"
+      echo "$RESPONSE"
+
+      if [[ "$RESPONSE" == *"Hello"* ]]; then
+        echo "Endpoint returned expected content"
+        exit 0
+      fi
+
+      echo "Retrying in 5 seconds..."
+      sleep 5
+    done
+
+    echo "Endpoint test failed"
+    exit 1
+
+  displayName: "Validate Hello World endpoint"
+
+# Example: how credentials would be used (template)
+- script: |
+    echo "Example of credential usage (not active)"
+
+    echo "curl -H 'Authorization: Bearer $(API_TOKEN)' $(APP_URL)"
+
+  displayName: "Credential usage example"
