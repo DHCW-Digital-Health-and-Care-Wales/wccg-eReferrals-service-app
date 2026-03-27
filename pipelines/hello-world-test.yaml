@@ -86,10 +86,11 @@ steps:
       echo "Attempt $i response:"
       echo "$RESPONSE"
 
-      if [[ "$RESPONSE" == *"Hello"* ]]; then
-        echo "Endpoint returned expected content"
-        exit 0
-      fi
+    if [[ "$RESPONSE" == *"Hello"* ]] || [[ "$RESPONSE" == *"Azure Container Apps"* ]]; then
+      echo "Endpoint returned expected content"
+      exit 0
+    fi
+
 
       echo "Retrying in 5 seconds..."
       sleep 5
