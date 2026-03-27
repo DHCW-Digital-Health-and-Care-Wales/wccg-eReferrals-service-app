@@ -156,7 +156,5 @@ steps:
 # Warning: make sure the endpoint/url used below is the same in the container apps blade.
 - script: |
     echo "Calling internal endpoint..."
-    curl -v http://nwri-hello-world-app.calmhill-dba92a82.uksouth.azurecontainerapps.io/
-    curl -v https://$(FQDN)
-    curl -v https://$FQDN
+    curl -v http://nwri-hello-world-app.ambitiousplant-35c5ed11.uksouth.azurecontainerapps.io/
   displayName: "Curl internal Container App endpoint"
