@@ -128,6 +128,6 @@ public class ReferralService : IReferralService
     private static ServiceRequest GetServiceRequestByProfile(IList<ServiceRequest> serviceRequests, string profile)
     {
         var serviceRequest = serviceRequests.FirstOrDefault(sr => sr.HasProfile(profile));
-        return serviceRequest ?? throw new RequestParameterValidationException("ServiceRequest", $"No ServiceRequest with profile '{profile}' found.");
+        return serviceRequest ?? throw new RequestParameterValidationException("ServiceRequest", $"No ServiceRequest with profile '{profile}' found");
     }
 }
