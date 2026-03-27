@@ -257,7 +257,7 @@ public class BundleCancelReferralModelValidatorTests
     public void ShouldContainErrorWhenOrganizationIdentifierSystemMissing()
     {
         var model = CreateValidModelFromExampleBundle(CancelBundleFile);
-        model.Organizations![0].Identifier![0].System = null;
+        model.Organizations![0].Identifier[0].System = null;
 
         var result = _sut.TestValidate(model);
 
@@ -269,7 +269,7 @@ public class BundleCancelReferralModelValidatorTests
     public void ShouldContainErrorWhenOrganizationIdentifierValueMissing()
     {
         var model = CreateValidModelFromExampleBundle(CancelBundleFile);
-        model.Organizations![0].Identifier![0].Value = null;
+        model.Organizations![0].Identifier[0].Value = null;
 
         var result = _sut.TestValidate(model);
 
