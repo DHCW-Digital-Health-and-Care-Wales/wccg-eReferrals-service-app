@@ -112,7 +112,7 @@ steps:
           --environment $ENV_NAME \
           --image "$ACR_NAME.azurecr.io/$IMAGE_NAME" \
           --target-port 80 \
-          --ingress internal
+          --ingress external
       fi
 
       echo "Fetching app URL..."
