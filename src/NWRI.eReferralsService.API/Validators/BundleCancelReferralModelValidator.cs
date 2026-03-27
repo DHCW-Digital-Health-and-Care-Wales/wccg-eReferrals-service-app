@@ -123,9 +123,7 @@ public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancel
                     .DependentRules(() =>
                     {
                         patient.RuleFor(x => x.Identifier)
-                            .Must(ids => ids.Any(i =>
-                                string.Equals(i.System, NhsNumberSystem, StringComparison.OrdinalIgnoreCase) &&
-                                !string.IsNullOrEmpty(i.Value)))
+                            .Must(ids => ids.Any(i => string.Equals(i.System, NhsNumberSystem, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(i.Value)))
                             .WithMessage(MissingPatientNhsNumber);
                     });
 
@@ -164,25 +162,27 @@ public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancel
                                   .WithMessage(MissingEntityField<Organization>(MetaProfile));
 
                               organization.RuleFor(x => x.Meta!.LastUpdatedElement)
-                                  .NotNull()
+                                  .NotEmpty()
                                   .WithMessage(MissingEntityField<Organization>(MetaLastUpdated));
                           });
 
                       organization.RuleFor(x => x.Identifier)
-                          .NotEmpty()
-                          .WithMessage(MissingEntityField<Organization>(nameof(Organization.Identifier)));
+                        .NotEmpty()
+                        .WithMessage(MissingEntityField<Organization>(nameof(Organization.Identifier)))
+                        .DependentRules(() =>
+                        {
+                            organization.RuleForEach(x => x.Identifier)
+                                .ChildRules(identifier =>
+                                {
+                                    identifier.RuleFor(x => x.System)
+                                        .NotEmpty()
+                                        .WithMessage(MissingEntityField<Organization>(IdentifierSystem));
 
-                      organization.RuleForEach(x => x.Identifier)
-                          .ChildRules(identifier =>
-                          {
-                              identifier.RuleFor(x => x.System)
-                                  .NotEmpty()
-                                  .WithMessage(MissingEntityField<Organization>(IdentifierSystem));
-
-                              identifier.RuleFor(x => x.Value)
-                                  .NotEmpty()
-                                  .WithMessage(MissingEntityField<Organization>(IdentifierValue));
-                          });
+                                    identifier.RuleFor(x => x.Value)
+                                        .NotEmpty()
+                                        .WithMessage(MissingEntityField<Organization>(IdentifierValue));
+                                });
+                        });
 
                       organization.RuleFor(x => x.Name)
                           .NotEmpty()
