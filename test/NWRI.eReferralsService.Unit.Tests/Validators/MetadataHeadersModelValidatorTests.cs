@@ -26,10 +26,11 @@ public class MetadataHeadersModelValidatorTests
     {
         var fhirBase64Decoder = new FhirBase64Decoder(NullLogger<FhirBase64Decoder>.Instance, _jsonSerializerOptions);
 
-        _sut = new MetadataHeadersModelValidator(fhirBase64Decoder);
-
-        _sut.ClassLevelCascadeMode = CascadeMode.Continue;
-        _sut.RuleLevelCascadeMode = CascadeMode.Stop;
+        _sut = new MetadataHeadersModelValidator(fhirBase64Decoder)
+        {
+            ClassLevelCascadeMode = CascadeMode.Continue,
+            RuleLevelCascadeMode = CascadeMode.Stop
+        };
 
         _fixture.Register(() => new Identifier(_fixture.Create<string>(), _fixture.Create<string>()));
         _fixture.Register(() => new Organization { Id = _fixture.Create<string>() });
