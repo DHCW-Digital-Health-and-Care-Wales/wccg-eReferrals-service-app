@@ -60,12 +60,12 @@
           {
             "coding": [
               {
-                "code": "6",
+                "code": "referral",
                 "display": "Transfer of Care",
                 "system": "https://fhir.nhs.uk/CodeSystem/message-category-servicerequest"
               },
               {
-                "code": "01",
+                "code": "referraltosecondarycare",
                 "display": "Primary Care to Secondary Care",
                 "system": "https://fhir.nhs.uk/CodeSystem/usecases-categories-bars"
               }

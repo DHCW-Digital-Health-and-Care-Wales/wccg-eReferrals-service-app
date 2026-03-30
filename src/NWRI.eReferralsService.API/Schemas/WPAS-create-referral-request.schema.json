@@ -134,7 +134,7 @@
           "description": "The terms of reference for the referral request.  https://www.datadictionary.wales.nhs.uk/index.html#!WordDocuments/servicetyperequested.htm",
           "type": "string",
           "minLength": 1,
-          "maxLength": 1
+          "maxLength": 36
         },
         "ReferrerCode": {
           "description": "The nationally recognised registry code of the person making the referral.  https://www.datadictionary.wales.nhs.uk/index.html#!WordDocuments/referrercode.htm",
@@ -145,7 +145,7 @@
           "description": "This is to indicate whether the patient is treated as an NHS, private or amenity patient etc.  https://www.datadictionary.wales.nhs.uk/index.html#!WordDocuments/administrativecategory.htm",
           "type": "string",
           "minLength": 2,
-          "maxLength": 2
+          "maxLength": 36
         },
         "DateOfReferral": {
           "description": "The date on which the patient was told about the referral, in the format ccyyMMdd.  https://www.datadictionary.wales.nhs.uk/index.html#!WordDocuments/dateofpatientreferral.htm",
