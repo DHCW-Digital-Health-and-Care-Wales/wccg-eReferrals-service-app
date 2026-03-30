@@ -11,12 +11,12 @@ namespace NWRI.eReferralsService.API.Controllers;
 [AuditLogRequest]
 public sealed class MetadataController : ControllerBase
 {
-    private readonly ICapabilityStatementService _capabilityStatementService;
+    private readonly IMetadataService _metadataService;
     private readonly ILogger<MetadataController> _logger;
 
-    public MetadataController(ICapabilityStatementService capabilityStatementService, ILogger<MetadataController> logger)
+    public MetadataController(IMetadataService metadataService, ILogger<MetadataController> logger)
     {
-        _capabilityStatementService = capabilityStatementService;
+        _metadataService = metadataService;
         _logger = logger;
     }
 
@@ -26,7 +26,7 @@ public sealed class MetadataController : ControllerBase
     {
         _logger.CalledMethod(nameof(GetMetadata));
 
-        var json = await _capabilityStatementService.GetCapabilityStatementAsync(cancellationToken);
+        var json = await _metadataService.GetMetadataAsync(Request.Headers, cancellationToken);
 
         return new ContentResult
         {
