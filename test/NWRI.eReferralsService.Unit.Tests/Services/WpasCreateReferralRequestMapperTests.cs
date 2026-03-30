@@ -41,8 +41,10 @@ public class WpasCreateReferralRequestMapperTests
             payload.PatientDetails.PatientName.FirstName.Should().Be("Julie");
             payload.PatientDetails.BirthDate.Should().Be("19590504");
             payload.PatientDetails.Sex.Should().Be("F");
-            payload.ReferralDetails.ServiceTypeRequested.Should().Be("6");
-            payload.ReferralDetails.AdministrativeCategory.Should().Be("01");
+            payload.ReferralDetails.ServiceTypeRequested.Should().Be("referral");
+            payload.ReferralDetails.ServiceTypeRequested.Length.Should().BeLessOrEqualTo(36);
+            payload.ReferralDetails.AdministrativeCategory.Should().Be("referraltosecondarycare");
+            payload.ReferralDetails.AdministrativeCategory.Length.Should().BeLessOrEqualTo(36);
             payload.ReferralDetails.ReferrerCode.Should().Be("PT2489");
             payload.ReferralDetails.DateOfReferral.Should().Be("20240820");
             payload.ReferralDetails.MainSpecialty.Should().Be("130");

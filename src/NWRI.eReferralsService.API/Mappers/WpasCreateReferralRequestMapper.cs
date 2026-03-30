@@ -74,14 +74,14 @@ public sealed class WpasCreateReferralRequestMapper
                 ServiceTypeRequested = createReferralModel.ServiceRequest?.Category
                                            .SelectMany(c => c.Coding)
                                            .First(c => string.Equals(c.System, ServiceRequestCategorySystem, StringComparison.OrdinalIgnoreCase))
-                                           .Code![0].ToString()!,
+                                           .Code!,
                 ReferrerCode = createReferralModel.Practitioners?.First()
                     .Identifier.First()
                     .Value!,
-                AdministrativeCategory = FormatFixedWidthLeftJustified(createReferralModel.ServiceRequest?.Category
+                AdministrativeCategory = createReferralModel.ServiceRequest?.Category
                                              .SelectMany(c => c.Coding)
                                              .First(c => string.Equals(c.System, BarsUseCaseCategorySystem, StringComparison.OrdinalIgnoreCase))
-                                             .Code!, 2),
+                                             .Code!,
                 DateOfReferral = WpasDate(createReferralModel.ServiceRequest?.AuthoredOn),
                 MainSpecialty = OphthalmologyMainSpecialtyCode,
                 ReferrerPriorityType = UrgentReferrerPriorityType,
