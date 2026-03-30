@@ -69,7 +69,7 @@ public sealed class WpasCreateReferralRequestMapper
             },
             ReferralDetails = new ReferralDetails
             {
-                OutpatientReferralSource = FormatFixedWidthLeftJustified(senderOrganisationId, 2),
+                OutpatientReferralSource = senderOrganisationId,
                 ReferringOrganisationCode = receiverOrganisationId,
                 ServiceTypeRequested = createReferralModel.ServiceRequest?.Category
                                            .SelectMany(c => c.Coding)
