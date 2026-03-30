@@ -18,7 +18,7 @@ public sealed class MetadataHeadersModelValidator : AbstractValidator<HeadersMod
         When(x => !string.IsNullOrWhiteSpace(x.TargetIdentifier), () =>
         {
             RuleFor(x => x.TargetIdentifier)
-                .Must(fhirBase64Decoder.IsValid<Identifier>)
+                .Must(fhirBase64Decoder.CanDecode<Identifier>)
                 .WithMessage(ValidationMessages.InvalidFhirObject(RequestHeaderKeys.TargetIdentifier, nameof(Identifier)))
                 .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
         });

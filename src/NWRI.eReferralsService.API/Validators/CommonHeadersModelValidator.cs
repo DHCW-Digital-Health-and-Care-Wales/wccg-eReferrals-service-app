@@ -14,7 +14,7 @@ public sealed class CommonHeadersModelValidator : AbstractValidator<HeadersModel
             .NotEmpty()
             .WithMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.EndUserOrganisation))
             .WithErrorCode(nameof(ValidationErrorCode.MissingRequiredHeaderCode))
-            .Must(fhirBase64Decoder.IsValid<Organization>)
+            .Must(fhirBase64Decoder.CanDecode<Organization>)
             .WithMessage(ValidationMessages.InvalidFhirObject(RequestHeaderKeys.EndUserOrganisation, nameof(Organization)))
             .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
 
@@ -22,14 +22,14 @@ public sealed class CommonHeadersModelValidator : AbstractValidator<HeadersModel
             .NotEmpty()
             .WithMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.RequestingSoftware))
             .WithErrorCode(nameof(ValidationErrorCode.MissingRequiredHeaderCode))
-            .Must(fhirBase64Decoder.IsValid<Device>)
+            .Must(fhirBase64Decoder.CanDecode<Device>)
             .WithMessage(ValidationMessages.InvalidFhirObject(RequestHeaderKeys.RequestingSoftware, nameof(Device)))
             .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
 
         When(x => !string.IsNullOrWhiteSpace(x.RequestingPractitioner), () =>
         {
             RuleFor(x => x.RequestingPractitioner)
-                .Must(fhirBase64Decoder.IsValid<PractitionerRole>)
+                .Must(fhirBase64Decoder.CanDecode<PractitionerRole>)
                 .WithMessage(ValidationMessages.InvalidFhirObject(RequestHeaderKeys.RequestingPractitioner, nameof(PractitionerRole)))
                 .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
         });

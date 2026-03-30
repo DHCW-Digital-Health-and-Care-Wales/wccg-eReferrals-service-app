@@ -116,7 +116,7 @@ public class FhirBase64DecoderTests
     public void IsValidShouldReturnFalseWhenBase64ValueMissing(string? base64Value)
     {
         // Act
-        var result = _decoder.IsValid<Identifier>(base64Value);
+        var result = _decoder.CanDecode<Identifier>(base64Value);
 
         // Assert
         result.Should().BeFalse();
@@ -130,7 +130,7 @@ public class FhirBase64DecoderTests
         var base64 = ToBase64Json(identifier);
 
         // Act
-        var result = _decoder.IsValid<Identifier>(base64);
+        var result = _decoder.CanDecode<Identifier>(base64);
 
         // Assert
         result.Should().BeTrue();
@@ -140,7 +140,7 @@ public class FhirBase64DecoderTests
     public void IsValidShouldReturnFalseWhenBase64Invalid()
     {
         // Act
-        var result = _decoder.IsValid<Identifier>("not-base64");
+        var result = _decoder.CanDecode<Identifier>("not-base64");
 
         // Assert
         result.Should().BeFalse();

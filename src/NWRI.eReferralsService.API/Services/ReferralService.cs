@@ -30,7 +30,7 @@ public class ReferralService : IReferralService
     private readonly IReferralWorkflowProcessor _referralWorkflowProcessor;
 
     public ReferralService(
-        [FromKeyedServices(HeaderValidatorKeys.ReferralHeaders)] IValidator<HeadersModel> referralHeadersModelValidator,
+        [FromKeyedServices(ServiceKeys.Validators.ReferralHeaders)] IValidator<HeadersModel> referralHeadersModelValidator,
         JsonSerializerOptions jsonSerializerOptions,
         IEventLogger eventLogger,
         IRequestFhirHeadersDecoder requestFhirHeadersDecoder,

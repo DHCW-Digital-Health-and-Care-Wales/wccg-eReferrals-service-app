@@ -19,7 +19,7 @@ public sealed class ReferralHeadersModelValidator : AbstractValidator<HeadersMod
             .NotEmpty()
             .WithMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.TargetIdentifier))
             .WithErrorCode(nameof(ValidationErrorCode.MissingRequiredHeaderCode))
-            .Must(fhirBase64Decoder.IsValid<Identifier>)
+            .Must(fhirBase64Decoder.CanDecode<Identifier>)
             .WithMessage(ValidationMessages.InvalidFhirObject(RequestHeaderKeys.TargetIdentifier, nameof(Identifier)))
             .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
 

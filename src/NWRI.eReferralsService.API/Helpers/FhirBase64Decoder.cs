@@ -38,7 +38,7 @@ public class FhirBase64Decoder
         }
     }
 
-    public bool IsValid<T>(string? base64Value) where T : Base
+    public bool CanDecode<T>(string? base64Value) where T : Base
     {
         return TryDecode<T>(base64Value, out _);
     }

@@ -50,8 +50,8 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<IValidator<BundleCreateReferralModel>, BundleCreateReferralModelValidator>();
         services.AddScoped<IValidator<BundleCancelReferralModel>, BundleCancelReferralModelValidator>();
-        services.AddKeyedScoped<IValidator<HeadersModel>, ReferralHeadersModelValidator>(HeaderValidatorKeys.ReferralHeaders);
-        services.AddKeyedScoped<IValidator<HeadersModel>, MetadataHeadersModelValidator>(HeaderValidatorKeys.MetadataHeaders);
+        services.AddKeyedScoped<IValidator<HeadersModel>, ReferralHeadersModelValidator>(ServiceKeys.Validators.ReferralHeaders);
+        services.AddKeyedScoped<IValidator<HeadersModel>, MetadataHeadersModelValidator>(ServiceKeys.Validators.MetadataHeaders);
         services.AddSingleton<IFhirBundleProfileValidator, FhirBundleProfileValidator>();
         services.AddSingleton<WpasJsonSchemaValidator>();
     }
