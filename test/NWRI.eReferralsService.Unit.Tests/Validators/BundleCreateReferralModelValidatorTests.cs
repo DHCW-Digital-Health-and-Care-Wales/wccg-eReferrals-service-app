@@ -176,13 +176,13 @@ public class BundleCreateReferralModelValidatorTests
         var model = CreateValidModelFromExampleBundle();
 
         model.Organizations = model.Organizations!
-            .Where(o => !StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, ReceivingPerformingOrganisationName))
+            .Where(o => !StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, CreateReferralReceiverOrganisationName))
             .ToList();
 
         var result = _sut.TestValidate(model);
 
         result.Errors.Should().Contain(e =>
-            e.ErrorMessage == $"Organization with name '{ReceivingPerformingOrganisationName}' is required");
+            e.ErrorMessage == $"Organization with name '{CreateReferralReceiverOrganisationName}' is required");
     }
 
     [Fact]
@@ -191,13 +191,13 @@ public class BundleCreateReferralModelValidatorTests
         var model = CreateValidModelFromExampleBundle();
 
         model.Organizations = model.Organizations!
-            .Where(o => !StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, SenderOrganisationName))
+            .Where(o => !StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, CreateReferralSenderOrganisationName))
             .ToList();
 
         var result = _sut.TestValidate(model);
 
         result.Errors.Should().Contain(e =>
-            e.ErrorMessage == $"Organization with name '{SenderOrganisationName}' is required");
+            e.ErrorMessage == $"Organization with name '{CreateReferralSenderOrganisationName}' is required");
     }
 
     [Fact]

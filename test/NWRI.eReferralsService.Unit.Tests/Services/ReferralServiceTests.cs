@@ -100,7 +100,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
         var receiverOrganisation = bundle.Entry
             .Select(e => e.Resource)
             .OfType<Organization>()
-            .First(o => string.Equals(o.Name, FhirConstants.ReceivingPerformingOrganisationName, StringComparison.Ordinal));
+            .First(o => string.Equals(o.Name, FhirConstants.CreateReferralReceiverOrganisationName, StringComparison.Ordinal));
         receiverOrganisation.Identifier.First().Value = "TP2V"; // invalid length: schema requires exactly 5
 
         var bundleJson = JsonSerializer.Serialize(bundle, _jsonSerializerOptions);
@@ -895,9 +895,18 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
             ]
         };
 
+        var senderOrganisationName = FhirConstants.CreateReferralSenderOrganisationName;
+        var receiverOrganisationName = FhirConstants.CreateReferralReceiverOrganisationName;
+
+        if (reasonCode == FhirConstants.BarsMessageReasonUpdate)
+        {
+            senderOrganisationName = FhirConstants.CancelReferralSenderOrganisationName;
+            receiverOrganisationName = FhirConstants.CancelReferralReceiverOrganisationName;
+        }
+
         var receiverOrganisation = new Organization
         {
-            Name = FhirConstants.ReceivingPerformingOrganisationName,
+            Name = receiverOrganisationName,
             Identifier =
             [
                 new Identifier
@@ -909,7 +918,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
 
         var senderOrganisation = new Organization
         {
-            Name = "Sender Organization",
+            Name = senderOrganisationName,
             Identifier =
             [
                 new Identifier

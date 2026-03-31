@@ -13,6 +13,8 @@ public static class FhirConstants
     public const string BarsServiceRequestCancelReferral = "BARSServiceRequest-request-validation";
     public const string BarsLocationIncidentLocation = "BARSLocationIncidentLocation";
     public const string BarsFlagSceneSafety = "BARSFlagSceneSafety";
-    public const string ReceivingPerformingOrganisationName = "Receiving/performing Organization";
-    public const string SenderOrganisationName = "Sender Organization";
+    public const string CreateReferralReceiverOrganisationName = "Receiving/performing Organization";
+    public const string CreateReferralSenderOrganisationName = "Sender Organization";
+    public const string CancelReferralReceiverOrganisationName = "Receiver Organization";
+    public const string CancelReferralSenderOrganisationName = "Sender Organization";
 }

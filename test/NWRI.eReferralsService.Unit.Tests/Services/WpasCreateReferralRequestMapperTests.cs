@@ -102,7 +102,7 @@ public class WpasCreateReferralRequestMapperTests
     {
         var model = CreateValidModelFromExampleBundle();
         model.Organizations = model.Organizations!
-            .Where(o => !StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, ReceivingPerformingOrganisationName))
+            .Where(o => !StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, CreateReferralReceiverOrganisationName))
             .ToList();
 
         var act = () => WpasCreateReferralRequestMapper.Map(model);
@@ -115,7 +115,7 @@ public class WpasCreateReferralRequestMapperTests
     {
         var model = CreateValidModelFromExampleBundle();
         model.Organizations = model.Organizations!
-            .Where(o => !StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, SenderOrganisationName))
+            .Where(o => !StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, CreateReferralSenderOrganisationName))
             .ToList();
 
         var act = () => WpasCreateReferralRequestMapper.Map(model);

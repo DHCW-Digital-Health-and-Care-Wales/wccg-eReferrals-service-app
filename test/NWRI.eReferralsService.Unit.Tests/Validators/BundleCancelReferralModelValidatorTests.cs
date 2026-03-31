@@ -186,4 +186,94 @@ public class BundleCancelReferralModelValidatorTests
         result.Errors.Should().Contain(e =>
             e.ErrorMessage == ValidationMessages.MissingEntityField<ServiceRequest>(nameof(ServiceRequest.Meta)));
     }
+
+    [Fact]
+    public void ShouldContainErrorWhenReceiverOrganizationMissing()
+    {
+        var model = CreateValidModelFromExampleBundle(CancelBundleFile);
+
+        model.Organizations = model.Organizations!
+            .Where(o => !StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, CancelReferralReceiverOrganisationName))
+            .ToList();
+
+        var result = _sut.TestValidate(model);
+
+        result.Errors.Should().Contain(e =>
+            e.ErrorMessage == $"Organization with name '{CancelReferralReceiverOrganisationName}' is required");
+    }
+
+    [Fact]
+    public void ShouldContainErrorWhenSenderOrganizationMissing()
+    {
+        var model = CreateValidModelFromExampleBundle(CancelBundleFile);
+
+        model.Organizations = model.Organizations!
+            .Where(o => !StringComparer.InvariantCultureIgnoreCase.Equals(o.Name, CancelReferralSenderOrganisationName))
+            .ToList();
+
+        var result = _sut.TestValidate(model);
+
+        result.Errors.Should().Contain(e =>
+            e.ErrorMessage == $"Organization with name '{CancelReferralSenderOrganisationName}' is required");
+    }
+
+    [Fact]
+    public void ShouldContainErrorWhenOrganizationMetaMissing()
+    {
+        var model = CreateValidModelFromExampleBundle(CancelBundleFile);
+        model.Organizations![0].Meta = null;
+
+        var result = _sut.TestValidate(model);
+
+        result.Errors.Should().Contain(e =>
+            e.ErrorMessage == ValidationMessages.MissingEntityField<Organization>(nameof(Organization.Meta)));
+    }
+
+    [Fact]
+    public void ShouldContainErrorWhenOrganizationMetaProfileMissing()
+    {
+        var model = CreateValidModelFromExampleBundle(CancelBundleFile);
+        model.Organizations![0].Meta!.Profile = [];
+
+        var result = _sut.TestValidate(model);
+
+        result.Errors.Should().Contain(e =>
+            e.ErrorMessage == ValidationMessages.MissingEntityField<Organization>("meta.profile"));
+    }
+
+    [Fact]
+    public void ShouldContainErrorWhenOrganizationMetaLastUpdatedMissing()
+    {
+        var model = CreateValidModelFromExampleBundle(CancelBundleFile);
+        model.Organizations![0].Meta!.LastUpdatedElement = null;
+
+        var result = _sut.TestValidate(model);
+
+        result.Errors.Should().Contain(e =>
+            e.ErrorMessage == ValidationMessages.MissingEntityField<Organization>("meta.lastUpdated"));
+    }
+
+    [Fact]
+    public void ShouldContainErrorWhenOrganizationIdentifierSystemMissing()
+    {
+        var model = CreateValidModelFromExampleBundle(CancelBundleFile);
+        model.Organizations![0].Identifier[0].System = null;
+
+        var result = _sut.TestValidate(model);
+
+        result.Errors.Should().Contain(e =>
+            e.ErrorMessage == ValidationMessages.MissingEntityField<Organization>("identifier.system"));
+    }
+
+    [Fact]
+    public void ShouldContainErrorWhenOrganizationIdentifierValueMissing()
+    {
+        var model = CreateValidModelFromExampleBundle(CancelBundleFile);
+        model.Organizations![0].Identifier[0].Value = null;
+
+        var result = _sut.TestValidate(model);
+
+        result.Errors.Should().Contain(e =>
+            e.ErrorMessage == ValidationMessages.MissingEntityField<Organization>("identifier.value"));
+    }
 }
