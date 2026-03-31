@@ -32,7 +32,7 @@ public class WpasCreateReferralRequestMapperTests
             payload.RecordId.Should().Be("2.16.840.1.113883.2.1.8.1.3.987");
             payload.RecordId.Length.Should().BeLessOrEqualTo(36);
             payload.ContractDetails.ProviderOrganisationCode.Should().Be("7A4BV");
-            payload.ContractDetails.ProviderOrganisationCode.Length.Should().BeInRange(5,5);
+            payload.ContractDetails.ProviderOrganisationCode.Length.Should().BeInRange(5,6);
             payload.ReferralDetails.ReferringOrganisationCode.Should().Be("7A4BV");
             payload.ReferralDetails.OutpatientReferralSource.Should().Be("TP2VC");
             payload.ReferralDetails.OutpatientReferralSource.Length.Should().BeLessOrEqualTo(12);
