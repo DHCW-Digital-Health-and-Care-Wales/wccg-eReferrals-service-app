@@ -82,7 +82,7 @@ public sealed class WpasCreateReferralRequestMapper
                                              .SelectMany(c => c.Coding)
                                              .First(c => string.Equals(c.System, BarsUseCaseCategorySystem, StringComparison.OrdinalIgnoreCase))
                                              .Code!,
-                DateOfReferral = WpasDate(createReferralModel.ServiceRequest?.AuthoredOn),
+                DateOfReferral = createReferralModel.ServiceRequest?.AuthoredOn!,
                 MainSpecialty = OphthalmologyMainSpecialtyCode,
                 ReferrerPriorityType = UrgentReferrerPriorityType,
                 ReasonForReferral = FormatFixedWidthLeftJustified(
