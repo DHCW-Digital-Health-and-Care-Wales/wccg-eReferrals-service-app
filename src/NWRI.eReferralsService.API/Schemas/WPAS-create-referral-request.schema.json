@@ -19,7 +19,7 @@
           "description": "The provider code that identifies the health care provider who is responsible for managing the treatment of the patient.  https://www.datadictionary.wales.nhs.uk/index.html#!WordDocuments/organisationcodecodeofprovider.htm",
           "type": "string",
           "minLength": 5,
-          "maxLength": 5
+          "maxLength": 6
         }
       },
       "required": ["ProviderOrganisationCode"]
