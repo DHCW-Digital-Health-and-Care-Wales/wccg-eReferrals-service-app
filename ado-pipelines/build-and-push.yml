@@ -1,0 +1,107 @@
+# ado-pipelines/build-and-push.yml
+#
+# Build, test, and push the NWRI eReferrals Service API Docker image to ACR.
+#
+# Triggers on merge to main and manual dispatch (all ADO pipelines support manual runs).
+# Runs unit tests first; Docker build/push only proceeds if tests pass.
+#
+# Infrastructure variables (acrName, acrLoginServer, imageName, azureSubscription)
+# are stored in the ADO Library variable group 'nwri-ereferrals-dev'.
+# To set up: ADO > Pipelines > Library > + Variable group > name it 'nwri-ereferrals-dev'
+# and add the required variables. Then authorize the pipeline to use this group.
+
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  name: UKS-DHCW-NWRI-DEV-ADOSelfHostPool
+
+variables:
+  # Build config — safe in YAML, changes with code
+  - name: buildConfiguration
+    value: "Release"
+  - name: solutionFile
+    value: "NWRI.eReferralsService.sln"
+  - name: unitTestProject
+    value: "test/NWRI.eReferralsService.Unit.Tests/NWRI.eReferralsService.Unit.Tests.csproj"
+  - name: dockerfilePath
+    value: "src/NWRI.eReferralsService.API/Dockerfile"
+  - name: dockerBuildContext
+    value: "src/NWRI.eReferralsService.API"
+  # Infrastructure config — from ADO Library variable group
+  - group: nwri-ereferrals-dev
+
+steps:
+  - checkout: self
+    displayName: "Checkout source code"
+
+  - script: dotnet restore $(solutionFile)
+    displayName: "Restore NuGet packages"
+
+  - script: dotnet build $(solutionFile) --no-restore --configuration $(buildConfiguration)
+    displayName: "Build solution"
+
+  - script: >
+      dotnet test $(unitTestProject)
+      --no-restore
+      --no-build
+      --configuration $(buildConfiguration)
+      --verbosity normal
+      --logger trx
+      --collect "XPlat Code Coverage"
+      --settings coverlet.runsettings
+      --results-directory $(Agent.TempDirectory)/TestResults
+    displayName: "Run unit tests"
+
+  - task: PublishTestResults@2
+    displayName: "Publish test results"
+    condition: always()
+    inputs:
+      testResultsFormat: "VSTest"
+      testResultsFiles: "$(Agent.TempDirectory)/TestResults/**/*.trx"
+      mergeTestResults: true
+      testRunTitle: "Unit Tests - $(Build.BuildNumber)"
+
+  - task: PublishCodeCoverageResults@2
+    displayName: "Publish code coverage"
+    condition: always()
+    inputs:
+      summaryFileLocation: "$(Agent.TempDirectory)/TestResults/**/coverage.cobertura.xml"
+
+  - task: AzureCLI@2
+    displayName: "Build and push Docker image to ACR"
+    condition: succeeded()
+    inputs:
+      azureSubscription: $(azureSubscription)
+      scriptType: "bash"
+      scriptLocation: "inlineScript"
+      inlineScript: |
+        set -euo pipefail
+
+        echo "Authenticating to ACR $(acrLoginServer)..."
+        az acr login --name $(acrName)
+
+        IMAGE_FULL="$(acrLoginServer)/$(imageName)"
+        COMMIT_TAG="$(Build.SourceVersion)"
+
+        echo "Building Docker image..."
+        echo "  Image: ${IMAGE_FULL}"
+        echo "  Tags:  latest, ${COMMIT_TAG}"
+
+        docker build \
+          -t "${IMAGE_FULL}:latest" \
+          -t "${IMAGE_FULL}:${COMMIT_TAG}" \
+          -f "$(dockerfilePath)" \
+          "$(dockerBuildContext)"
+
+        echo "Pushing Docker image..."
+        docker push "${IMAGE_FULL}:latest"
+        docker push "${IMAGE_FULL}:${COMMIT_TAG}"
+
+        echo "============================================"
+        echo " Docker image pushed successfully"
+        echo " Repository: ${IMAGE_FULL}"
+        echo " Tags:       latest, ${COMMIT_TAG}"
+        echo "============================================"

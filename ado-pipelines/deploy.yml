@@ -1,0 +1,160 @@
+# ado-pipelines/deploy.yml
+#
+# Deploy the NWRI eReferrals Service API to Azure Container Apps.
+#
+# Manual trigger only. Accepts an image tag parameter (defaults to 'latest').
+#
+# Infrastructure variables (acrLoginServer, imageName, containerAppName,
+# resourceGroup, azureSubscription) are stored in the ADO Library variable
+# group 'nwri-ereferrals-dev'.
+#
+# To add environment selection for multi-env support, add a parameter:
+#   - name: environment
+#     displayName: "Target environment"
+#     type: string
+#     default: "dev"
+#     values: [dev, staging, prod]
+# Then conditionally load the matching variable group:
+#   - ${{ if eq(parameters.environment, 'dev') }}:
+#     - group: nwri-ereferrals-dev
+#   - ${{ if eq(parameters.environment, 'prod') }}:
+#     - group: nwri-ereferrals-prod
+
+trigger: none
+
+parameters:
+  - name: imageTag
+    displayName: "Docker image tag to deploy (commit SHA or 'latest')"
+    type: string
+    default: "latest"
+
+pool:
+  name: UKS-DHCW-NWRI-DEV-ADOSelfHostPool
+
+variables:
+  # Pipeline-specific config
+  - name: healthCheckMaxAttempts
+    value: 30
+  - name: healthCheckIntervalSeconds
+    value: 10
+  # Infrastructure config — from ADO Library variable group
+  - group: nwri-ereferrals-dev
+
+steps:
+  - task: AzureCLI@2
+    displayName: "Deploy to Azure Container Apps"
+    inputs:
+      azureSubscription: $(azureSubscription)
+      scriptType: "bash"
+      scriptLocation: "inlineScript"
+      inlineScript: |
+        set -euo pipefail
+
+        IMAGE_REF="$(acrLoginServer)/$(imageName):${{ parameters.imageTag }}"
+        REVISION_SUFFIX="v$(Build.BuildId)"
+
+        echo "============================================"
+        echo " Deploying to Container App"
+        echo " App:      $(containerAppName)"
+        echo " Image:    ${IMAGE_REF}"
+        echo " Revision: ${REVISION_SUFFIX}"
+        echo "============================================"
+
+        az containerapp update \
+          --name "$(containerAppName)" \
+          --resource-group "$(resourceGroup)" \
+          --image "${IMAGE_REF}" \
+          --revision-suffix "${REVISION_SUFFIX}" \
+          --output json
+
+        echo "Container App update command completed."
+
+  - task: AzureCLI@2
+    displayName: "Wait for revision to become healthy"
+    inputs:
+      azureSubscription: $(azureSubscription)
+      scriptType: "bash"
+      scriptLocation: "inlineScript"
+      inlineScript: |
+        set -euo pipefail
+
+        MAX_ATTEMPTS=$(healthCheckMaxAttempts)
+        INTERVAL=$(healthCheckIntervalSeconds)
+        APP_NAME="$(containerAppName)"
+        RG="$(resourceGroup)"
+
+        echo "Waiting for latest revision to become healthy..."
+        echo "  Max attempts: ${MAX_ATTEMPTS} (timeout: $((MAX_ATTEMPTS * INTERVAL))s)"
+
+        for i in $(seq 1 ${MAX_ATTEMPTS}); do
+          HEALTH_STATE=$(az containerapp show \
+            --name "${APP_NAME}" \
+            --resource-group "${RG}" \
+            --query "properties.latestRevisionHealthState" \
+            --output tsv 2>/dev/null || echo "Unknown")
+
+          REVISION_NAME=$(az containerapp show \
+            --name "${APP_NAME}" \
+            --resource-group "${RG}" \
+            --query "properties.latestRevisionName" \
+            --output tsv 2>/dev/null || echo "Unknown")
+
+          echo "  Attempt ${i}/${MAX_ATTEMPTS}: revision=${REVISION_NAME}, health=${HEALTH_STATE}"
+
+          if [ "${HEALTH_STATE}" = "Healthy" ]; then
+            echo "Revision is healthy."
+            break
+          fi
+
+          if [ "${HEALTH_STATE}" = "Degraded" ] || [ "${HEALTH_STATE}" = "Failed" ]; then
+            echo "##vso[task.logissue type=error]Revision health state is '${HEALTH_STATE}'. Deployment may have failed."
+            echo "Fetching revision details for diagnostics..."
+            az containerapp revision show \
+              --name "${APP_NAME}" \
+              --resource-group "${RG}" \
+              --revision "${REVISION_NAME}" \
+              --output json || true
+            exit 1
+          fi
+
+          if [ "${i}" -eq "${MAX_ATTEMPTS}" ]; then
+            echo "##vso[task.logissue type=error]Health check timed out after $((MAX_ATTEMPTS * INTERVAL)) seconds."
+            exit 1
+          fi
+
+          sleep ${INTERVAL}
+        done
+
+  - task: AzureCLI@2
+    displayName: "Print deployment summary"
+    condition: succeeded()
+    inputs:
+      azureSubscription: $(azureSubscription)
+      scriptType: "bash"
+      scriptLocation: "inlineScript"
+      inlineScript: |
+        set -euo pipefail
+
+        APP_NAME="$(containerAppName)"
+        RG="$(resourceGroup)"
+
+        FQDN=$(az containerapp show \
+          --name "${APP_NAME}" \
+          --resource-group "${RG}" \
+          --query "properties.configuration.ingress.fqdn" \
+          --output tsv)
+
+        REVISION=$(az containerapp show \
+          --name "${APP_NAME}" \
+          --resource-group "${RG}" \
+          --query "properties.latestRevisionName" \
+          --output tsv)
+
+        echo "============================================"
+        echo " Deployment complete"
+        echo " App:      ${APP_NAME}"
+        echo " Revision: ${REVISION}"
+        echo " Image:    $(acrLoginServer)/$(imageName):${{ parameters.imageTag }}"
+        echo " URL:      https://${FQDN}"
+        echo " Health:   https://${FQDN}/health"
+        echo "============================================"
