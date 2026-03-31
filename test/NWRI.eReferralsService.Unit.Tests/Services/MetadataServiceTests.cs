@@ -152,7 +152,7 @@ public class MetadataServiceTests
              _fixture.Mock<IEventLogger>().Object);
     }
 
-    private static IHeaderDictionary CreateHeaders()
+    private static HeaderDictionary CreateHeaders()
     {
         return new HeaderDictionary
         {
