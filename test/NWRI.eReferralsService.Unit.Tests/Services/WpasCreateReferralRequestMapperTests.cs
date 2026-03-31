@@ -46,7 +46,8 @@ public class WpasCreateReferralRequestMapperTests
             payload.ReferralDetails.AdministrativeCategory.Should().Be("referraltosecondarycare");
             payload.ReferralDetails.AdministrativeCategory.Length.Should().BeLessOrEqualTo(36);
             payload.ReferralDetails.ReferrerCode.Should().Be("PT2489");
-            payload.ReferralDetails.DateOfReferral.Should().Be("20240820");
+            payload.ReferralDetails.DateOfReferral.Should().Be("2024-08-20T11:30:00+01:00");
+            payload.ReferralDetails.DateOfReferral.Length.Should().BeLessOrEqualTo(25);
             payload.ReferralDetails.MainSpecialty.Should().Be("130");
             payload.ReferralDetails.ReferrerPriorityType.Should().Be("2");
             payload.ReferralDetails.ReasonForReferral.Should().Be("Glaucoma");

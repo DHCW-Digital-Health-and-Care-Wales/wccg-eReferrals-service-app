@@ -151,7 +151,7 @@
           "description": "The date on which the patient was told about the referral, in the format ccyyMMdd.  https://www.datadictionary.wales.nhs.uk/index.html#!WordDocuments/dateofpatientreferral.htm",
           "type": "string",
           "minLength": 8,
-          "maxLength": 8
+          "maxLength": 25
         },
         "MainSpecialty": {
           "description": "The code identifying each Main Specialty designated by Royal Colleges.  https://www.datadictionary.wales.nhs.uk/index.html#!WordDocuments/mainspecialtyconsultant.htm",
