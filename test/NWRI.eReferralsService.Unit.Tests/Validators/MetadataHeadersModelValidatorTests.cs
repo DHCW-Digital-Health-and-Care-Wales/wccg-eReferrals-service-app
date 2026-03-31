@@ -1,86 +1,53 @@
 using System.Text;
 using System.Text.Json;
 using AutoFixture;
+using FluentAssertions;
 using FluentValidation;
 using FluentValidation.TestHelper;
 using Hl7.Fhir.Model;
+using Microsoft.Extensions.Logging.Abstractions;
 using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.Extensions;
+using NWRI.eReferralsService.API.Helpers;
 using NWRI.eReferralsService.API.Models;
 using NWRI.eReferralsService.API.Validators;
 using NWRI.eReferralsService.Unit.Tests.Extensions;
 
 namespace NWRI.eReferralsService.Unit.Tests.Validators;
 
-public class HeadersModelValidatorTests
+public class MetadataHeadersModelValidatorTests
 {
     private readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions().ForFhirExtended();
     private readonly IFixture _fixture = new Fixture().WithCustomizations();
 
-    private readonly HeadersModelValidator _sut;
+    private readonly MetadataHeadersModelValidator _sut;
 
-    public HeadersModelValidatorTests()
+    public MetadataHeadersModelValidatorTests()
     {
-        _sut = new HeadersModelValidator(new JsonSerializerOptions().ForFhirExtended())
+        var fhirBase64Decoder = new FhirBase64Decoder(NullLogger<FhirBase64Decoder>.Instance, _jsonSerializerOptions);
+
+        _sut = new MetadataHeadersModelValidator(fhirBase64Decoder)
         {
             ClassLevelCascadeMode = CascadeMode.Continue,
             RuleLevelCascadeMode = CascadeMode.Stop
         };
 
         _fixture.Register(() => new Identifier(_fixture.Create<string>(), _fixture.Create<string>()));
-        _fixture.Register(() => new Organization {Id = _fixture.Create<string>()});
-        _fixture.Register(() => new Device {Id = _fixture.Create<string>()});
-        _fixture.Register(() => new PractitionerRole {Id = _fixture.Create<string>()});
-    }
+        _fixture.Register(() => new Organization { Id = _fixture.Create<string>() });
+        _fixture.Register(() => new Device { Id = _fixture.Create<string>() });
+        _fixture.Register(() => new PractitionerRole { Id = _fixture.Create<string>() });
 
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    [InlineData("  ")]
-    public void ShouldContainErrorWhenTargetIdentifierEmpty(string? value)
-    {
-        //Arrange
-        var model = _fixture.Build<HeadersModel>()
-            .With(x => x.TargetIdentifier, value)
-            .Create();
-
-        //Act
-        var validationResult = _sut.TestValidate(model);
-
-        //Assert
-        validationResult.ShouldHaveValidationErrorFor(x => x.TargetIdentifier)
-            .WithErrorMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.TargetIdentifier))
-            .WithErrorCode(nameof(ValidationErrorCode.MissingRequiredHeaderCode));
-    }
-
-    [Fact]
-    public void ShouldContainErrorWhenTargetIdentifierNotValid()
-    {
-        //Arrange
-        var model = _fixture.Create<HeadersModel>();
-
-        //Act
-        var validationResult = _sut.TestValidate(model);
-
-        //Assert
-        validationResult.ShouldHaveValidationErrorFor(x => x.TargetIdentifier)
-            .WithErrorMessage(ValidationMessages.InvalidFhirObject(RequestHeaderKeys.TargetIdentifier, nameof(Identifier)))
-            .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
-    }
-
-    [Fact]
-    public void ShouldNotContainErrorWhenTargetIdentifierValid()
-    {
-        //Arrange
-        var model = _fixture.Build<HeadersModel>()
-            .With(x => x.TargetIdentifier, CreateValidBase64<Identifier>())
-            .Create();
-
-        //Act
-        var validationResult = _sut.TestValidate(model);
-
-        //Assert
-        validationResult.ShouldNotHaveValidationErrorFor(x => x.TargetIdentifier);
+        _fixture.Register(() => new HeadersModel
+        {
+            TargetIdentifier = null,
+            EndUserOrganisation = CreateValidBase64<Organization>(),
+            RequestingSoftware = CreateValidBase64<Device>(),
+            RequestId = Guid.NewGuid().ToString(),
+            CorrelationId = Guid.NewGuid().ToString(),
+            UseContext = null,
+            Accept = "application/fhir+json;version=1.2.0",
+            RequestingPractitioner = null
+        });
     }
 
     [Theory]
@@ -89,15 +56,15 @@ public class HeadersModelValidatorTests
     [InlineData("  ")]
     public void ShouldContainErrorWhenEndUserOrganisationEmpty(string? value)
     {
-        //Arrange
+        // Arrange
         var model = _fixture.Build<HeadersModel>()
             .With(x => x.EndUserOrganisation, value)
             .Create();
 
-        //Act
+        // Act
         var validationResult = _sut.TestValidate(model);
 
-        //Assert
+        // Assert
         validationResult.ShouldHaveValidationErrorFor(x => x.EndUserOrganisation)
             .WithErrorMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.EndUserOrganisation))
             .WithErrorCode(nameof(ValidationErrorCode.MissingRequiredHeaderCode));
@@ -106,13 +73,15 @@ public class HeadersModelValidatorTests
     [Fact]
     public void ShouldContainErrorWhenEndUserOrganisationNotValid()
     {
-        //Arrange
-        var model = _fixture.Create<HeadersModel>();
+        // Arrange
+        var model = _fixture.Build<HeadersModel>()
+            .With(x => x.EndUserOrganisation, "invalid")
+            .Create();
 
-        //Act
+        // Act
         var validationResult = _sut.TestValidate(model);
 
-        //Assert
+        // Assert
         validationResult.ShouldHaveValidationErrorFor(x => x.EndUserOrganisation)
             .WithErrorMessage(ValidationMessages.InvalidFhirObject(RequestHeaderKeys.EndUserOrganisation, nameof(Organization)))
             .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
@@ -121,15 +90,15 @@ public class HeadersModelValidatorTests
     [Fact]
     public void ShouldNotContainErrorWhenEndUserOrganisationValid()
     {
-        //Arrange
+        // Arrange
         var model = _fixture.Build<HeadersModel>()
             .With(x => x.EndUserOrganisation, CreateValidBase64<Organization>())
             .Create();
 
-        //Act
+        // Act
         var validationResult = _sut.TestValidate(model);
 
-        //Assert
+        // Assert
         validationResult.ShouldNotHaveValidationErrorFor(x => x.EndUserOrganisation);
     }
 
@@ -139,15 +108,15 @@ public class HeadersModelValidatorTests
     [InlineData("  ")]
     public void ShouldContainErrorWhenRequestingSoftwareEmpty(string? value)
     {
-        //Arrange
+        // Arrange
         var model = _fixture.Build<HeadersModel>()
             .With(x => x.RequestingSoftware, value)
             .Create();
 
-        //Act
+        // Act
         var validationResult = _sut.TestValidate(model);
 
-        //Assert
+        // Assert
         validationResult.ShouldHaveValidationErrorFor(x => x.RequestingSoftware)
             .WithErrorMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.RequestingSoftware))
             .WithErrorCode(nameof(ValidationErrorCode.MissingRequiredHeaderCode));
@@ -156,13 +125,15 @@ public class HeadersModelValidatorTests
     [Fact]
     public void ShouldContainErrorWhenRequestingSoftwareNotValid()
     {
-        //Arrange
-        var model = _fixture.Create<HeadersModel>();
+        // Arrange
+        var model = _fixture.Build<HeadersModel>()
+            .With(x => x.RequestingSoftware, "invalid")
+            .Create();
 
-        //Act
+        // Act
         var validationResult = _sut.TestValidate(model);
 
-        //Assert
+        // Assert
         validationResult.ShouldHaveValidationErrorFor(x => x.RequestingSoftware)
             .WithErrorMessage(ValidationMessages.InvalidFhirObject(RequestHeaderKeys.RequestingSoftware, nameof(Device)))
             .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
@@ -171,28 +142,30 @@ public class HeadersModelValidatorTests
     [Fact]
     public void ShouldNotContainErrorWhenRequestingSoftwareValid()
     {
-        //Arrange
+        // Arrange
         var model = _fixture.Build<HeadersModel>()
             .With(x => x.RequestingSoftware, CreateValidBase64<Device>())
             .Create();
 
-        //Act
+        // Act
         var validationResult = _sut.TestValidate(model);
 
-        //Assert
+        // Assert
         validationResult.ShouldNotHaveValidationErrorFor(x => x.RequestingSoftware);
     }
 
     [Fact]
-    public void ShouldContainErrorWhenRequestingPractitionerPresentAndNotValid()
+    public void ShouldContainErrorWhenRequestingPractitionerPresentAndInvalid()
     {
-        //Arrange
-        var model = _fixture.Create<HeadersModel>();
+        // Arrange
+        var model = _fixture.Build<HeadersModel>()
+            .With(x => x.RequestingPractitioner, "invalid")
+            .Create();
 
-        //Act
+        // Act
         var validationResult = _sut.TestValidate(model);
 
-        //Assert
+        // Assert
         validationResult.ShouldHaveValidationErrorFor(x => x.RequestingPractitioner)
             .WithErrorMessage(ValidationMessages.InvalidFhirObject(RequestHeaderKeys.RequestingPractitioner, nameof(PractitionerRole)))
             .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
@@ -201,30 +174,30 @@ public class HeadersModelValidatorTests
     [Fact]
     public void ShouldNotContainErrorWhenRequestingPractitionerNotPresent()
     {
-        //Arrange
+        // Arrange
         var model = _fixture.Build<HeadersModel>()
             .Without(x => x.RequestingPractitioner)
             .Create();
 
-        //Act
+        // Act
         var validationResult = _sut.TestValidate(model);
 
-        //Assert
+        // Assert
         validationResult.ShouldNotHaveValidationErrorFor(x => x.RequestingPractitioner);
     }
 
     [Fact]
     public void ShouldNotContainErrorWhenRequestingPractitionerPresentAndValid()
     {
-        //Arrange
+        // Arrange
         var model = _fixture.Build<HeadersModel>()
             .With(x => x.RequestingPractitioner, CreateValidBase64<PractitionerRole>())
             .Create();
 
-        //Act
+        // Act
         var validationResult = _sut.TestValidate(model);
 
-        //Assert
+        // Assert
         validationResult.ShouldNotHaveValidationErrorFor(x => x.RequestingPractitioner);
     }
 
@@ -234,15 +207,15 @@ public class HeadersModelValidatorTests
     [InlineData("  ")]
     public void ShouldContainErrorWhenRequestIdEmpty(string? value)
     {
-        //Arrange
+        // Arrange
         var model = _fixture.Build<HeadersModel>()
             .With(x => x.RequestId, value)
             .Create();
 
-        //Act
+        // Act
         var validationResult = _sut.TestValidate(model);
 
-        //Assert
+        // Assert
         validationResult.ShouldHaveValidationErrorFor(x => x.RequestId)
             .WithErrorMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.RequestId))
             .WithErrorCode(nameof(ValidationErrorCode.MissingRequiredHeaderCode));
@@ -251,13 +224,15 @@ public class HeadersModelValidatorTests
     [Fact]
     public void ShouldContainErrorWhenRequestIdNotValid()
     {
-        //Arrange
-        var model = _fixture.Create<HeadersModel>();
+        // Arrange
+        var model = _fixture.Build<HeadersModel>()
+            .With(x => x.RequestId, "invalid")
+            .Create();
 
-        //Act
+        // Act
         var validationResult = _sut.TestValidate(model);
 
-        //Assert
+        // Assert
         validationResult.ShouldHaveValidationErrorFor(x => x.RequestId)
             .WithErrorMessage(ValidationMessages.NotGuidFormat(RequestHeaderKeys.RequestId))
             .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
@@ -266,15 +241,15 @@ public class HeadersModelValidatorTests
     [Fact]
     public void ShouldNotContainErrorWhenRequestIdValid()
     {
-        //Arrange
+        // Arrange
         var model = _fixture.Build<HeadersModel>()
             .With(x => x.RequestId, Guid.NewGuid().ToString())
             .Create();
 
-        //Act
+        // Act
         var validationResult = _sut.TestValidate(model);
 
-        //Assert
+        // Assert
         validationResult.ShouldNotHaveValidationErrorFor(x => x.RequestId);
     }
 
@@ -284,15 +259,15 @@ public class HeadersModelValidatorTests
     [InlineData("  ")]
     public void ShouldContainErrorWhenCorrelationIdEmpty(string? value)
     {
-        //Arrange
+        // Arrange
         var model = _fixture.Build<HeadersModel>()
             .With(x => x.CorrelationId, value)
             .Create();
 
-        //Act
+        // Act
         var validationResult = _sut.TestValidate(model);
 
-        //Assert
+        // Assert
         validationResult.ShouldHaveValidationErrorFor(x => x.CorrelationId)
             .WithErrorMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.CorrelationId))
             .WithErrorCode(nameof(ValidationErrorCode.MissingRequiredHeaderCode));
@@ -301,13 +276,15 @@ public class HeadersModelValidatorTests
     [Fact]
     public void ShouldContainErrorWhenCorrelationIdNotValid()
     {
-        //Arrange
-        var model = _fixture.Create<HeadersModel>();
+        // Arrange
+        var model = _fixture.Build<HeadersModel>()
+            .With(x => x.CorrelationId, "invalid")
+            .Create();
 
-        //Act
+        // Act
         var validationResult = _sut.TestValidate(model);
 
-        //Assert
+        // Assert
         validationResult.ShouldHaveValidationErrorFor(x => x.CorrelationId)
             .WithErrorMessage(ValidationMessages.NotGuidFormat(RequestHeaderKeys.CorrelationId))
             .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
@@ -316,73 +293,16 @@ public class HeadersModelValidatorTests
     [Fact]
     public void ShouldNotContainErrorWhenCorrelationIdValid()
     {
-        //Arrange
+        // Arrange
         var model = _fixture.Build<HeadersModel>()
             .With(x => x.CorrelationId, Guid.NewGuid().ToString())
             .Create();
 
-        //Act
+        // Act
         var validationResult = _sut.TestValidate(model);
 
-        //Assert
+        // Assert
         validationResult.ShouldNotHaveValidationErrorFor(x => x.CorrelationId);
-    }
-
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    [InlineData("  ")]
-    public void ShouldContainErrorWhenUseContextEmpty(string? value)
-    {
-        //Arrange
-        var model = _fixture.Build<HeadersModel>()
-            .With(x => x.UseContext, value)
-            .Create();
-
-        //Act
-        var validationResult = _sut.TestValidate(model);
-
-        //Assert
-        validationResult.ShouldHaveValidationErrorFor(x => x.UseContext)
-            .WithErrorMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.UseContext))
-            .WithErrorCode(nameof(ValidationErrorCode.MissingRequiredHeaderCode));
-    }
-
-    [Fact]
-    public void ShouldContainErrorWhenUseContextNotValid()
-    {
-        //Arrange
-        var model = _fixture.Build<HeadersModel>()
-            .With(x => x.UseContext, "|")
-            .Create();
-
-        //Act
-        var validationResult = _sut.TestValidate(model);
-
-        //Assert
-        validationResult.ShouldHaveValidationErrorFor(x => x.UseContext)
-            .WithErrorMessage(ValidationMessages.NotExpectedFormat(RequestHeaderKeys.UseContext,
-                RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.UseContext)))
-            .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
-    }
-
-    [Theory]
-    [InlineData("a4t2|servicerequest-response")]
-    [InlineData("validation|a4t2")]
-    [InlineData("new|servicerequest-response|validation")]
-    [InlineData("a4t2|servicerequest-response|validation|new")]
-    public void ShouldNotContainErrorWhenUseContextValid(string useContext)
-    {
-        //Arrange
-        var model = _fixture.Build<HeadersModel>()
-            .With(x => x.UseContext, useContext)
-            .Create();
-
-        //Act
-        var validationResult = _sut.TestValidate(model);
-
-        //Assert
-        validationResult.ShouldNotHaveValidationErrorFor(x => x.UseContext);
     }
 
     [Theory]
@@ -391,15 +311,15 @@ public class HeadersModelValidatorTests
     [InlineData("  ")]
     public void ShouldContainErrorWhenAcceptEmpty(string? value)
     {
-        //Arrange
+        // Arrange
         var model = _fixture.Build<HeadersModel>()
             .With(x => x.Accept, value)
             .Create();
 
-        //Act
+        // Act
         var validationResult = _sut.TestValidate(model);
 
-        //Assert
+        // Assert
         validationResult.ShouldHaveValidationErrorFor(x => x.Accept)
             .WithErrorMessage(ValidationMessages.MissingRequiredHeader(RequestHeaderKeys.Accept))
             .WithErrorCode(nameof(ValidationErrorCode.MissingRequiredHeaderCode));
@@ -412,15 +332,15 @@ public class HeadersModelValidatorTests
     [InlineData("application/fhir+json;version=a.3")]
     public void ShouldContainErrorWhenAcceptNotValid(string accept)
     {
-        //Arrange
+        // Arrange
         var model = _fixture.Build<HeadersModel>()
             .With(x => x.Accept, accept)
             .Create();
 
-        //Act
+        // Act
         var validationResult = _sut.TestValidate(model);
 
-        //Assert
+        // Assert
         validationResult.ShouldHaveValidationErrorFor(x => x.Accept)
             .WithErrorMessage(ValidationMessages.NotExpectedFormat(RequestHeaderKeys.Accept,
                 RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept)))
@@ -433,16 +353,91 @@ public class HeadersModelValidatorTests
     [InlineData("version=1.2.0;    application/fhir+json")]
     public void ShouldNotContainErrorWhenAcceptValid(string value)
     {
-        //Arrange
+        // Arrange
         var model = _fixture.Build<HeadersModel>()
             .With(x => x.Accept, value)
             .Create();
 
-        //Act
+        // Act
         var validationResult = _sut.TestValidate(model);
 
-        //Assert
+        // Assert
         validationResult.ShouldNotHaveValidationErrorFor(x => x.Accept);
+    }
+
+    [Fact]
+    public void ShouldNotContainErrorWhenUseContextMissing()
+    {
+        // Arrange
+        var model = _fixture.Build<HeadersModel>()
+            .Without(x => x.UseContext)
+            .Create();
+
+        // Act
+        var validationResult = _sut.TestValidate(model);
+
+        // Assert
+        validationResult.ShouldNotHaveValidationErrorFor(x => x.UseContext);
+    }
+
+    [Fact]
+    public void ShouldNotContainErrorWhenTargetIdentifierMissing()
+    {
+        // Arrange
+        var model = _fixture.Build<HeadersModel>()
+            .Without(x => x.TargetIdentifier)
+            .Create();
+
+        // Act
+        var validationResult = _sut.TestValidate(model);
+
+        // Assert
+        validationResult.ShouldNotHaveValidationErrorFor(x => x.TargetIdentifier);
+    }
+
+    [Fact]
+    public void ShouldContainErrorWhenTargetIdentifierPresentAndInvalid()
+    {
+        // Arrange
+        var model = _fixture.Build<HeadersModel>()
+            .With(x => x.TargetIdentifier, "invalid")
+            .Create();
+
+        // Act
+        var validationResult = _sut.TestValidate(model);
+
+        // Assert
+        validationResult.ShouldHaveValidationErrorFor(x => x.TargetIdentifier)
+            .WithErrorMessage(ValidationMessages.InvalidFhirObject(RequestHeaderKeys.TargetIdentifier, nameof(Identifier)))
+            .WithErrorCode(nameof(ValidationErrorCode.InvalidHeaderCode));
+    }
+
+    [Fact]
+    public void ShouldNotContainErrorWhenTargetIdentifierPresentAndValid()
+    {
+        // Arrange
+        var model = _fixture.Build<HeadersModel>()
+            .With(x => x.TargetIdentifier, CreateValidBase64<Identifier>())
+            .Create();
+
+        // Act
+        var validationResult = _sut.TestValidate(model);
+
+        // Assert
+        validationResult.ShouldNotHaveValidationErrorFor(x => x.TargetIdentifier);
+    }
+
+    [Fact]
+    public void ShouldBeValidWhenRequiredMetadataHeadersArePresent()
+    {
+        // Arrange
+        var model = _fixture.Create<HeadersModel>();
+
+        // Act
+        var validationResult = _sut.TestValidate(model);
+
+        // Assert
+        validationResult.IsValid.Should().BeTrue();
     }
 
     private string CreateValidBase64<T>()

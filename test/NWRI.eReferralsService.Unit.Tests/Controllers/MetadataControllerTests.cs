@@ -1,5 +1,6 @@
 using AutoFixture;
 using FluentAssertions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using NWRI.eReferralsService.API.Constants;
@@ -19,6 +20,11 @@ public class MetadataControllerTests
     {
         _fixture.OmitAutoProperties = true;
         _sut = _fixture.CreateWithFrozen<MetadataController>();
+
+        _sut.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext()
+        };
     }
 
     [Fact]
@@ -27,8 +33,8 @@ public class MetadataControllerTests
         // Arrange
         var outputJson = _fixture.Create<string>();
 
-        _fixture.Mock<ICapabilityStatementService>()
-            .Setup(x => x.GetCapabilityStatementAsync(It.IsAny<CancellationToken>()))
+        _fixture.Mock<IMetadataService>()
+            .Setup(x => x.GetMetadataAsync(It.IsAny<IHeaderDictionary>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(outputJson);
 
         // Act
@@ -42,13 +48,34 @@ public class MetadataControllerTests
     }
 
     [Fact]
+    public async Task GetMetadataShouldPassRequestHeadersToService()
+    {
+        // Arrange
+        var outputJson = _fixture.Create<string>();
+
+        _fixture.Mock<IMetadataService>()
+            .Setup(x => x.GetMetadataAsync(It.IsAny<IHeaderDictionary>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(outputJson);
+
+        // Act
+        await _sut.GetMetadata(CancellationToken.None);
+
+        // Assert
+        _fixture.Mock<IMetadataService>().Verify(
+            x => x.GetMetadataAsync(
+                It.Is<IHeaderDictionary>(h => h == _sut.Request.Headers),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact]
     public async Task GetMetadataShouldPropagateExceptionsFromService()
     {
         // Arrange
         var ex = new FileNotFoundException(_fixture.Create<string>());
 
-        _fixture.Mock<ICapabilityStatementService>()
-            .Setup(x => x.GetCapabilityStatementAsync(It.IsAny<CancellationToken>()))
+        _fixture.Mock<IMetadataService>()
+            .Setup(x => x.GetMetadataAsync(It.IsAny<IHeaderDictionary>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(ex);
 
         // Act

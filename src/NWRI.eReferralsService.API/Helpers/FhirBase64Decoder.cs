@@ -37,4 +37,9 @@ public class FhirBase64Decoder
             return false;
         }
     }
+
+    public bool CanDecode<T>(string? base64Value) where T : Base
+    {
+        return TryDecode<T>(base64Value, out _);
+    }
 }

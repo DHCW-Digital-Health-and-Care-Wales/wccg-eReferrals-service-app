@@ -417,7 +417,8 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
             .With(x => x.Errors, validationFailures)
             .Create();
 
-        _fixture.Mock<IValidator<HeadersModel>>().Setup(x => x.ValidateAsync(It.IsAny<HeadersModel>(), It.IsAny<CancellationToken>()))
+        _fixture.Mock<IValidator<HeadersModel>>()
+            .Setup(x => x.ValidateAsync(It.IsAny<HeadersModel>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(validationResult);
 
         var sut = CreateReferralService();
@@ -739,7 +740,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
         var eventLogger = _fixture.Mock<IEventLogger>().Object;
         var wpasApiClient = _fixture.Mock<IWpasApiClient>().Object;
         var fhirBundleProfileValidator = _fixture.Mock<IFhirBundleProfileValidator>().Object;
-        var headerValidator = _fixture.Mock<IValidator<HeadersModel>>().Object;
+        var referralHeadersModelValidator = _fixture.Mock<IValidator<HeadersModel>>().Object;
         var createBundleValidator = _fixture.Mock<IValidator<BundleCreateReferralModel>>().Object;
         var cancelBundleValidator = _fixture.Mock<IValidator<BundleCancelReferralModel>>().Object;
         var jsonSerializerOptions = new JsonSerializerOptions().ForFhirExtended();
@@ -759,7 +760,7 @@ public class ReferralServiceTests : IClassFixture<ReferralServiceTests.SchemaVal
         );
 
         return new ReferralService(
-            headerValidator,
+            referralHeadersModelValidator,
             jsonSerializerOptions,
             eventLogger,
             _fixture.Mock<IRequestFhirHeadersDecoder>().Object,

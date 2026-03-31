@@ -8,6 +8,7 @@ using Microsoft.Extensions.Http.Resilience;
 using Microsoft.Extensions.Options;
 using NWRI.eReferralsService.API.Configuration;
 using NWRI.eReferralsService.API.Configuration.Resilience;
+using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.EventLogging;
 using NWRI.eReferralsService.API.HealthChecks;
 using NWRI.eReferralsService.API.Mappers;
@@ -49,7 +50,8 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<IValidator<BundleCreateReferralModel>, BundleCreateReferralModelValidator>();
         services.AddScoped<IValidator<BundleCancelReferralModel>, BundleCancelReferralModelValidator>();
-        services.AddScoped<IValidator<HeadersModel>, HeadersModelValidator>();
+        services.AddKeyedScoped<IValidator<HeadersModel>, ReferralHeadersModelValidator>(ServiceKeys.Validators.ReferralHeaders);
+        services.AddKeyedScoped<IValidator<HeadersModel>, MetadataHeadersModelValidator>(ServiceKeys.Validators.MetadataHeaders);
         services.AddSingleton<IFhirBundleProfileValidator, FhirBundleProfileValidator>();
         services.AddSingleton<WpasJsonSchemaValidator>();
     }
@@ -74,6 +76,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IReferralWorkflowProcessor, ReferralWorkflowProcessor>();
         services.AddSingleton<IFileProvider>(sp => sp.GetRequiredService<IWebHostEnvironment>().ContentRootFileProvider);
         services.AddScoped<IReferralService, ReferralService>();
+        services.AddScoped<IMetadataService, MetadataService>();
         services.AddSingleton<ICapabilityStatementService, StaticFileCapabilityStatementService>();
     }
 

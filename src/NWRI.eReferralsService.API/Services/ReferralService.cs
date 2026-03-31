@@ -23,19 +23,20 @@ public class ReferralService : IReferralService
         Cancel
     }
 
-    private readonly IValidator<HeadersModel> _headerValidator;
+    private readonly IValidator<HeadersModel> _referralHeadersModelValidator;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
     private readonly IEventLogger _eventLogger;
     private readonly IRequestFhirHeadersDecoder _requestFhirHeadersDecoder;
     private readonly IReferralWorkflowProcessor _referralWorkflowProcessor;
 
-    public ReferralService(IValidator<HeadersModel> headerValidator,
+    public ReferralService(
+        [FromKeyedServices(ServiceKeys.Validators.ReferralHeaders)] IValidator<HeadersModel> referralHeadersModelValidator,
         JsonSerializerOptions jsonSerializerOptions,
         IEventLogger eventLogger,
         IRequestFhirHeadersDecoder requestFhirHeadersDecoder,
         IReferralWorkflowProcessor referralWorkflowProcessor)
     {
-        _headerValidator = headerValidator;
+        _referralHeadersModelValidator = referralHeadersModelValidator;
         _jsonSerializerOptions = jsonSerializerOptions;
         _eventLogger = eventLogger;
         _requestFhirHeadersDecoder = requestFhirHeadersDecoder;
@@ -108,7 +109,7 @@ public class ReferralService : IReferralService
 
     private async Task ValidateHeadersAsync(HeadersModel headersModel)
     {
-        var headersValidationResult = await _headerValidator.ValidateAsync(headersModel);
+        var headersValidationResult = await _referralHeadersModelValidator.ValidateAsync(headersModel);
         if (!headersValidationResult.IsValid)
         {
             throw new HeaderValidationException(headersValidationResult.Errors);
