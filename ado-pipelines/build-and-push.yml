@@ -8,7 +8,7 @@ trigger:
       - main
 
 pool:
-  name: UKS-DHCW-NWRI-DEV-ADOSelfHostPool
+  name: UKS-DHCW-NWRI-DEV-ADOSelfHostPoolVM
 
 variables:
   - name: buildConfiguration
@@ -69,13 +69,23 @@ steps:
     displayName: "Build and push Docker image to ACR"
     inputs:
       azureSubscription: $(azureSubscription)
-      scriptType: "bash"
+      scriptType: "ps"
       scriptLocation: "inlineScript"
       inlineScript: |
-        az acr build \
-          --registry $(acrName) \
-          --image "$(imageName):$(Build.SourceVersion)" \
-          --file "$(dockerfilePath)" \
+        echo "Authenticating to ACR $(acrLoginServer)..."
+        az acr login --name $(acrName)
+
+        IMAGE_FULL="$(acrLoginServer)/$(imageName)"
+        COMMIT_TAG="$(Build.SourceVersion)"
+
+        echo "Building Docker image..."
+        echo "  Image: ${IMAGE_FULL}"
+        echo "  Tags:  latest, ${COMMIT_TAG}"
+
+        docker build `
+          -t "${IMAGE_FULL}:latest" `
+          -t "${IMAGE_FULL}:${COMMIT_TAG}" `
+          -f "$(dockerfilePath)" `
           "$(dockerBuildContext)"
 
 #  - script: |
