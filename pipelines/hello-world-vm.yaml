@@ -32,11 +32,6 @@ steps:
 - powershell: docker ps
   displayName: 'docker ps'
 
-- powershell: |
-    # Windows usually uses Docker Desktop, not apt-get
-    Write-Host "Ensure Docker Desktop is installed and running"
-  displayName: 'docker install (manual check)'
-
 - powershell: docker info
   displayName: 'Checking docker info'
 
