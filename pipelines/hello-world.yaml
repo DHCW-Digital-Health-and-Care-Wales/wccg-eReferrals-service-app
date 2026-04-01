@@ -22,6 +22,9 @@ steps:
     which nc
     nc -h
   displayName: 'Verify netcat'
+
+- script: dotnet --version
+  displayName: 'Checking dotnet version'
   
 - script: echo "Testing ADO connectivity to all NWRI resources"
   displayName: 'Start connectivity tests'
