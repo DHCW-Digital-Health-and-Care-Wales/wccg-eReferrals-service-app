@@ -35,10 +35,6 @@ steps:
 - powershell: docker info
   displayName: 'Checking docker info'
 
-- powershell: |
-    Get-Service docker | Select-Object Status, Name
-  displayName: 'Checking docker service'
-
 - powershell: Write-Host "Testing ADO connectivity to all NWRI resources"
   displayName: 'Start connectivity tests'
 
