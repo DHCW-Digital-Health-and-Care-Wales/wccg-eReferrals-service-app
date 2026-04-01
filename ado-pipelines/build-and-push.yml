@@ -67,6 +67,7 @@ steps:
 
   - task: AzureCLI@2
     displayName: "Build and push Docker image to ACR"
+    condition: succeeded()
     inputs:
       azureSubscription: $(azureSubscription)
       scriptType: "ps"
@@ -88,46 +89,12 @@ steps:
           -f "$(dockerfilePath)" `
           "$(dockerBuildContext)"
 
-#  - script: |
-#      az acr build \
-#        --registry $(acrName) \
-#        --image "$(imageName):latest" \
-#        --image "$(imageName):$(Build.SourceVersion)" \
-#        --file "$(dockerfilePath)" \
-#        "$(dockerBuildContext)"
-#    displayName: "Build and push Docker image to ACR"
-#    condition: succeeded()
+        Write-Host "Pushing Docker image..."
+        docker push "${imageFull}:latest"
+        docker push "${imageFull}:${commitTag}"
 
-#  - script: |
-#      set -euo pipefail
-#
-#      echo "Authenticating with managed identity..."
-#      az login --identity --allow-no-subscriptions
-#
-#      echo "Authenticating to ACR $(acrLoginServer)..."
-#      az acr login --name $(acrName)
-#
-#      IMAGE_FULL="$(acrLoginServer)/$(imageName)"
-#      COMMIT_TAG="$(Build.SourceVersion)"
-#
-#      echo "Building Docker image..."
-#      echo "  Image: ${IMAGE_FULL}"
-#      echo "  Tags:  latest, ${COMMIT_TAG}"
-#
-#      docker build \
-#        -t "${IMAGE_FULL}:latest" \
-#        -t "${IMAGE_FULL}:${COMMIT_TAG}" \
-#        -f "$(dockerfilePath)" \
-#        "$(dockerBuildContext)"
-#
-#      echo "Pushing Docker image..."
-#      docker push "${IMAGE_FULL}:latest"
-#      docker push "${IMAGE_FULL}:${COMMIT_TAG}"
-#
-#      echo "============================================"
-#      echo " Docker image pushed successfully"
-#      echo " Repository: ${IMAGE_FULL}"
-#      echo " Tags:       latest, ${COMMIT_TAG}"
-#      echo "============================================"
-#    displayName: "Build and push Docker image to ACR"
-#    condition: succeeded()
+        Write-Host "============================================"
+        Write-Host " Docker image pushed successfully"
+        Write-Host " Repository: $imageFull"
+        Write-Host " Tags:       latest, $commitTag"
+        Write-Host "============================================"
