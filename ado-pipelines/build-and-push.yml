@@ -67,14 +67,16 @@ steps:
 
   - task: AzureCLI@2
     displayName: "Build and push Docker image to ACR"
-    scriptType: "bash"
-    scriptLocation: "inlineScript"
-    inlineScript: |
-      az acr build \
-        --registry $(acrName) \
-        --image "$(imageName):$(Build.SourceVersion)" \
-        --file "$(dockerfilePath)" \
-        "$(dockerBuildContext)"
+    inputs:
+      azureSubscription: $(azureSubscription)
+      scriptType: "bash"
+      scriptLocation: "inlineScript"
+      inlineScript: |
+        az acr build \
+          --registry $(acrName) \
+          --image "$(imageName):$(Build.SourceVersion)" \
+          --file "$(dockerfilePath)" \
+          "$(dockerBuildContext)"
 
 #  - script: |
 #      az acr build \
