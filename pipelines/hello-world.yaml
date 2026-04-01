@@ -25,6 +25,9 @@ steps:
 
 - script: dotnet --version
   displayName: 'Checking dotnet version'
+
+- script: docker --version
+  displayName: 'Checking docker version'
   
 - script: echo "Testing ADO connectivity to all NWRI resources"
   displayName: 'Start connectivity tests'
