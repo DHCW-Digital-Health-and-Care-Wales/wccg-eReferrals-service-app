@@ -71,7 +71,7 @@ steps:
         --image "$(imageName):latest" \
         --image "$(imageName):$(Build.SourceVersion)" \
         --file "$(dockerfilePath)" \
-        --context "$(dockerBuildContext)"
+        "$(dockerBuildContext)"
     displayName: "Build and push Docker image to ACR"
     condition: succeeded()
 
