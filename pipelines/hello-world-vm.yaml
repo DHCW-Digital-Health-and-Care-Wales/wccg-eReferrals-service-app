@@ -1,0 +1,60 @@
+trigger: none
+
+pool:
+  name: UKS-DHCW-NWRI-DEV-ADOSelfHostPoolVM
+
+steps:
+
+- powershell: Write-Host "Hello, world!"
+  displayName: 'Print Hello World'
+
+- powershell: |
+    Write-Host "OS info:"
+    systeminfo | Select-String "OS Name","OS Version"
+    Write-Host "PATH:"
+    Write-Host $env:PATH
+  displayName: 'Verify environment'
+
+- powershell: |
+    if (Get-Command Test-NetConnection -ErrorAction SilentlyContinue) {
+        Write-Host "Test-NetConnection is available"
+    } else {
+        Write-Host "Test-NetConnection not found"
+    }
+  displayName: 'Verify network tools'
+
+- powershell: dotnet --version
+  displayName: 'Checking dotnet version'
+
+- powershell: docker --version
+  displayName: 'Checking docker version'
+
+- powershell: docker ps
+  displayName: 'docker ps'
+
+- powershell: |
+    # Windows usually uses Docker Desktop, not apt-get
+    Write-Host "Ensure Docker Desktop is installed and running"
+  displayName: 'docker install (manual check)'
+
+- powershell: docker info
+  displayName: 'Checking docker info'
+
+- powershell: |
+    Get-Service docker | Select-Object Status, Name
+  displayName: 'Checking docker service'
+
+- powershell: Write-Host "Testing ADO connectivity to all NWRI resources"
+  displayName: 'Start connectivity tests'
+
+- powershell: Test-NetConnection -ComputerName "uks-dhcw-dev-nwri-appconfig.azconfig.io" -Port 443
+  displayName: 'Testing ADO connection to Application Configuration store'
+
+- powershell: Test-NetConnection -ComputerName "uksdhcwdevnwriacr.azurecr.io" -Port 443
+  displayName: 'Testing ADO connection to Azure Container Registry'
+
+- powershell: Test-NetConnection -ComputerName "uks-dhcw-dev-nwri-kv.vault.azure.net" -Port 443
+  displayName: 'Testing ADO connection to Azure Key Vault'
+
+- powershell: Test-NetConnection -ComputerName "uksdhcwdevnwrisa.blob.core.windows.net" -Port 443
+  displayName: 'Testing ADO connection to NWRI Storage Account'
