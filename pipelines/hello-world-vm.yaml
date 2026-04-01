@@ -1,7 +1,7 @@
 trigger: none
 
 pool:
-  name: UKS-DHCW-NWRI-DEV-ADOSelfHostPoolVM
+  name: UKS-DHCW-NWRI-DEV-ADOSelfHostPool
 
 steps:
 
@@ -23,8 +23,14 @@ steps:
     }
   displayName: 'Verify network tools'
 
-- powershell: dotnet --version
-  displayName: 'Checking dotnet version'
+- powershell: |
+    Write-Host "Checking dotnet version..."
+    dotnet --version
+    Write-Host "Installed SDKs:"
+    dotnet --list-sdks
+    Write-Host "Installed runtimes:"
+    dotnet --list-runtimes
+  displayName: 'Check dotnet SDK and runtimes'
 
 - powershell: docker --version
   displayName: 'Checking docker version'
@@ -35,7 +41,9 @@ steps:
 - powershell: docker info
   displayName: 'Checking docker info'
 
-- powershell: az --version
+- powershell: |
+    Write-Host "Checking Azure CLI version..."
+    az --version
   displayName: 'Check Azure CLI version'
 
 - powershell: Write-Host "Testing ADO connectivity to all NWRI resources"
