@@ -1,9 +1,6 @@
 # ado-pipelines/build-and-push.yml
 #
 # Build, test, and push the NWRI eReferrals Service API Docker image to ACR.
-# Uses managed identity on the self-hosted agent (no service connection required).
-#
-# If you have an Azure RM service connection, use build-and-push-with-sc.yml instead.
 
 trigger:
   branches:
