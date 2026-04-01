@@ -67,7 +67,6 @@ steps:
 
   - task: AzureCLI@2
     displayName: "Build and push Docker image to ACR"
-    condition: succeeded()
     inputs:
       azureSubscription: $(azureSubscription)
       scriptType: "ps"
@@ -78,6 +77,9 @@ steps:
 
         $imageFull = "$(acrLoginServer)/$(imageName)"
         $commitTag = "$(Build.SourceVersion)"
+
+        Write-Host "Cleaning up old Docker images..."
+        docker image prune -f --filter "until=72h"
 
         Write-Host "Building Docker image..."
         Write-Host "  Image: $imageFull"
