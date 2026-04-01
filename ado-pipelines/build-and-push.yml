@@ -65,15 +65,26 @@ steps:
     inputs:
       summaryFileLocation: "$(Agent.TempDirectory)/**/coverage.cobertura.xml"
 
-  - script: |
+  - task: AzureCLI@2
+    displayName: "Build and push Docker image to ACR"
+    scriptType: "bash"
+    scriptLocation: "inlineScript"
+    inlineScript: |
       az acr build \
         --registry $(acrName) \
-        --image "$(imageName):latest" \
         --image "$(imageName):$(Build.SourceVersion)" \
         --file "$(dockerfilePath)" \
         "$(dockerBuildContext)"
-    displayName: "Build and push Docker image to ACR"
-    condition: succeeded()
+
+#  - script: |
+#      az acr build \
+#        --registry $(acrName) \
+#        --image "$(imageName):latest" \
+#        --image "$(imageName):$(Build.SourceVersion)" \
+#        --file "$(dockerfilePath)" \
+#        "$(dockerBuildContext)"
+#    displayName: "Build and push Docker image to ACR"
+#    condition: succeeded()
 
 #  - script: |
 #      set -euo pipefail
