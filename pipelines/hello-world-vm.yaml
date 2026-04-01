@@ -9,13 +9,6 @@ steps:
   displayName: 'Print Hello World'
 
 - powershell: |
-    Write-Host "OS info:"
-    systeminfo | Select-String "OS Name","OS Version"
-    Write-Host "PATH:"
-    Write-Host $env:PATH
-  displayName: 'Verify environment'
-
-- powershell: |
     if (Get-Command Test-NetConnection -ErrorAction SilentlyContinue) {
         Write-Host "Test-NetConnection is available"
     } else {
