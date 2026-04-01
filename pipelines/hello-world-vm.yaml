@@ -35,6 +35,9 @@ steps:
 - powershell: docker info
   displayName: 'Checking docker info'
 
+- powershell: az --version
+  displayName: 'Check Azure CLI version'
+
 - powershell: Write-Host "Testing ADO connectivity to all NWRI resources"
   displayName: 'Start connectivity tests'
 
