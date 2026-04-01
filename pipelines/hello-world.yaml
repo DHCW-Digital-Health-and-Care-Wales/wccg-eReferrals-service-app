@@ -28,6 +28,12 @@ steps:
 
 - script: docker --version
   displayName: 'Checking docker version'
+
+- script: docker info
+  displayName: 'Checking docker info'
+
+- script: sudo systemctl status docker
+  displayName: 'Checking docker service'
   
 - script: echo "Testing ADO connectivity to all NWRI resources"
   displayName: 'Start connectivity tests'
