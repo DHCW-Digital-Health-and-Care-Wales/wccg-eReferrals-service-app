@@ -19,7 +19,7 @@ variables:
   - name: solutionFile
     value: "NWRI.eReferralsService.sln"
   - name: unitTestProject
-    value: "test/NWRI.eReferralsService.Unit.Tests/NWRI.eReferralsService.Unit.Tests.csproj"
+    value: "test/**/*.csproj"
   - name: dockerfilePath
     value: "src/NWRI.eReferralsService.API/Dockerfile"
   - name: dockerBuildContext
