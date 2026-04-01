@@ -72,19 +72,19 @@ steps:
       scriptType: "ps"
       scriptLocation: "inlineScript"
       inlineScript: |
-        echo "Authenticating to ACR $(acrLoginServer)..."
+        Write-Host "Authenticating to ACR $(acrLoginServer)..."
         az acr login --name $(acrName)
 
-        IMAGE_FULL="$(acrLoginServer)/$(imageName)"
-        COMMIT_TAG="$(Build.SourceVersion)"
+        $imageFull = "$(acrLoginServer)/$(imageName)"
+        $commitTag = "$(Build.SourceVersion)"
 
-        echo "Building Docker image..."
-        echo "  Image: ${IMAGE_FULL}"
-        echo "  Tags:  latest, ${COMMIT_TAG}"
+        Write-Host "Building Docker image..."
+        Write-Host "  Image: $imageFull"
+        Write-Host "  Tags:  latest, $commitTag"
 
         docker build `
-          -t "${IMAGE_FULL}:latest" `
-          -t "${IMAGE_FULL}:${COMMIT_TAG}" `
+          -t "${imageFull}:latest" `
+          -t "${imageFull}:${commitTag}" `
           -f "$(dockerfilePath)" `
           "$(dockerBuildContext)"
 
