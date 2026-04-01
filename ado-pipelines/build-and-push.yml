@@ -27,6 +27,12 @@ steps:
   - checkout: self
     displayName: "Checkout source code"
 
+  - task: UseDotNet@2
+    displayName: "Use .NET SDK 8.0"
+    inputs:
+      packageType: "sdk"
+      version: "8.0.x"
+
   - task: DotNetCoreCLI@2
     displayName: "Restore NuGet packages"
     inputs:
