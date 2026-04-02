@@ -78,9 +78,6 @@ steps:
         $imageFull = "$(acrLoginServer)/$(imageName)"
         $commitTag = "$(Build.SourceVersion)"
 
-        Write-Host "Cleaning up old Docker images..."
-        docker image prune -f --filter "until=72h"
-
         Write-Host "Building Docker image..."
         Write-Host "  Image: $imageFull"
         Write-Host "  Tags:  latest, $commitTag"
@@ -100,3 +97,6 @@ steps:
         Write-Host " Repository: $imageFull"
         Write-Host " Tags:       latest, $commitTag"
         Write-Host "============================================"
+
+        Write-Host "Cleaning up old Docker images..."
+        docker image prune -f --filter "until=72h"
