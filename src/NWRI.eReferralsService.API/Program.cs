@@ -21,7 +21,8 @@ builder.Services.AddSingleton<IValidateOptions<WpasApiConfig>, ValidateWpasApiCo
 builder.Services.AddOptions<ResilienceConfig>().Bind(builder.Configuration.GetSection(ResilienceConfig.SectionName));
 builder.Services.AddSingleton<IValidateOptions<ResilienceConfig>, ValidateResilienceConfigOptions>();
 
-builder.Services.AddOptions<FhirBundleProfileValidationConfig>().Bind(builder.Configuration.GetSection(FhirBundleProfileValidationConfig.SectionName));
+builder.Services.AddOptions<FhirBundleProfileValidationConfig>()
+    .Bind(builder.Configuration.GetSection(FhirBundleProfileValidationConfig.SectionName));
 builder.Services.AddSingleton<IValidateOptions<FhirBundleProfileValidationConfig>, ValidateFhirBundleProfileValidationOptions>();
 builder.Services.AddSingleton<IEventLogger, EventLogger>();
 builder.Services.AddSingleton<FhirBase64Decoder>();
@@ -54,11 +55,14 @@ builder.Services.AddCustomHealthChecks();
 
 var app = builder.Build();
 
+// Configure the HTTP request pipeline.
 app.UseMiddleware<RequestResponseAuditMiddleware>();
 app.UseMiddleware<ResponseMiddleware>();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+var swaggerEnabled = app.Environment.IsDevelopment() ||
+                     string.Equals(app.Configuration["SWAGGER_ENABLED"], "true", StringComparison.OrdinalIgnoreCase);
+
+if (swaggerEnabled)
 {
     app.UseSwagger();
     app.UseSwaggerUI();

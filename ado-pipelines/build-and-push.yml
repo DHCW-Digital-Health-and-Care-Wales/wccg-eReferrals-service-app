@@ -6,9 +6,10 @@ trigger:
   branches:
     include:
       - main
+pr: none
 
 pool:
-  name: UKS-DHCW-NWRI-DEV-ADOSelfHostPool
+  name: UKS-DHCW-NWRI-DEV-ADOSelfHostPoolVM
 
 variables:
   - name: buildConfiguration
@@ -26,6 +27,12 @@ variables:
 steps:
   - checkout: self
     displayName: "Checkout source code"
+
+  - task: UseDotNet@2
+    displayName: "Use .NET SDK 8.0"
+    inputs:
+      packageType: "sdk"
+      version: "8.0.x"
 
   - task: DotNetCoreCLI@2
     displayName: "Restore NuGet packages"
@@ -59,36 +66,38 @@ steps:
     inputs:
       summaryFileLocation: "$(Agent.TempDirectory)/**/coverage.cobertura.xml"
 
-  - script: |
-      set -euo pipefail
-
-      echo "Authenticating with managed identity..."
-      az login --identity --allow-no-subscriptions
-
-      echo "Authenticating to ACR $(acrLoginServer)..."
-      az acr login --name $(acrName)
-
-      IMAGE_FULL="$(acrLoginServer)/$(imageName)"
-      COMMIT_TAG="$(Build.SourceVersion)"
-
-      echo "Building Docker image..."
-      echo "  Image: ${IMAGE_FULL}"
-      echo "  Tags:  latest, ${COMMIT_TAG}"
-
-      docker build \
-        -t "${IMAGE_FULL}:latest" \
-        -t "${IMAGE_FULL}:${COMMIT_TAG}" \
-        -f "$(dockerfilePath)" \
-        "$(dockerBuildContext)"
-
-      echo "Pushing Docker image..."
-      docker push "${IMAGE_FULL}:latest"
-      docker push "${IMAGE_FULL}:${COMMIT_TAG}"
-
-      echo "============================================"
-      echo " Docker image pushed successfully"
-      echo " Repository: ${IMAGE_FULL}"
-      echo " Tags:       latest, ${COMMIT_TAG}"
-      echo "============================================"
+  - task: AzureCLI@2
     displayName: "Build and push Docker image to ACR"
-    condition: succeeded()
+    inputs:
+      azureSubscription: $(azureSubscription)
+      scriptType: "ps"
+      scriptLocation: "inlineScript"
+      inlineScript: |
+        Write-Host "Authenticating to ACR $(acrLoginServer)..."
+        az acr login --name $(acrName)
+
+        $imageFull = "$(acrLoginServer)/$(imageName)"
+        $commitTag = "$(Build.SourceVersion)"
+
+        Write-Host "Building Docker image..."
+        Write-Host "  Image: $imageFull"
+        Write-Host "  Tags:  latest, $commitTag"
+
+        docker build `
+          -t "${imageFull}:latest" `
+          -t "${imageFull}:${commitTag}" `
+          -f "$(dockerfilePath)" `
+          "$(dockerBuildContext)"
+
+        Write-Host "Pushing Docker image..."
+        docker push "${imageFull}:latest"
+        docker push "${imageFull}:${commitTag}"
+
+        Write-Host "============================================"
+        Write-Host " Docker image pushed successfully"
+        Write-Host " Repository: $imageFull"
+        Write-Host " Tags:       latest, $commitTag"
+        Write-Host "============================================"
+
+        Write-Host "Cleaning up old Docker images..."
+        docker image prune -f --filter "until=72h"
