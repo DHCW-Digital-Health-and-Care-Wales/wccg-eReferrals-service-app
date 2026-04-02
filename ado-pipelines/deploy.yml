@@ -85,6 +85,9 @@ steps:
           exit 1
         }
 
+        $deployedRevision = "$(containerAppName)--$revisionSuffix"
+        Write-Host "##vso[task.setvariable variable=deployedRevisionName]$deployedRevision"
+
         Write-Host "Container App update command completed."
 
   - task: AzureCLI@2
@@ -98,53 +101,53 @@ steps:
         $interval    = [int]"$(healthCheckIntervalSeconds)"
         $appName     = "$(containerAppName)"
         $rg          = "$(resourceGroup)"
+        $revisionName = "$(deployedRevisionName)"
         $timeoutSecs = $maxAttempts * $interval
 
         Write-Host "Waiting for latest revision to become healthy..."
         Write-Host "  Max attempts : $maxAttempts (timeout: ${timeoutSecs}s)"
 
         for ($i = 1; $i -le $maxAttempts; $i++) {
-          # Single az call per iteration – parse both fields from the JSON response.
-          $appJsonStr = az containerapp show `
+          $revJsonStr = az containerapp revision show `
             --name $appName `
             --resource-group $rg `
+            --revision $revisionName `
             --output json `
             --only-show-errors 2>$null
 
-          if ($LASTEXITCODE -eq 0 -and $appJsonStr) {
-            $appData      = $appJsonStr | ConvertFrom-Json
-            $healthState  = $appData.properties.latestRevisionHealthState
-            $revisionName = $appData.properties.latestRevisionName
+          if ($LASTEXITCODE -eq 0 -and $revJsonStr) {
+            $revData      = $revJsonStr | ConvertFrom-Json
+            $healthState  = $revData.properties.healthState
+            $runningState = $revData.properties.runningState
+            if (-not $healthState)  { $healthState  = "Unknown" }
+            if (-not $runningState) { $runningState = "Unknown" }
           } else {
             $healthState  = "Unknown"
-            $revisionName = "Unknown"
+            $runningState = "Unknown"
           }
 
-          Write-Host "  Attempt $i/$maxAttempts : revision=$revisionName, health=$healthState"
+          Write-Host "  Attempt $i/$maxAttempts : health=$healthState, running=$runningState"
 
           if ($healthState -eq "Healthy") {
             Write-Host "Revision is healthy."
             break
           }
 
-          if ($healthState -eq "Degraded" -or $healthState -eq "Failed") {
-            Write-Host "##vso[task.logissue type=error]Revision health state is '$healthState'. Deployment may have failed."
-            if ($revisionName -ne "Unknown") {
-              Write-Host "Fetching revision details for diagnostics..."
-              az containerapp revision show `
-                --name $appName `
-                --resource-group $rg `
-                --revision $revisionName `
-                --output json `
-                --only-show-errors
+          # Fail fast on terminal bad states
+          if ($healthState -eq "Unhealthy" -or $runningState -eq "Failed" -or $runningState -eq "Stopped") {
+            Write-Host "##vso[task.logissue type=error]Revision entered a failed state: health=$healthState, running=$runningState"
+            if ($revJsonStr) {
+              Write-Host "--- Revision details ---"
+              Write-Host $revJsonStr
             }
             exit 1
           }
 
           if ($i -eq $maxAttempts) {
-            Write-Host "##vso[task.logissue type=error]Health check timed out after $timeoutSecs seconds."
+            Write-Host "##vso[task.logissue type=error]Health check timed out after $timeoutSecs seconds (last state: health=$healthState, running=$runningState)."
             exit 1
           }
+
 
           Start-Sleep -Seconds $interval
         }
@@ -175,7 +178,7 @@ steps:
 
         $appData  = $appJsonStr | ConvertFrom-Json
         $fqdn     = $appData.properties.configuration.ingress.fqdn
-        $revision = $appData.properties.latestRevisionName
+        $revision = "$(deployedRevisionName)"
 
         Write-Host "============================================"
         Write-Host " Deployment complete"
