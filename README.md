@@ -80,6 +80,14 @@ To run the project locally, follow these steps:
 5. The service will warm up the FHIR validator during startup (check logs for confirmation).
 6. Open your web browser and navigate to `https://localhost:5069/swagger/index.html` to access the SwaggerUI with API endpoints.
 
+## Swagger
+
+By default, the Swagger UI is only available when running in the **Development** environment.
+
+To enable it in other environments (e.g. for production debugging), set the `SWAGGER_ENABLED` environment variable to `true`:
+
+> **Note**: Remember to remove the variable once you're done — leaving Swagger exposed in production is a security risk.
+
 ## Error Handling and Middleware
 The service uses `ResponseMiddleware` to handle all exceptions and return properly formatted FHIR `OperationOutcome` responses.
 
