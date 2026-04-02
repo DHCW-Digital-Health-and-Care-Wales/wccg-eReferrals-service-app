@@ -1,6 +1,7 @@
 pool:
   name: UKS-DHCW-NWRI-DEV-ADOSelfHostPoolVM
 
+trigger: none
 
 variables:
   - group: nwri-ereferrals-dev
