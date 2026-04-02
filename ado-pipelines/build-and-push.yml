@@ -6,6 +6,7 @@ trigger:
   branches:
     include:
       - main
+pr: none
 
 pool:
   name: UKS-DHCW-NWRI-DEV-ADOSelfHostPoolVM

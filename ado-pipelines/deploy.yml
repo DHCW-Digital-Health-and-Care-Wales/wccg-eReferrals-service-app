@@ -1,25 +1,18 @@
 # ado-pipelines/deploy.yml
 #
 # Deploy the NWRI eReferrals Service API to Azure Container Apps
-#
-# Prerequisites – the pipeline will FAIL EARLY with a clear message if these are not met:
-#   • The Azure Container App ($(containerAppName)) must already exist in $(resourceGroup).
-#     This pipeline only updates an existing app; it will NOT create one.
-#     Provision the Container App via Bicep / Terraform before running this pipeline for the first time.
-#   • The service connection ($(azureSubscription)) must have:
-#       - Contributor (or Azure ContainerApps Contributor) on the Container App / resource group
-#   • The Container App's own managed identity must have AcrPull on the ACR so it can pull the image at runtime.
 
 trigger: none
+pr: none
+
+pool:
+  name: UKS-DHCW-NWRI-DEV-ADOSelfHostPoolVM
 
 parameters:
   - name: imageTag
     displayName: "Docker image tag to deploy (commit SHA or 'latest')"
     type: string
     default: "latest"
-
-pool:
-  name: UKS-DHCW-NWRI-DEV-ADOSelfHostPoolVM
 
 variables:
   - name: healthCheckMaxAttempts
