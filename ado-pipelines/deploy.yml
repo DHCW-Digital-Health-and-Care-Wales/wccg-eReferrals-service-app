@@ -19,7 +19,7 @@ parameters:
     default: "latest"
 
 pool:
-  name: UKS-DHCW-NWRI-DEV-ADOSelfHostPool
+  name: UKS-DHCW-NWRI-DEV-ADOSelfHostPoolVM
 
 variables:
   - name: healthCheckMaxAttempts
