@@ -1,4 +1,4 @@
-name: .NET Dependency Audit
+name: ".NET Dependency Audit"
 
 on:
   workflow_dispatch:

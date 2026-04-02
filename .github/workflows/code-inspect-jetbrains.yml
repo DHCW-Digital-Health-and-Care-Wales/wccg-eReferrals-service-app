@@ -1,4 +1,4 @@
-name: code-inspect-jetbrains.yml
+name: "Code Inspection - JetBrains"
 
 on:
   workflow_dispatch:
