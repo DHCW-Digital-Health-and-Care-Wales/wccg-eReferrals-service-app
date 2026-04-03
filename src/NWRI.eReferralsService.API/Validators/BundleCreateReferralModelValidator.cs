@@ -41,7 +41,7 @@ public class BundleCreateReferralModelValidator : AbstractValidator<BundleCreate
                         destination.RuleFor(d => d.Endpoint)
                             .NotEmpty()
                             .WithMessage(MissingEntityField<MessageHeader>(DestinationEndpoint))
-                            .Equal(BarsEndpoint)
+                            .Equal(BarsEndpoint, StringComparer.OrdinalIgnoreCase)
                             .WithMessage($"{nameof(MessageHeader)}.{DestinationEndpoint} must be '{BarsEndpoint}'");
                     });
 
