@@ -6,12 +6,12 @@ namespace NWRI.eReferralsService.Unit.Tests.Extensions;
 
 public class FluentValidationExtensionsTests
 {
-    private class TestModel
+    private sealed class TestModel
     {
         public string? Url { get; init; }
     }
 
-    private class TestModelValidator : AbstractValidator<TestModel>
+    private sealed class TestModelValidator : AbstractValidator<TestModel>
     {
         public TestModelValidator()
         {
