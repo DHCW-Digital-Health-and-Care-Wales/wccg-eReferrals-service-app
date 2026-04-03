@@ -33,4 +33,9 @@ public static class ValidationMessages
     {
         return $"{typeof(TResource).Name}.{propertyName} is required";
     }
+
+    public static string InvalidHttpUrl<TResource>(string propertyName)
+    {
+        return $"{typeof(TResource).Name}.{propertyName} must be a valid HTTP URL";
+    }
 }

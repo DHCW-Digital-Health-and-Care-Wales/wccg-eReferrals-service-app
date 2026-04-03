@@ -1,5 +1,6 @@
 using FluentValidation;
 using Hl7.Fhir.Model;
+using NWRI.eReferralsService.API.Extensions;
 using NWRI.eReferralsService.API.Models;
 using static NWRI.eReferralsService.API.Constants.ValidationMessages;
 using static NWRI.eReferralsService.API.Constants.FhirConstants;
@@ -17,6 +18,7 @@ public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancel
     private const string OccurrencePeriod = "occurrencePeriod";
     private const string IdentifierSystem = "identifier.system";
     private const string IdentifierValue = "identifier.value";
+    private const string DestinationEndpoint = "destination.endpoint";
 
     public BundleCancelReferralModelValidator()
     {
@@ -34,6 +36,16 @@ public class BundleCancelReferralModelValidator : AbstractValidator<BundleCancel
                 messageHeader.RuleFor(x => x.Destination)
                     .NotEmpty()
                     .WithMessage(MissingEntityField<MessageHeader>(nameof(MessageHeader.Destination)));
+
+                messageHeader.RuleForEach(x => x.Destination)
+                    .ChildRules(destination =>
+                    {
+                        destination.RuleFor(d => d.Endpoint)
+                            .NotEmpty()
+                            .WithMessage(MissingEntityField<MessageHeader>(DestinationEndpoint))
+                            .ValidHttpUrl()
+                            .WithMessage(InvalidHttpUrl<MessageHeader>(DestinationEndpoint));
+                    });
 
                 messageHeader.RuleFor(x => x.Focus)
                     .NotEmpty()
