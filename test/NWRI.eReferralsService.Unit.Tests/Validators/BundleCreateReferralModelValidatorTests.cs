@@ -59,6 +59,33 @@ public class BundleCreateReferralModelValidatorTests
             .WithErrorMessage(ValidationMessages.MissingBundleEntity(nameof(MessageHeader)));
     }
 
+    [Theory]
+    [InlineData("")]
+    [InlineData(" ")]
+    [InlineData(null)]
+    public void ShouldContainErrorWhenMessageHeaderDestinationEndpointIsEmpty(string? endpoint)
+    {
+        var model = CreateValidModelFromExampleBundle();
+        var destination = model.MessageHeader!.Destination.First();
+        destination.Endpoint = endpoint;
+
+        var result = _sut.TestValidate(model);
+
+        result.Errors.Should().Contain(e => e.ErrorMessage == "MessageHeader.destination.endpoint is required");
+    }
+
+    [Fact]
+    public void ShouldContainErrorWhenMessageHeaderDestinationEndpointIsInvalidUrl()
+    {
+        var model = CreateValidModelFromExampleBundle();
+        var destination = model.MessageHeader!.Destination.First();
+        destination.Endpoint = "not-a-valid-url";
+
+        var result = _sut.TestValidate(model);
+
+        result.Errors.Should().Contain(e => e.ErrorMessage == "MessageHeader.destination.endpoint must be a valid HTTP URL");
+    }
+
     [Fact]
     public void ShouldContainErrorWhenServiceRequestNull()
     {
