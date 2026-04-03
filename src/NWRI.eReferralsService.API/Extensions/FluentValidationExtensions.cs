@@ -8,9 +8,12 @@ public static class FluentValidationExtensions
         this IRuleBuilder<T, string?> ruleBuilder)
     {
         return ruleBuilder.Must(url =>
-            string.IsNullOrWhiteSpace(url) ||
-            (Uri.TryCreate(url, UriKind.Absolute, out var uri) &&
-             (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps))
-        );
+        {
+            if (string.IsNullOrWhiteSpace(url))
+                return false;
+
+            return Uri.TryCreate(url, UriKind.Absolute, out var uri) &&
+                   (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
+        });
     }
 }

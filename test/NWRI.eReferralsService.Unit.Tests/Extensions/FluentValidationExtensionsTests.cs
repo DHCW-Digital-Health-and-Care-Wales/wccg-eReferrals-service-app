@@ -47,12 +47,12 @@ public class FluentValidationExtensionsTests
     [InlineData("")]
     [InlineData(" ")]
     [InlineData(null)]
-    public void ValidHttpUrlShouldAllowEmptyOrNullUrl(string? url)
+    public void ValidHttpUrlShouldNotAllowEmptyOrNullUrl(string? url)
     {
         var model = new TestModel { Url = url };
         var result = _sut.TestValidate(model);
 
-        result.ShouldNotHaveAnyValidationErrors();
+        result.ShouldHaveValidationErrorFor(x => x.Url);
     }
 }
 
