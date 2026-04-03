@@ -8,7 +8,7 @@ public class FluentValidationExtensionsTests
 {
     private class TestModel
     {
-        public string? Url { get; set; }
+        public string? Url { get; init; }
     }
 
     private class TestModelValidator : AbstractValidator<TestModel>
