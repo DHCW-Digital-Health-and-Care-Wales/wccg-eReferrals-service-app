@@ -74,6 +74,21 @@ public class BundleCreateReferralModelValidatorTests
         result.Errors.Should().Contain(e => e.ErrorMessage == "MessageHeader.destination.endpoint is required");
     }
 
+    [Theory]
+    [InlineData("invalid")]
+    [InlineData("https://example.com/wrong-url")]
+    public void ShouldContainErrorWhenMessageHeaderDestinationEndpointIsInvalid(string endpoint)
+    {
+        var model = CreateValidModelFromExampleBundle();
+        var destination = model.MessageHeader!.Destination.First();
+        destination.Endpoint = endpoint;
+
+        var result = _sut.TestValidate(model);
+
+        result.Errors.Should().Contain(e =>
+            e.ErrorMessage == "MessageHeader.destination.endpoint must be 'https://bars.wales.nhs.uk'");
+    }
+
     [Fact]
     public void ShouldContainErrorWhenServiceRequestNull()
     {

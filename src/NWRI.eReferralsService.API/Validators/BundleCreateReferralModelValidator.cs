@@ -12,6 +12,7 @@ public class BundleCreateReferralModelValidator : AbstractValidator<BundleCreate
     private const string OccurrencePeriod = "occurrencePeriod";
     private const string EventCoding = "eventCoding";
     private const string DestinationEndpoint = "destination.endpoint";
+    private const string BarsEndpoint = "https://bars.wales.nhs.uk";
 
     public BundleCreateReferralModelValidator()
     {
@@ -39,7 +40,9 @@ public class BundleCreateReferralModelValidator : AbstractValidator<BundleCreate
                     {
                         destination.RuleFor(d => d.Endpoint)
                             .NotEmpty()
-                            .WithMessage(MissingEntityField<MessageHeader>(DestinationEndpoint));
+                            .WithMessage(MissingEntityField<MessageHeader>(DestinationEndpoint))
+                            .Equal(BarsEndpoint)
+                            .WithMessage($"{nameof(MessageHeader)}.{DestinationEndpoint} must be '{BarsEndpoint}'");
                     });
 
                 messageHeader.RuleFor(x => x.Sender)
