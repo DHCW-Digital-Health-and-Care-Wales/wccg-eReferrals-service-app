@@ -28,7 +28,10 @@ public class FluentValidationExtensionsTests
     [InlineData("urn:uuid:d5ffd0cd-ec7e-48a1-84f1-91f4c0eb8fc5", false)]
     [InlineData("https://bars.wales.nhs.uk", true)]
     [InlineData("http://example.com/api", true)]
-    public void ValidHttpUrlShouldValidateCorrectly(string url, bool isValid)
+    [InlineData("", false)]
+    [InlineData(" ", false)]
+    [InlineData(null, false)]
+    public void ValidHttpUrlShouldValidateCorrectly(string? url, bool isValid)
     {
         var model = new TestModel { Url = url };
         var result = _sut.TestValidate(model);
@@ -41,18 +44,6 @@ public class FluentValidationExtensionsTests
         {
             result.ShouldHaveValidationErrorFor(x => x.Url);
         }
-    }
-
-    [Theory]
-    [InlineData("")]
-    [InlineData(" ")]
-    [InlineData(null)]
-    public void ValidHttpUrlShouldNotAllowEmptyOrNullUrl(string? url)
-    {
-        var model = new TestModel { Url = url };
-        var result = _sut.TestValidate(model);
-
-        result.ShouldHaveValidationErrorFor(x => x.Url);
     }
 }
 
