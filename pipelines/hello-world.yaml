@@ -10,15 +10,6 @@ steps:
   displayName: 'Print Hello World'
 
 - script: |
-    echo "OS info:"
-    cat /etc/os-release
-    echo "apt-get location:"
-    ls -l /usr/bin/apt-get || echo "not found"
-    echo "PATH:"
-    echo $PATH
-  displayName: 'Verify environment'
-
-- script: |
     which nc
     nc -h
   displayName: 'Verify netcat'
