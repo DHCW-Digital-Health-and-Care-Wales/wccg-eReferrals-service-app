@@ -55,6 +55,9 @@ steps:
 
 - script: nc -zv uksdhcwdevnwrisa.blob.core.windows.net 443
   displayName: 'Testing ADO connection to NWRI Storage Account'
+
+- script: nc -zv uksdhcwdevnwrisa.file.core.windows.net 443
+  displayName: 'Testing ADO connection to NWRI Storage Account'
    
 - script: terraform --version
   displayName: 'Check Terraform version'
