@@ -2,7 +2,7 @@ trigger:
 - none
 
 pool:
-  name: UKS-DHCW-NWRI-DEV-ADOSelfHostPool
+  name: UKS-DHCW-NWRI-DEV-ADOSelfHostPoolVM
 
 steps:
 
