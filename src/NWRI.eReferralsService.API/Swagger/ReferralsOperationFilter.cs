@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Text.Json.Nodes;
 using JetBrains.Annotations;
-using Microsoft.OpenApi.Any;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using NWRI.eReferralsService.API.Swagger.Attributes;
 
@@ -27,7 +27,7 @@ public sealed class ReferralsOperationFilter : IOperationFilter
     private static void ApplyGetReferral(OpenApiOperation operation)
     {
         SwaggerHelpers.AddCommonHeaders(operation);
-        SwaggerHelpers.AddPathParameter(operation, "id", required: true, example: new OpenApiString(Guid.NewGuid().ToString()));
+        SwaggerHelpers.AddPathParameter(operation, "id", required: true, example: JsonValue.Create(Guid.NewGuid().ToString()));
         SwaggerHelpers.AddProxyNotImplementedResponses(operation);
     }
 

@@ -1,8 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Text.Json.Nodes;
 using JetBrains.Annotations;
-using Microsoft.OpenApi.Any;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using NWRI.eReferralsService.API.Swagger.Attributes;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -37,7 +37,7 @@ public sealed class BookingsOperationFilter : IOperationFilter
     private static void ApplyGetAppointmentById(OpenApiOperation operation)
     {
         SwaggerHelpers.AddCommonHeaders(operation);
-        SwaggerHelpers.AddPathParameter(operation, "id", required: true, example: new OpenApiString(Guid.NewGuid().ToString()));
+        SwaggerHelpers.AddPathParameter(operation, "id", required: true, example: JsonValue.Create(Guid.NewGuid().ToString()));
         SwaggerHelpers.AddProxyNotImplementedResponses(operation);
     }
 
@@ -60,8 +60,8 @@ public sealed class BookingsOperationFilter : IOperationFilter
             Description = "Comma-separated Slot status values (free, busy). Default: free.",
             Schema = new OpenApiSchema
             {
-                Type = "string",
-                Example = new OpenApiString("free,busy")
+                Type = JsonSchemaType.String,
+                Example = JsonValue.Create("free,busy")
             }
         });
 
@@ -75,13 +75,11 @@ public sealed class BookingsOperationFilter : IOperationFilter
             Explode = true,
             Schema = new OpenApiSchema
             {
-                Type = "array",
-                Items = new OpenApiSchema { Type = "string" },
-                Example = new OpenApiArray
-                {
-                    new OpenApiString("ge2022-03-01T12:00:00+00:00"),
-                    new OpenApiString("le2022-03-01T13:30:00+00:00")
-                }
+                Type = JsonSchemaType.Array,
+                Items = new OpenApiSchema { Type = JsonSchemaType.String },
+                Example = new JsonArray(
+                    "ge2022-03-01T12:00:00+00:00",
+                    "le2022-03-01T13:30:00+00:00")
             }
         });
 
@@ -98,27 +96,25 @@ public sealed class BookingsOperationFilter : IOperationFilter
             Explode = true,
             Schema = new OpenApiSchema
             {
-                Type = "array",
+                Type = JsonSchemaType.Array,
                 Items = new OpenApiSchema
                 {
-                    Type = "string",
-                    Enum = new List<IOpenApiAny>
+                    Type = JsonSchemaType.String,
+                    Enum = new List<JsonNode>
                     {
-                        new OpenApiString("Slot:schedule"),
-                        new OpenApiString("Schedule:actor:Practitioner"),
-                        new OpenApiString("Schedule:actor:PractitionerRole"),
-                        new OpenApiString("Schedule:actor:HealthcareService"),
-                        new OpenApiString("HealthcareService:providedBy"),
-                        new OpenApiString("HealthcareService:location"),
-                        new OpenApiString("Slot:*")
+                        JsonValue.Create("Slot:schedule"),
+                        JsonValue.Create("Schedule:actor:Practitioner"),
+                        JsonValue.Create("Schedule:actor:PractitionerRole"),
+                        JsonValue.Create("Schedule:actor:HealthcareService"),
+                        JsonValue.Create("HealthcareService:providedBy"),
+                        JsonValue.Create("HealthcareService:location"),
+                        JsonValue.Create("Slot:*")
                     }
                 }
             },
-            Example = new OpenApiArray
-            {
-                new OpenApiString("Slot:schedule"),
-                new OpenApiString("Schedule:actor:HealthcareService")
-            }
+            Example = new JsonArray(
+                "Slot:schedule",
+                "Schedule:actor:HealthcareService")
         });
     }
 }

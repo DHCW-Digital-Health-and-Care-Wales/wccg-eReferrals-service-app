@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using JetBrains.Annotations;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.Swagger.Attributes;
 using Swashbuckle.AspNetCore.SwaggerGen;

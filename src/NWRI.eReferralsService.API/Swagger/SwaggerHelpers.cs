@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using Microsoft.OpenApi.Any;
-using Microsoft.OpenApi.Models;
+using System.Text.Json.Nodes;
+using Microsoft.OpenApi;
 using NWRI.eReferralsService.API.Constants;
 
 namespace NWRI.eReferralsService.API.Swagger;
@@ -17,8 +17,8 @@ internal static class SwaggerHelpers
                 In = ParameterLocation.Header,
                 Name = header,
                 Required = isRequired,
-                Example = new OpenApiString(RequestHeaderKeys.GetExampleValue(header)),
-                Schema = new OpenApiSchema {Type = "string"}
+                Example = JsonValue.Create(RequestHeaderKeys.GetExampleValue(header)),
+                Schema = new OpenApiSchema {Type = JsonSchemaType.String}
             });
         }
     }
@@ -29,7 +29,7 @@ internal static class SwaggerHelpers
         AddHeaders(operation, RequestHeaderKeys.GetAllOptional(), false);
     }
 
-    public static void AddPathParameter(OpenApiOperation operation, string name, bool required, IOpenApiAny? example = null)
+    public static void AddPathParameter(OpenApiOperation operation, string name, bool required, JsonNode? example = null)
     {
         UpsertParameter(operation, new OpenApiParameter
         {
@@ -37,13 +37,13 @@ internal static class SwaggerHelpers
             Name = name,
             Required = required,
             Example = example,
-            Schema = new OpenApiSchema {Type = "string"}
+            Schema = new OpenApiSchema {Type = JsonSchemaType.String}
         });
     }
 
     private static void AddIfMissing(OpenApiOperation operation, OpenApiParameter parameter)
     {
-        operation.Parameters ??= new List<OpenApiParameter>();
+        operation.Parameters ??= new List<IOpenApiParameter>();
 
         var location = parameter.In ?? throw new ArgumentException("Parameter.In must be set.", nameof(parameter));
 
@@ -57,7 +57,7 @@ internal static class SwaggerHelpers
 
     public static void UpsertParameter(OpenApiOperation operation, OpenApiParameter parameter)
     {
-        operation.Parameters ??= new List<OpenApiParameter>();
+        operation.Parameters ??= new List<IOpenApiParameter>();
 
         var location = parameter.In ?? throw new ArgumentException("Parameter.In must be set.", nameof(parameter));
 
@@ -80,7 +80,7 @@ internal static class SwaggerHelpers
             {
                 {
                     RequestHeaderKeys.GetExampleValue(RequestHeaderKeys.Accept),
-                    new OpenApiMediaType {Example = new OpenApiString(File.ReadAllText(examplePath))}
+                    new OpenApiMediaType {Example = JsonValue.Create(File.ReadAllText(examplePath))}
                 }
             }
         };
@@ -102,29 +102,32 @@ internal static class SwaggerHelpers
         };
     }
 
-    private static int FindParameterIndex(OpenApiOperation operation, ParameterLocation location, string name)
+    private static int FindParameterIndex(OpenApiOperation operation, ParameterLocation location, string? name)
     {
-        for (var i = 0; i < operation.Parameters.Count; i++)
+        if (operation.Parameters != null)
         {
-            var p = operation.Parameters[i];
-
-            var pLoc = p.In;
-            if (pLoc is null)
+            for (var i = 0; i < operation.Parameters.Count; i++)
             {
-                continue;
-            }
+                var p = operation.Parameters[i];
 
-            if (pLoc.Value != location)
-            {
-                continue;
-            }
+                var pLoc = p.In;
+                if (pLoc is null)
+                {
+                    continue;
+                }
 
-            if (!p.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
-            {
-                continue;
-            }
+                if (pLoc.Value != location)
+                {
+                    continue;
+                }
 
-            return i;
+                if (p.Name != null && !p.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                return i;
+            }
         }
 
         return -1;
