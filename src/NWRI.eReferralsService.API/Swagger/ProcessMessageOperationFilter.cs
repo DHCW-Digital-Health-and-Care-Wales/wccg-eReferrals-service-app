@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Text.Json.Nodes;
 using JetBrains.Annotations;
-using Microsoft.OpenApi.Any;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using NWRI.eReferralsService.API.Constants;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using NWRI.eReferralsService.API.Swagger.Attributes;
@@ -17,7 +17,7 @@ public sealed class ProcessMessageOperationFilter : IOperationFilter
     {
         if (context.MethodInfo.GetCustomAttribute<SwaggerProcessMessageRequestAttribute>() is not null)
         {
-            operation.Parameters ??= new List<OpenApiParameter>();
+            operation.Parameters ??= new List<IOpenApiParameter>();
             operation.Parameters.Clear();
 
             SwaggerHelpers.AddCommonHeaders(operation);
@@ -31,22 +31,22 @@ public sealed class ProcessMessageOperationFilter : IOperationFilter
     {
         operation.RequestBody = new OpenApiRequestBody
         {
-            Content =
+            Content = new Dictionary<string, OpenApiMediaType>
             {
-                [FhirConstants.FhirMediaType] = new OpenApiMediaType
+                [FhirConstants.FhirMediaType] = new()
                 {
-                    Examples = new Dictionary<string, OpenApiExample>
+                    Examples = new Dictionary<string, IOpenApiExample>
                     {
-                        ["create"] = new()
+                        ["create"] = new OpenApiExample
                         {
                             Summary = "Create referral",
-                            Value = new OpenApiString(
+                            Value = JsonValue.Create(
                                 File.ReadAllText("Swagger/Examples/process-message-create-payload.json"))
                         },
-                        ["cancel"] = new()
+                        ["cancel"] = new OpenApiExample
                         {
                             Summary = "Cancel referral",
-                            Value = new OpenApiString(
+                            Value = JsonValue.Create(
                                 File.ReadAllText("Swagger/Examples/process-message-cancel-payload.json"))
                         }
                     }
@@ -75,17 +75,17 @@ public sealed class ProcessMessageOperationFilter : IOperationFilter
                 {
                     [FhirConstants.FhirMediaType] = new()
                     {
-                        Examples = new Dictionary<string, OpenApiExample>
+                        Examples = new Dictionary<string, IOpenApiExample>
                         {
-                            ["proxy-server-error"] = new()
+                            ["proxy-server-error"] = new OpenApiExample
                             {
                                 Summary = "Proxy error",
-                                Value = new OpenApiString(File.ReadAllText("Swagger/Examples/common-proxy-server-error.json"))
+                                Value = JsonValue.Create(File.ReadAllText("Swagger/Examples/common-proxy-server-error.json"))
                             },
-                            ["receiver-server-error"] = new()
+                            ["receiver-server-error"] = new OpenApiExample
                             {
                                 Summary = "WPAS API error",
-                                Value = new OpenApiString(File.ReadAllText("Swagger/Examples/common-external-server-error.json"))
+                                Value = JsonValue.Create(File.ReadAllText("Swagger/Examples/common-external-server-error.json"))
                             }
                         }
                     }
