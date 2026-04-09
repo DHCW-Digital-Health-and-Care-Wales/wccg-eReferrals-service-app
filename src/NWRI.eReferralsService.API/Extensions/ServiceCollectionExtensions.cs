@@ -33,6 +33,11 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ITelemetryInitializer, EnrichLoggerContext>();
         services.Configure<TelemetryConfiguration>(config =>
         {
+            if (string.Equals(configuration["DISABLE_MANAGED_IDENTITY_FOR_APPINSIGHTS"], "true", StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
             if (isDevelopmentEnvironment)
             {
                 config.SetAzureTokenCredential(new AzureCliCredential());
