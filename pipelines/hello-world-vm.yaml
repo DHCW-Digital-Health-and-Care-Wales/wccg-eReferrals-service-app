@@ -53,3 +53,6 @@ steps:
 
 - powershell: Test-NetConnection -ComputerName "uksdhcwdevnwrisa.blob.core.windows.net" -Port 443
   displayName: 'Testing ADO connection to NWRI Storage Account'
+
+- powershell: Test-NetConnection -ComputerName "uksdhcwdevnwrisa.file.core.windows.net" -Port 443
+  displayName: 'Testing ADO connection to NWRI Storage Account'
