@@ -30,7 +30,7 @@ public static class ServiceCollectionExtensions
             .GetValue<string>(nameof(ApplicationInsightsConfig.ConnectionString));
 
         services.AddApplicationInsightsTelemetry(options => options.ConnectionString = appInsightsConnectionString);
-        services.AddApplicationInsightsTelemetryProcessor<AppInsightsTelemetryProcessor>();
+        services.AddApplicationInsightsTelemetryProcessor<HealthCheckTelemetryFilter>();
         services.AddSingleton<ITelemetryInitializer, EnrichLoggerContext>();
         services.Configure<TelemetryConfiguration>(config =>
         {

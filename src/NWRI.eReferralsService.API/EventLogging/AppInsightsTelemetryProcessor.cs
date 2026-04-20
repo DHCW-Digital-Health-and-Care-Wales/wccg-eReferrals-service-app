@@ -5,12 +5,11 @@ using NWRI.eReferralsService.API.Constants;
 
 namespace NWRI.eReferralsService.API.EventLogging;
 
-public sealed class AppInsightsTelemetryProcessor : ITelemetryProcessor
+public class HealthCheckTelemetryFilter : ITelemetryProcessor
 {
-    private static readonly string[] ExcludedFromTelemetryPaths = [ApiRoutes.HealthCheck];
     private readonly ITelemetryProcessor _next;
 
-    public AppInsightsTelemetryProcessor(ITelemetryProcessor next)
+    public HealthCheckTelemetryFilter(ITelemetryProcessor next)
     {
         _next = next;
     }
@@ -18,7 +17,8 @@ public sealed class AppInsightsTelemetryProcessor : ITelemetryProcessor
     public void Process(ITelemetry item)
     {
         if (item is RequestTelemetry requestTelemetry && requestTelemetry.Url != null &&
-            ExcludedFromTelemetryPaths.Contains(requestTelemetry.Url.AbsolutePath, StringComparer.OrdinalIgnoreCase))
+            string.Equals(ApiRoutes.HealthCheck, requestTelemetry.Url.AbsolutePath, StringComparison.OrdinalIgnoreCase) &&
+            requestTelemetry.ResponseCode == "200")
         {
             return;
         }
