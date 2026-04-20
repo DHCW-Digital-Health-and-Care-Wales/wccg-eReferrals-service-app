@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.ApplicationInsights.Extensibility;
@@ -6,7 +5,6 @@ using NWRI.eReferralsService.API.Constants;
 
 namespace NWRI.eReferralsService.API.EventLogging;
 
-[ExcludeFromCodeCoverage]
 public sealed class AppInsightsTelemetryProcessor : ITelemetryProcessor
 {
     private static readonly string[] ExcludedFromTelemetryPaths = [ApiRoutes.HealthCheck];
