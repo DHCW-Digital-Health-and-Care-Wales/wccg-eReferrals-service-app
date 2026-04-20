@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using NWRI.eReferralsService.API.Constants;
 
 namespace NWRI.eReferralsService.API.Extensions;
 
@@ -9,18 +10,18 @@ public static class WebApplicationExtensions
     public static void MapCustomHealthChecks(this WebApplication app)
     {
         // Readiness probe
-        app.MapHealthChecks("/health/ready", new HealthCheckOptions
+        app.MapHealthChecks(ApiRoutes.HealthCheckReady, new HealthCheckOptions
         {
             Predicate = check => check.Tags.Contains("ready")
         });
 
         // Liveness probe
-        app.MapHealthChecks("/health/live", new HealthCheckOptions
+        app.MapHealthChecks(ApiRoutes.HealthCheckLive, new HealthCheckOptions
         {
             Predicate = check => check.Tags.Contains("live")
         });
 
         // General health check endpoint
-        app.MapHealthChecks("/health", new HealthCheckOptions());
+        app.MapHealthChecks(ApiRoutes.HealthCheckPath, new HealthCheckOptions());
     }
 }
