@@ -22,10 +22,10 @@ public class AppInsightsTelemetryProcessorTests
     }
 
     [Theory]
-    [InlineData("/health/ready")]
-    [InlineData("/health/live")]
-    [InlineData("/something/health")]
-    [InlineData("/api/referrals")]
+    [InlineData(ApiRoutes.HealthCheckReady)]
+    [InlineData(ApiRoutes.HealthCheckLive)]
+    [InlineData($"/something/{ApiRoutes.HealthCheck}")]
+    [InlineData("/metadata")]
     public void ProcessShouldNotFilterRequestWhenPathIsNotExcluded(string path)
     {
         var next = new Mock<ITelemetryProcessor>();
