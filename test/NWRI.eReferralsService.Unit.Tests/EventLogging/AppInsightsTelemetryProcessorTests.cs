@@ -46,6 +46,18 @@ public class AppInsightsTelemetryProcessorTests
     }
 
     [Fact]
+    public void ProcessShouldAllowUrlsContainingHealthSegment()
+    {
+        var spy = new TelemetryProcessorSpy();
+        var sut = new AppInsightsTelemetryProcessor(spy);
+        var telemetry = new RequestTelemetry { Url = new Uri("https://localhost/something/health") };
+
+        sut.Process(telemetry);
+
+        spy.ProcessedTelemetry.Should().BeSameAs(telemetry);
+    }
+
+    [Fact]
     public void ProcessShouldAllowNonHealthRequestTelemetry()
     {
         var spy = new TelemetryProcessorSpy();
