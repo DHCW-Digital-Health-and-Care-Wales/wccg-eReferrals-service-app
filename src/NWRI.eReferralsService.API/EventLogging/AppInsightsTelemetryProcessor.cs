@@ -19,8 +19,7 @@ public sealed class AppInsightsTelemetryProcessor : ITelemetryProcessor
 
     public void Process(ITelemetry item)
     {
-        if (item is RequestTelemetry requestTelemetry &&
-            requestTelemetry.Url is not null &&
+        if (item is RequestTelemetry requestTelemetry && requestTelemetry.Url != null &&
             ExcludedFromTelemetryPaths.Contains(requestTelemetry.Url.AbsolutePath, StringComparer.OrdinalIgnoreCase))
         {
             return;

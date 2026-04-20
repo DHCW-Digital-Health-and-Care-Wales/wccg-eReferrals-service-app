@@ -1,7 +1,7 @@
-using FluentAssertions;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.ApplicationInsights.Extensibility;
+using Moq;
 using NWRI.eReferralsService.API.Constants;
 using NWRI.eReferralsService.API.EventLogging;
 
@@ -10,84 +10,30 @@ namespace NWRI.eReferralsService.Unit.Tests.EventLogging;
 public class AppInsightsTelemetryProcessorTests
 {
     [Fact]
-    public void ProcessShouldFilterExactHealthPath()
+    public void ProcessShouldFilterHealthCheckPath()
     {
-        var spy = new TelemetryProcessorSpy();
-        var sut = new AppInsightsTelemetryProcessor(spy);
+        var next = new Mock<ITelemetryProcessor>();
+        var sut = new AppInsightsTelemetryProcessor(next.Object);
         var telemetry = new RequestTelemetry { Url = new Uri($"https://localhost{ApiRoutes.HealthCheckPath}") };
 
         sut.Process(telemetry);
 
-        spy.ProcessedTelemetry.Should().BeNull();
+        next.Verify(x => x.Process(It.IsAny<ITelemetry>()), Times.Never);
     }
 
-    [Fact]
-    public void ProcessShouldAllowHealthReadyPath()
+    [Theory]
+    [InlineData("/health/ready")]
+    [InlineData("/health/live")]
+    [InlineData("/something/health")]
+    [InlineData("/api/referrals")]
+    public void ProcessShouldNotFilterRequestWhenPathIsNotExcluded(string path)
     {
-        var spy = new TelemetryProcessorSpy();
-        var sut = new AppInsightsTelemetryProcessor(spy);
-        var telemetry = new RequestTelemetry { Url = new Uri("https://localhost/health/ready") };
+        var next = new Mock<ITelemetryProcessor>();
+        var sut = new AppInsightsTelemetryProcessor(next.Object);
+        var telemetry = new RequestTelemetry { Url = new Uri($"https://localhost{path}") };
 
         sut.Process(telemetry);
 
-        spy.ProcessedTelemetry.Should().BeSameAs(telemetry);
-    }
-
-    [Fact]
-    public void ProcessShouldAllowHealthLivePath()
-    {
-        var spy = new TelemetryProcessorSpy();
-        var sut = new AppInsightsTelemetryProcessor(spy);
-        var telemetry = new RequestTelemetry { Url = new Uri("https://localhost/health/live") };
-
-        sut.Process(telemetry);
-
-        spy.ProcessedTelemetry.Should().BeSameAs(telemetry);
-    }
-
-    [Fact]
-    public void ProcessShouldAllowUrlsContainingHealthSegment()
-    {
-        var spy = new TelemetryProcessorSpy();
-        var sut = new AppInsightsTelemetryProcessor(spy);
-        var telemetry = new RequestTelemetry { Url = new Uri("https://localhost/something/health") };
-
-        sut.Process(telemetry);
-
-        spy.ProcessedTelemetry.Should().BeSameAs(telemetry);
-    }
-
-    [Fact]
-    public void ProcessShouldAllowNonHealthRequestTelemetry()
-    {
-        var spy = new TelemetryProcessorSpy();
-        var sut = new AppInsightsTelemetryProcessor(spy);
-        var telemetry = new RequestTelemetry { Url = new Uri("https://localhost/api/referrals") };
-
-        sut.Process(telemetry);
-
-        spy.ProcessedTelemetry.Should().BeSameAs(telemetry);
-    }
-
-    [Fact]
-    public void ProcessShouldAllowNonRequestTelemetry()
-    {
-        var spy = new TelemetryProcessorSpy();
-        var sut = new AppInsightsTelemetryProcessor(spy);
-        var telemetry = new TraceTelemetry("test");
-
-        sut.Process(telemetry);
-
-        spy.ProcessedTelemetry.Should().BeSameAs(telemetry);
-    }
-
-    private sealed class TelemetryProcessorSpy : ITelemetryProcessor
-    {
-        public ITelemetry? ProcessedTelemetry { get; private set; }
-
-        public void Process(ITelemetry telemetry)
-        {
-            ProcessedTelemetry = telemetry;
-        }
+        next.Verify(x => x.Process(telemetry), Times.Once);
     }
 }
