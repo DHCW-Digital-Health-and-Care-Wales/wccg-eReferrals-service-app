@@ -22,6 +22,6 @@ public static class WebApplicationExtensions
         });
 
         // General health check endpoint
-        app.MapHealthChecks(ApiRoutes.HealthCheckPath, new HealthCheckOptions());
+        app.MapHealthChecks(ApiRoutes.HealthCheck, new HealthCheckOptions());
     }
 }

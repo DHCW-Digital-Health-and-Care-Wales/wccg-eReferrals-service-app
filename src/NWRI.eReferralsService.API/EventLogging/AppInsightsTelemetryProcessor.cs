@@ -9,7 +9,7 @@ namespace NWRI.eReferralsService.API.EventLogging;
 [ExcludeFromCodeCoverage]
 public sealed class AppInsightsTelemetryProcessor : ITelemetryProcessor
 {
-    private static readonly string[] ExcludedFromTelemetryPaths = [ApiRoutes.HealthCheckPath];
+    private static readonly string[] ExcludedFromTelemetryPaths = [ApiRoutes.HealthCheck];
     private readonly ITelemetryProcessor _next;
 
     public AppInsightsTelemetryProcessor(ITelemetryProcessor next)

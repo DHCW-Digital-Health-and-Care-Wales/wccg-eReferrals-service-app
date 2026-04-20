@@ -14,7 +14,7 @@ public class AppInsightsTelemetryProcessorTests
     {
         var next = new Mock<ITelemetryProcessor>();
         var sut = new AppInsightsTelemetryProcessor(next.Object);
-        var telemetry = new RequestTelemetry { Url = new Uri($"https://localhost{ApiRoutes.HealthCheckPath}") };
+        var telemetry = new RequestTelemetry { Url = new Uri($"https://localhost{ApiRoutes.HealthCheck}") };
 
         sut.Process(telemetry);
 
