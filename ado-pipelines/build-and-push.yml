@@ -27,6 +27,7 @@ variables:
 steps:
   - checkout: self
     displayName: "Checkout source code"
+    clean: true
 
   - task: UseDotNet@2
     displayName: "Use .NET SDK 8.0"
