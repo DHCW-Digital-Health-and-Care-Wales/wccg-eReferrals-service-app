@@ -12,10 +12,10 @@
 
   <ItemGroup>
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
-    <PackageReference Include="Hl7.Fhir.R4" Version="6.1.1" />
+    <PackageReference Include="Hl7.Fhir.R4" Version="6.2.0" />
     <PackageReference Include="Hl7.Fhir.Specification.Data.R4" Version="6.1.1" />
     <PackageReference Include="Firely.Fhir.Packages" Version="5.0.2" />
-    <PackageReference Include="Firely.Fhir.Validation.R4" Version="3.1.1" />
+    <PackageReference Include="Firely.Fhir.Validation.R4" Version="3.2.0" />
     <PackageReference Include="JetBrains.Annotations" Version="2025.2.4" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="10.0.6" />
     <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.5.0" />
